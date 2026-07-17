@@ -26,6 +26,7 @@
 		"vitest": "^4.1.8"
 	},
 	"dependencies": {
-		"pdfjs-dist": "^6.1.200"
+		"pdfjs-dist": "^6.1.200",
+		"tesseract.js": "^7.0.0"
 	}
 }
