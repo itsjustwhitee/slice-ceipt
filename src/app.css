@@ -1,12 +1,12 @@
 :root {
 	color-scheme: dark;
 	--color-bg: #2b2b30;
-	--color-surface: #ffffff;
+	--color-surface: #ffefe3;
 	--color-text: #f5f5f5;
 	--color-text-on-surface: #1a1a1a;
 	--color-text-muted: #b5b5bb;
-	--color-accent: #ff7a3d;
-	--color-accent-hover: #e8672c;
+	--color-accent: #ff7910;
+	--color-accent-hover: #e06a0e;
 }
 
 * {
