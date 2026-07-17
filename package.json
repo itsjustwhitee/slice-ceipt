@@ -1,5 +1,5 @@
 {
-	"name": "receiptsplitter",
+	"name": "slice-ceipt",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",

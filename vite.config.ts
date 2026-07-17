@@ -9,12 +9,12 @@ export default defineConfig({
 			base: (process.env.BASE_PATH ?? '') + '/',
 			registerType: 'autoUpdate',
 			manifest: {
-				name: 'Receipt Splitter',
-				short_name: 'Receipt Splitter',
+				name: 'SliceCeipt',
+				short_name: 'SliceCeipt',
 				start_url: '.',
 				display: 'standalone',
-				background_color: '#ffffff',
-				theme_color: '#000000'
+				background_color: '#2b2b30',
+				theme_color: '#ff7a3d'
 			}
 		})
 	],

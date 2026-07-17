@@ -1,5 +1,5 @@
 const en = {
-	welcome: 'Welcome to Receipt Splitter'
+	welcome: 'Welcome to SliceCeipt'
 };
 
 export default en;

@@ -1,7 +1,7 @@
 import type { Dictionary } from './en';
 
 const it: Dictionary = {
-	welcome: 'Benvenuto su Receipt Splitter'
+	welcome: 'Benvenuto su SliceCeipt'
 };
 
 export default it;

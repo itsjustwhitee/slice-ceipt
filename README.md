@@ -1,42 +1,47 @@
-# sv
+# SliceCeipt
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A free, mobile-first web app for splitting shared receipts (photo or PDF) among multiple people — item by item, down to the cent.
 
-## Creating a project
+## Status
 
-If you're seeing this, you've probably already done this step. Congrats!
+🚧 Work in progress. This repo currently holds the foundational app shell (SvelteKit scaffold, static prerendering, offline-capable PWA, EN/IT i18n skeleton, deploy pipeline). The actual receipt scanning and splitting UI is being built next.
 
-```sh
-# create a new project
-npx sv create my-app
-```
+## How it works
 
-To recreate this project with the same configuration:
+- **No backend, no accounts, no database.** The entire app is a static site — OCR and PDF parsing run client-side, in your browser.
+- **Installable PWA.** Works offline after the first visit — useful when you're splitting a receipt with poor signal.
+- **Free to run, free to host.** Deployed via GitHub Pages, no paid services involved.
 
-```sh
-# recreate this project
-npx sv@0.16.3 create --template minimal --types ts --add vitest="usages:unit" sveltekit-adapter="adapter:static" --install npm .
-```
+## Tech stack
+
+- [SvelteKit](https://svelte.dev/docs/kit) + TypeScript, built as a fully static, prerendered site (`@sveltejs/adapter-static`)
+- [Vitest](https://vitest.dev/) for unit tests
+- [`@vite-pwa/sveltekit`](https://vite-pwa-org.netlify.app/frameworks/sveltekit) for the installable/offline PWA support
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Requires npm (this project uses npm exclusively — no yarn/pnpm).
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
+npm install
 npm run dev -- --open
 ```
 
 ## Building
 
-To create a production version of your app:
-
 ```sh
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+Preview the production build locally with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Testing
+
+```sh
+npm run test    # unit tests
+npm run check   # type-check
+```
+
+## Deployment
+
+Pushes to `main` build and deploy automatically to GitHub Pages via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
