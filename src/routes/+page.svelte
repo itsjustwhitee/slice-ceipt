@@ -1,2 +1,7 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import { locale, t } from '$lib/i18n';
+</script>
+
+<h1>{$t('welcome')}</h1>
+<button onclick={() => locale.set('en')}>EN</button>
+<button onclick={() => locale.set('it')}>IT</button>
