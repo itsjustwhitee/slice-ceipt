@@ -28,7 +28,20 @@ const it: Dictionary = {
 	setupContinue: 'Continua',
 	setupNeedMoreParticipants: 'Aggiungi almeno 2 partecipanti',
 	itemsPlaceholder: 'Elenco articoli in arrivo',
-	startOver: 'Ricomincia'
+	startOver: 'Ricomincia',
+	unassignedLabel: 'Non assegnato',
+	bulkApply: 'Imposta la stessa divisione per tutti',
+	bulkApplyButton: 'Applica a tutti gli articoli',
+	itemNamePlaceholder: 'Nome articolo',
+	priceLabel: 'Prezzo',
+	quantityLabel: 'Quantità',
+	addItem: 'Aggiungi articolo',
+	deleteItem: 'Elimina',
+	expand: 'Dettagli',
+	collapse: 'Nascondi dettagli',
+	assignWholeItem: "Assegna l'intero articolo",
+	unitLabel: 'Unità',
+	itemsContinue: 'Continua'
 };
 
 export default it;

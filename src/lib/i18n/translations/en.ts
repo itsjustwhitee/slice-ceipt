@@ -26,7 +26,20 @@ const en = {
 	setupContinue: 'Continue',
 	setupNeedMoreParticipants: 'Add at least 2 participants',
 	itemsPlaceholder: 'Item list coming soon',
-	startOver: 'Start over'
+	startOver: 'Start over',
+	unassignedLabel: 'Unassigned',
+	bulkApply: 'Set the same split for everyone',
+	bulkApplyButton: 'Apply to all items',
+	itemNamePlaceholder: 'Item name',
+	priceLabel: 'Price',
+	quantityLabel: 'Qty',
+	addItem: 'Add item',
+	deleteItem: 'Delete',
+	expand: 'Details',
+	collapse: 'Hide details',
+	assignWholeItem: 'Assign the whole item',
+	unitLabel: 'Unit',
+	itemsContinue: 'Continue'
 };
 
 export default en;
