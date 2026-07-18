@@ -24,7 +24,9 @@ const en = {
 	deletePreset: 'Delete',
 	singleCountLabel: 'Number of people',
 	setupContinue: 'Continue',
-	setupNeedMoreParticipants: 'Add at least 2 participants'
+	setupNeedMoreParticipants: 'Add at least 2 participants',
+	itemsPlaceholder: 'Item list coming soon',
+	startOver: 'Start over'
 };
 
 export default en;

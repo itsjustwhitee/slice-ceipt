@@ -26,7 +26,9 @@ const it: Dictionary = {
 	deletePreset: 'Elimina',
 	singleCountLabel: 'Numero di persone',
 	setupContinue: 'Continua',
-	setupNeedMoreParticipants: 'Aggiungi almeno 2 partecipanti'
+	setupNeedMoreParticipants: 'Aggiungi almeno 2 partecipanti',
+	itemsPlaceholder: 'Elenco articoli in arrivo',
+	startOver: 'Ricomincia'
 };
 
 export default it;
