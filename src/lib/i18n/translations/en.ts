@@ -44,7 +44,10 @@ const en = {
 	customSharePlaceholder: 'e.g. 2/5 or 40%',
 	applyShare: 'Apply',
 	mixedShare: 'Mixed',
-	yourTotal: 'Your total'
+	yourTotal: 'Your total',
+	copySummary: 'Copy',
+	copied: 'Copied',
+	shareSummary: 'Share'
 };
 
 export default en;

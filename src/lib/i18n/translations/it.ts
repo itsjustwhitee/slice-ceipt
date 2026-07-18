@@ -46,7 +46,10 @@ const it: Dictionary = {
 	customSharePlaceholder: 'es. 2/5 o 40%',
 	applyShare: 'Applica',
 	mixedShare: 'Misto',
-	yourTotal: 'Il tuo totale'
+	yourTotal: 'Il tuo totale',
+	copySummary: 'Copia',
+	copied: 'Copiato',
+	shareSummary: 'Condividi'
 };
 
 export default it;
