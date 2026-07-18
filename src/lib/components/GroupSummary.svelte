@@ -3,7 +3,7 @@
 	import { t, locale } from '$lib/i18n';
 	import { currency } from '$lib/stores/currency';
 	import { participants, participantColors } from '$lib/stores/participants';
-	import { groupItems, groupTotals, resetSession } from '$lib/stores/receipt';
+	import { groupItems, groupTotals, resetSession, step } from '$lib/stores/receipt';
 	import { computeGroupItemization } from '$lib/session';
 	import { formatCents } from '$lib/money';
 	import { formatGroupSummaryText } from '$lib/format-summary';
@@ -65,7 +65,12 @@
 
 	<ShareBar text={summaryText} />
 
-	<button class="start-over" type="button" onclick={resetSession}>{$t('startOver')}</button>
+	<div class="summary-actions">
+		<button class="back-to-items" type="button" onclick={() => step.set('items')}>
+			{$t('backToItems')}
+		</button>
+		<button class="start-over" type="button" onclick={resetSession}>{$t('startOver')}</button>
+	</div>
 </div>
 
 <style>
@@ -121,8 +126,13 @@
 		opacity: 0.85;
 	}
 
-	.start-over {
+	.summary-actions {
+		display: flex;
+		gap: 0.75rem;
 		margin-top: 1.5rem;
-		width: 100%;
+	}
+
+	.summary-actions button {
+		flex: 1;
 	}
 </style>

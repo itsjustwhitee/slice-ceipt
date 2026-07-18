@@ -2,7 +2,7 @@
 <script lang="ts">
 	import { t, locale } from '$lib/i18n';
 	import { currency } from '$lib/stores/currency';
-	import { singleItems, singleTotal, resetSession } from '$lib/stores/receipt';
+	import { singleItems, singleTotal, resetSession, step } from '$lib/stores/receipt';
 	import { computeSingleItemization } from '$lib/session';
 	import { formatCents } from '$lib/money';
 	import { formatSingleSummaryText } from '$lib/format-summary';
@@ -29,7 +29,12 @@
 
 	<ShareBar text={summaryText} />
 
-	<button class="start-over" type="button" onclick={resetSession}>{$t('startOver')}</button>
+	<div class="summary-actions">
+		<button class="back-to-items" type="button" onclick={() => step.set('items')}>
+			{$t('backToItems')}
+		</button>
+		<button class="start-over" type="button" onclick={resetSession}>{$t('startOver')}</button>
+	</div>
 </div>
 
 <style>
@@ -55,8 +60,13 @@
 		background: color-mix(in srgb, var(--color-text-on-surface) 4%, transparent);
 	}
 
-	.start-over {
+	.summary-actions {
+		display: flex;
+		gap: 0.75rem;
 		margin-top: 1.5rem;
-		width: 100%;
+	}
+
+	.summary-actions button {
+		flex: 1;
 	}
 </style>

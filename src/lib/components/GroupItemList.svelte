@@ -22,6 +22,8 @@
 	let expandedItemId = $state<string | null>(null);
 	let bulkPanelOpen = $state(false);
 	let bulkAssignment = $state<Map<string, number>>(new Map());
+	let editingPriceId = $state<string | null>(null);
+	let priceDraft = $state('');
 
 	let newItemName = $state('');
 	let newItemPrice = $state('');
@@ -49,6 +51,16 @@
 	function handlePriceChange(itemId: string, value: string) {
 		const cents = Math.round(Number(value) * 100);
 		if (Number.isFinite(cents)) updateItemUnitPrice(itemId, cents);
+	}
+
+	function startEditPrice(itemId: string, cents: number) {
+		editingPriceId = itemId;
+		priceDraft = (cents / 100).toFixed(2);
+	}
+
+	function commitPrice(itemId: string) {
+		handlePriceChange(itemId, priceDraft);
+		editingPriceId = null;
 	}
 
 	function submitAddItem() {
@@ -125,11 +137,17 @@
 					/>
 					<input
 						class="item-price"
-						type="number"
-						min="0"
-						step="0.01"
-						value={(item.unitPriceCents / 100).toFixed(2)}
-						onchange={(e) => handlePriceChange(item.id, (e.target as HTMLInputElement).value)}
+						type="text"
+						inputmode="decimal"
+						value={editingPriceId === item.id
+							? priceDraft
+							: formatCents(item.unitPriceCents, $currency, $locale)}
+						onfocus={() => startEditPrice(item.id, item.unitPriceCents)}
+						oninput={(e) => (priceDraft = (e.target as HTMLInputElement).value)}
+						onblur={() => commitPrice(item.id)}
+						onkeydown={(e) => {
+							if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
+						}}
 					/>
 					<GroupAssignmentPicker
 						assignment={item.units[0].assignment}
@@ -263,7 +281,7 @@
 	}
 
 	.item-price {
-		width: 6ch;
+		width: 8ch;
 	}
 
 	.item-name,
