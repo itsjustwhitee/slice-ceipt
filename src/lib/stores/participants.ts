@@ -1,4 +1,5 @@
-import { writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
+import { participantColor } from '../colors';
 
 export interface Participant {
 	id: string;
@@ -22,3 +23,9 @@ export function renameParticipant(id: string, name: string): void {
 export function setParticipantNames(names: string[]): void {
 	participants.set(names.map((name) => ({ id: crypto.randomUUID(), name })));
 }
+
+export const participantColors = derived(participants, ($participants) => {
+	const map = new Map<string, string>();
+	$participants.forEach((p, i) => map.set(p.id, participantColor(i)));
+	return map;
+});
