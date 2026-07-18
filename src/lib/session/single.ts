@@ -1,4 +1,4 @@
-import { calculateSingleSplit, type Fraction } from '$lib/money';
+import { calculateSingleShare, calculateSingleSplit, type Fraction } from '$lib/money';
 import type { ParsedItem } from '$lib/parsing';
 
 export interface SingleUnitState {
@@ -48,4 +48,30 @@ export function computeSingleTotal(items: SingleItem[]): number {
 		item.units.map((unit) => ({ amountCents: item.unitPriceCents, fraction: unit.fraction }))
 	);
 	return calculateSingleSplit(units);
+}
+
+export interface ItemShare {
+	name: string;
+	shareCents: number;
+}
+
+/**
+ * Per-item breakdown of the user's own share in single mode, computed via
+ * the same `calculateSingleShare` `computeSingleTotal` already uses per
+ * unit, so summing every returned `shareCents` reproduces the running
+ * total exactly. Items with every unit set to "non mio" are omitted.
+ */
+export function computeSingleItemization(items: SingleItem[]): ItemShare[] {
+	const result: ItemShare[] = [];
+	for (const item of items) {
+		let shareCents = 0;
+		let included = false;
+		for (const unit of item.units) {
+			if (unit.fraction === null) continue;
+			included = true;
+			shareCents += calculateSingleShare(item.unitPriceCents, unit.fraction);
+		}
+		if (included) result.push({ name: item.name, shareCents });
+	}
+	return result;
 }

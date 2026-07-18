@@ -1,4 +1,4 @@
-import { calculateGroupSplit, type GroupSplitResult, type GroupUnit } from '$lib/money';
+import { calculateGroupSplit, splitAmongWeights, type GroupSplitResult, type GroupUnit, type WeightedParticipant } from '$lib/money';
 import type { ParsedItem } from '$lib/parsing';
 
 export interface GroupUnitState {
@@ -57,4 +57,39 @@ export function computeGroupTotals(
 		item.units.map((unit) => ({ amountCents: item.unitPriceCents, assignment: unit.assignment }))
 	);
 	return calculateGroupSplit(units, participantOrder);
+}
+
+export interface ItemShare {
+	name: string;
+	shareCents: number;
+}
+
+/**
+ * Per-item breakdown of one participant's share, computed the same way
+ * `calculateGroupSplit` computes totals (same per-unit `splitAmongWeights`
+ * call, same `participantOrder` for tie-breaking) so summing every
+ * returned `shareCents` reproduces that participant's total exactly —
+ * this never reimplements the split math, only itemizes it per item.
+ */
+export function computeGroupItemization(
+	items: GroupItem[],
+	participantId: string,
+	participantOrder: string[]
+): ItemShare[] {
+	const result: ItemShare[] = [];
+	for (const item of items) {
+		let shareCents = 0;
+		let included = false;
+		for (const unit of item.units) {
+			if (!unit.assignment.has(participantId)) continue;
+			included = true;
+			const weighted: WeightedParticipant[] = participantOrder
+				.filter((id) => unit.assignment.has(id))
+				.map((id) => ({ participantId: id, weight: unit.assignment.get(id)! }));
+			const shares = splitAmongWeights(item.unitPriceCents, weighted);
+			shareCents += shares.get(participantId) ?? 0;
+		}
+		if (included) result.push({ name: item.name, shareCents });
+	}
+	return result;
 }

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createGroupItemsFromParsed, computeGroupTotals } from './group';
+import {
+	createGroupItemsFromParsed,
+	computeGroupTotals,
+	computeGroupItemization,
+	type GroupItem
+} from './group';
 
 describe('createGroupItemsFromParsed', () => {
 	it('decomposes quantity into that many unassigned units for a plain item', () => {
@@ -104,5 +109,69 @@ describe('computeGroupTotals', () => {
 		expect(result.totals.get('andrea')).toBe(-30);
 		expect(result.totals.get('chiara')).toBe(-30);
 		expect(result.unassignedUnitIndices).toEqual([]);
+	});
+
+	it('lists only items the participant is assigned to, with their per-item share', () => {
+		const items: GroupItem[] = [
+			{
+				id: 'item-0',
+				name: 'Bread',
+				unitPriceCents: 250,
+				quantity: 1,
+				units: [{ assignment: new Map([['alice', 1]]) }]
+			},
+			{
+				id: 'item-1',
+				name: 'Milk',
+				unitPriceCents: 100,
+				quantity: 2,
+				units: [
+					{ assignment: new Map([['alice', 1], ['bob', 1]]) },
+					{ assignment: new Map([['bob', 1]]) }
+				]
+			},
+			{
+				id: 'item-2',
+				name: 'Eggs',
+				unitPriceCents: 300,
+				quantity: 1,
+				units: [{ assignment: new Map() }]
+			}
+		];
+		const aliceItems = computeGroupItemization(items, 'alice', ['alice', 'bob']);
+		expect(aliceItems).toEqual([
+			{ name: 'Bread', shareCents: 250 },
+			{ name: 'Milk', shareCents: 50 }
+		]);
+		expect(aliceItems.find((i) => i.name === 'Eggs')).toBeUndefined();
+	});
+
+	it('itemization sums to exactly the same total as computeGroupTotals, for every participant', () => {
+		const items: GroupItem[] = [
+			{
+				id: 'item-0',
+				name: 'Bread',
+				unitPriceCents: 250,
+				quantity: 1,
+				units: [{ assignment: new Map([['alice', 1]]) }]
+			},
+			{
+				id: 'item-1',
+				name: 'Milk',
+				unitPriceCents: 100,
+				quantity: 2,
+				units: [
+					{ assignment: new Map([['alice', 1], ['bob', 1]]) },
+					{ assignment: new Map([['bob', 1]]) }
+				]
+			}
+		];
+		const participantOrder = ['alice', 'bob'];
+		const totals = computeGroupTotals(items, participantOrder);
+		for (const id of participantOrder) {
+			const itemization = computeGroupItemization(items, id, participantOrder);
+			const sum = itemization.reduce((acc, i) => acc + i.shareCents, 0);
+			expect(sum).toBe(totals.totals.get(id));
+		}
 	});
 });
