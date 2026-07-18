@@ -12,10 +12,18 @@ export async function extractTextFromPdfTextLayer(data: ArrayBuffer): Promise<st
 	for (let i = 1; i <= pdf.numPages; i++) {
 		const page = await pdf.getPage(i);
 		const textContent = await page.getTextContent();
-		const pageText = textContent.items
-			.map((item) => ('str' in item ? item.str : ''))
-			.join(' ');
-		fullText += pageText + '\n';
+		for (const item of textContent.items) {
+			if (!('str' in item)) continue;
+			// pdf.js's own layout signal for "this text item ends a line" —
+			// without it, every item on a page (each price, each item name)
+			// gets joined with a plain space into one giant line, which the
+			// rest of this pipeline can't parse: every downstream line-based
+			// heuristic (extractItemLines, parsePriceCents's end-of-line
+			// anchor) depends on real newlines matching the printed receipt's
+			// actual line breaks, not just whitespace between words.
+			fullText += item.str + (item.hasEOL ? '\n' : ' ');
+		}
+		fullText += '\n';
 	}
 	return fullText;
 }
