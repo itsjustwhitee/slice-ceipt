@@ -8,12 +8,17 @@
 	import SingleItemList from '$lib/components/SingleItemList.svelte';
 	import GroupSummary from '$lib/components/GroupSummary.svelte';
 	import SingleSummary from '$lib/components/SingleSummary.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import Logo from '$lib/icons/Logo.svelte';
 </script>
 
 <main>
-	<div class="lang-switch">
-		<button class:is-active={$locale === 'en'} onclick={() => locale.set('en')}>EN</button>
-		<button class:is-active={$locale === 'it'} onclick={() => locale.set('it')}>IT</button>
+	<div class="top-bar">
+		<Logo size={32} />
+		<div class="lang-switch">
+			<button class:is-active={$locale === 'en'} onclick={() => locale.set('en')}>EN</button>
+			<button class:is-active={$locale === 'it'} onclick={() => locale.set('it')}>IT</button>
+		</div>
 	</div>
 
 	{#if $step === 'upload'}
@@ -31,6 +36,8 @@
 	{:else}
 		<SingleSummary />
 	{/if}
+
+	<Footer />
 </main>
 
 <style>
@@ -40,10 +47,15 @@
 		padding: 2rem 1.5rem 4rem;
 	}
 
+	.top-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1.5rem;
+	}
+
 	.lang-switch {
 		display: flex;
 		gap: 0.5rem;
-		margin-bottom: 1.5rem;
-		justify-content: flex-end;
 	}
 </style>
