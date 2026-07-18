@@ -16,6 +16,12 @@ const TRAILING_PRICE = /(-?)(\d[\d.,]*\d|\d)\s*(?:€|EUR)?\s*$/;
 const QUANTITY_MARKER =
 	/(?:(\d+)\s*(?:X\b|PZ\b)|\bX\s*(\d+)\b|Q\.?T[AÀ]?\.?\s*(\d+))/i;
 
+// Many Italian receipts print a per-line VAT rate between the item name and
+// its price (e.g. "PASSATA DI POMODORO 4,00% 0,99") — this is the item's tax
+// category, not part of its name, and must be stripped before the name is
+// used, the same way a quantity marker is.
+const VAT_PERCENTAGE = /\d{1,2}[.,]\d{2}\s*%\s*$/;
+
 /**
  * Splits one already-confirmed item line (from `extractItemLines`) into its
  * name, per-unit price, and quantity. When the line's price is a lump total
@@ -30,7 +36,8 @@ export function extractNameAndPrice(line: string): ParsedLine | null {
 	if (totalCents === null) return null;
 
 	const priceMatch = line.match(TRAILING_PRICE);
-	const nameWithMarker = line.slice(0, line.length - (priceMatch?.[0].length ?? 0)).trim();
+	const nameWithVat = line.slice(0, line.length - (priceMatch?.[0].length ?? 0)).trim();
+	const nameWithMarker = nameWithVat.replace(VAT_PERCENTAGE, '').trim();
 
 	const markerMatch = nameWithMarker.match(QUANTITY_MARKER);
 	if (!markerMatch) {

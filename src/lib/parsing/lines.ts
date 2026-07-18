@@ -9,9 +9,14 @@ import { parsePriceCents } from './price';
 // Deliberately excludes "P.IVA" (the store's own VAT registration number,
 // which appears in the HEADER, not the footer — an earlier version matched
 // it and incorrectly truncated the item region to nothing on every receipt
-// that prints it, which is effectively all of them).
+// that prints it, which is effectively all of them) and "DOCUMENTO
+// COMMERCIALE" (the mandatory title Italian receipts have printed at the
+// TOP since the 2020 "scontrino elettronico" reform, not the bottom — an
+// earlier version matched it and truncated the item region to nothing on
+// every receipt using this now-standard format, i.e. most real Italian
+// receipts).
 const FOOTER_KEYWORDS =
-	/^\s*(TOTALE|SUBTOTALE|CONTANTE|RESTO|CARTA|BANCOMAT|PAGAMENTO|IVA|IMPOSTA|DOCUMENTO\s+COMMERCIALE|SCONTRINO\s+FISCALE|OPERATORE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|SUBTOTAL|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
+	/^\s*(TOTALE|SUBTOTALE|CONTANTE|RESTO|CARTA|BANCOMAT|PAGAMENTO|IVA|IMPOSTA|SCONTRINO\s+FISCALE|OPERATORE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|SUBTOTAL|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
 
 /**
  * Extracts the subset of raw OCR/text lines that make up the item list:

@@ -59,4 +59,28 @@ describe('extractNameAndPrice', () => {
 			quantity: 1
 		});
 	});
+
+	it('strips a trailing per-line VAT rate printed between the name and the price (real Italian receipt format)', () => {
+		expect(extractNameAndPrice('PASSATA DI POMODOR 4,00% 0,99')).toEqual({
+			name: 'PASSATA DI POMODOR',
+			unitPriceCents: 99,
+			quantity: 1
+		});
+	});
+
+	it('strips a trailing VAT rate on a discount line too', () => {
+		expect(extractNameAndPrice('SCONTO % CLIENTI 40,00% 4,00% -1,40')).toEqual({
+			name: 'SCONTO % CLIENTI 40,00%',
+			unitPriceCents: -140,
+			quantity: 1
+		});
+	});
+
+	it('does not strip a number that only coincidentally looks like a VAT rate but has no percent sign', () => {
+		expect(extractNameAndPrice('CACIOT MISTO MONTE 4,00        5,90')).toEqual({
+			name: 'CACIOT MISTO MONTE 4,00',
+			unitPriceCents: 590,
+			quantity: 1
+		});
+	});
 });

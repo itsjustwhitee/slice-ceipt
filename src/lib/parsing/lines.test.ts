@@ -59,4 +59,24 @@ describe('extractItemLines', () => {
 	it('returns an empty array when nothing looks like an item', () => {
 		expect(extractItemLines(['STORE NAME', 'ADDRESS LINE'])).toEqual([]);
 	});
+
+	it('does not treat "DOCUMENTO COMMERCIALE" as a footer marker, since modern Italian receipts print it as a HEADER title (post-2020 e-receipt reform), not a footer one', () => {
+		const lines = [
+			'COOP ALLEANZA 3.0 Soc. Coop.',
+			'Via Copparo, 132 - 44123 FERRARA (FE)',
+			'P.I. e C.F. 03503411203',
+			'',
+			'DOCUMENTO COMMERCIALE',
+			'di vendita o prestazione',
+			'PASSATA DI POMODORO       0,99',
+			'TONNO OLIO OLIVA          6,99',
+			'',
+			'SUBTOTALE                 7,98',
+			'TOTALE COMPLESSIVO         7,98'
+		];
+		expect(extractItemLines(lines)).toEqual([
+			'PASSATA DI POMODORO       0,99',
+			'TONNO OLIO OLIVA          6,99'
+		]);
+	});
 });
