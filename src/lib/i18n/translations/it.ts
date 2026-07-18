@@ -27,7 +27,6 @@ const it: Dictionary = {
 	singleCountLabel: 'Numero di persone',
 	setupContinue: 'Continua',
 	setupNeedMoreParticipants: 'Aggiungi almeno 2 partecipanti',
-	itemsPlaceholder: 'Elenco articoli in arrivo',
 	startOver: 'Ricomincia',
 	unassignedLabel: 'Non assegnato',
 	bulkApply: 'Imposta la stessa divisione per tutti',

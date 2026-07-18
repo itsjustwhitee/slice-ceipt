@@ -1,11 +1,13 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
-	import { locale, t } from '$lib/i18n';
-	import { step, mode, resetSession } from '$lib/stores/receipt';
+	import { locale } from '$lib/i18n';
+	import { step, mode } from '$lib/stores/receipt';
 	import Uploader from '$lib/components/Uploader.svelte';
 	import SetupStep from '$lib/components/SetupStep.svelte';
 	import GroupItemList from '$lib/components/GroupItemList.svelte';
 	import SingleItemList from '$lib/components/SingleItemList.svelte';
+	import GroupSummary from '$lib/components/GroupSummary.svelte';
+	import SingleSummary from '$lib/components/SingleSummary.svelte';
 </script>
 
 <main>
@@ -24,11 +26,10 @@
 		{:else}
 			<SingleItemList />
 		{/if}
+	{:else if $mode === 'group'}
+		<GroupSummary />
 	{:else}
-		<div class="card">
-			<h1>{$t('itemsPlaceholder')}</h1>
-			<button onclick={resetSession}>{$t('startOver')}</button>
-		</div>
+		<SingleSummary />
 	{/if}
 </main>
 

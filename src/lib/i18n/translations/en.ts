@@ -25,7 +25,6 @@ const en = {
 	singleCountLabel: 'Number of people',
 	setupContinue: 'Continue',
 	setupNeedMoreParticipants: 'Add at least 2 participants',
-	itemsPlaceholder: 'Item list coming soon',
 	startOver: 'Start over',
 	unassignedLabel: 'Unassigned',
 	bulkApply: 'Set the same split for everyone',
