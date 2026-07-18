@@ -45,7 +45,12 @@ const en = {
 	copySummary: 'Copy',
 	copied: 'Copied',
 	shareSummary: 'Share',
-	summaryTitle: 'Summary'
+	summaryTitle: 'Summary',
+	footerPrivacy: 'SliceCeipt runs entirely in your browser. No receipt data, images, or personal information is ever uploaded, stored, or transmitted to any server. Nothing is collected, logged, or shared with anyone.',
+	footerLicenseNote: 'SliceCeipt is free software, licensed under the GNU General Public License v3.0.',
+	footerViewLicense: 'View the license',
+	footerSource: 'Source code',
+	footerMadeBy: 'Made by itsjustwhitee'
 };
 
 export default en;

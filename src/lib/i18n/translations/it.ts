@@ -47,7 +47,12 @@ const it: Dictionary = {
 	copySummary: 'Copia',
 	copied: 'Copiato',
 	shareSummary: 'Condividi',
-	summaryTitle: 'Riepilogo'
+	summaryTitle: 'Riepilogo',
+	footerPrivacy: 'SliceCeipt funziona interamente nel tuo browser. Nessun dato dello scontrino, immagine o informazione personale viene mai caricato, salvato o trasmesso a un server. Niente viene raccolto, registrato o condiviso con nessuno.',
+	footerLicenseNote: 'SliceCeipt è software libero, distribuito secondo i termini della GNU General Public License v3.0.',
+	footerViewLicense: 'Leggi la licenza',
+	footerSource: 'Codice sorgente',
+	footerMadeBy: 'Realizzato da itsjustwhitee'
 };
 
 export default it;
