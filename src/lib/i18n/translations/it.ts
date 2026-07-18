@@ -49,7 +49,8 @@ const it: Dictionary = {
 	yourTotal: 'Il tuo totale',
 	copySummary: 'Copia',
 	copied: 'Copiato',
-	shareSummary: 'Condividi'
+	shareSummary: 'Condividi',
+	summaryTitle: 'Riepilogo'
 };
 
 export default it;

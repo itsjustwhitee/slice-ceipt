@@ -47,7 +47,8 @@ const en = {
 	yourTotal: 'Your total',
 	copySummary: 'Copy',
 	copied: 'Copied',
-	shareSummary: 'Share'
+	shareSummary: 'Share',
+	summaryTitle: 'Summary'
 };
 
 export default en;
