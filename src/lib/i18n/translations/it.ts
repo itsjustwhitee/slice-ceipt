@@ -9,7 +9,24 @@ const it: Dictionary = {
 	extractionInProgress: 'Lettura dello scontrino…',
 	extractionErrorTitle: 'Non è stato possibile leggere lo scontrino',
 	extractionRetry: 'Riprova',
-	extractionContinueManually: 'Continua senza'
+	extractionContinueManually: 'Continua senza',
+	setupTitle: 'Chi divide il conto?',
+	modeGroup: 'Gruppo',
+	modeSingle: 'Da solo',
+	modeGroupHint: 'Aggiungi tutti per nome e assegna gli articoli a ciascuno.',
+	modeSingleHint: 'Inserisci quante persone condividono e scegli la tua parte di ogni articolo.',
+	participantsTitle: 'Partecipanti',
+	participantNamePlaceholder: 'Nome',
+	addParticipant: 'Aggiungi',
+	removeParticipant: 'Rimuovi',
+	presetsTitle: 'Gruppi salvati',
+	savePreset: 'Salva questo gruppo',
+	presetNamePlaceholder: 'Nome del gruppo',
+	applyPreset: 'Usa',
+	deletePreset: 'Elimina',
+	singleCountLabel: 'Numero di persone',
+	setupContinue: 'Continua',
+	setupNeedMoreParticipants: 'Aggiungi almeno 2 partecipanti'
 };
 
 export default it;
