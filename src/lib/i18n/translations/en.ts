@@ -27,7 +27,7 @@ const en = {
 	setupNeedMoreParticipants: 'Add at least 2 participants',
 	startOver: 'Start over',
 	unassignedLabel: 'Unassigned',
-	bulkApply: 'Set the same split for everyone',
+	bulkApply: 'Set default split',
 	bulkApplyButton: 'Apply to all items',
 	itemNamePlaceholder: 'Item name',
 	priceLabel: 'Price',

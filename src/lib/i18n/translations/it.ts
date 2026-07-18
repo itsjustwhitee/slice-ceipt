@@ -29,7 +29,7 @@ const it: Dictionary = {
 	setupNeedMoreParticipants: 'Aggiungi almeno 2 partecipanti',
 	startOver: 'Ricomincia',
 	unassignedLabel: 'Non assegnato',
-	bulkApply: 'Imposta la stessa divisione per tutti',
+	bulkApply: 'Imposta divisione default',
 	bulkApplyButton: 'Applica a tutti gli articoli',
 	itemNamePlaceholder: 'Nome articolo',
 	priceLabel: 'Prezzo',

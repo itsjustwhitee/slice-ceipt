@@ -24,12 +24,14 @@
 		next.set(participantId, Math.max(1, current + delta));
 		onchange(next);
 	}
+
+	let showStepper = $derived(assignment.size > 1);
 </script>
 
 <div class="assignment-picker">
 	{#each $participants as participant (participant.id)}
 		{@const weight = assignment.get(participant.id)}
-		<div class="picker-row">
+		<div class="picker-entry">
 			<button
 				type="button"
 				class="chip"
@@ -39,7 +41,7 @@
 			>
 				{participant.name}
 			</button>
-			{#if weight !== undefined}
+			{#if weight !== undefined && showStepper}
 				<div class="weight-stepper">
 					<button type="button" onclick={() => adjustWeight(participant.id, -1)}>−</button>
 					<span>{weight}</span>
@@ -53,14 +55,15 @@
 <style>
 	.assignment-picker {
 		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+		align-items: center;
+		gap: 0.4rem;
+		flex-wrap: wrap;
 	}
 
-	.picker-row {
+	.picker-entry {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.3rem;
 	}
 
 	.chip {
@@ -68,7 +71,8 @@
 		border: 2px solid var(--chip-color);
 		color: var(--chip-color);
 		background: transparent;
-		padding: 0.35em 1em;
+		padding: 0.25em 0.85em;
+		font-size: 0.9rem;
 	}
 
 	.chip.is-selected {
@@ -79,7 +83,7 @@
 	.weight-stepper {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.3rem;
 	}
 
 	.weight-stepper span {

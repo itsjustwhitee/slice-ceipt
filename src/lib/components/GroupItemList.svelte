@@ -3,7 +3,6 @@
 	import { t, locale } from '$lib/i18n';
 	import { currency } from '$lib/stores/currency';
 	import { groupItems, groupTotals, step } from '$lib/stores/receipt';
-	import { participants } from '$lib/stores/participants';
 	import { participantColors } from '$lib/stores/participants';
 	import {
 		setItemAssignment,
@@ -89,14 +88,34 @@
 	<ul class="item-list">
 		{#each $groupItems as item (item.id)}
 			{@const assignedIds = assignedParticipantIds(item.units)}
-			<li class="item-row">
-				<div class="item-summary">
+			{@const rowColor = assignedIds.length === 1 ? $participantColors.get(assignedIds[0]) : undefined}
+			<li
+				class="item-row"
+				class:is-unassigned={assignedIds.length === 0}
+				style:--row-color={rowColor}
+			>
+				<div class="row-main">
+					{#if item.quantity > 1}
+						<button
+							type="button"
+							class="chevron"
+							class:is-expanded={expandedItemId === item.id}
+							aria-label={expandedItemId === item.id ? $t('collapse') : $t('expand')}
+							title={expandedItemId === item.id ? $t('collapse') : $t('expand')}
+							onclick={() => toggleExpanded(item.id)}
+						>
+							▸
+						</button>
+					{:else}
+						<span class="chevron-spacer"></span>
+					{/if}
 					<input
 						class="item-name"
 						type="text"
 						value={item.name}
 						onchange={(e) => updateItemName(item.id, (e.target as HTMLInputElement).value)}
 					/>
+					<span class="item-qty">×</span>
 					<input
 						class="item-quantity"
 						type="number"
@@ -112,16 +131,10 @@
 						value={(item.unitPriceCents / 100).toFixed(2)}
 						onchange={(e) => handlePriceChange(item.id, (e.target as HTMLInputElement).value)}
 					/>
-					<button
-						type="button"
-						class="expand-toggle"
-						class:is-expanded={expandedItemId === item.id}
-						aria-label={expandedItemId === item.id ? $t('collapse') : $t('expand')}
-						title={expandedItemId === item.id ? $t('collapse') : $t('expand')}
-						onclick={() => toggleExpanded(item.id)}
-					>
-						▾
-					</button>
+					<GroupAssignmentPicker
+						assignment={item.units[0].assignment}
+						onchange={(next) => setItemAssignment(item.id, next)}
+					/>
 					<button
 						type="button"
 						class="icon-button is-danger"
@@ -133,35 +146,17 @@
 					</button>
 				</div>
 
-				{#if assignedIds.length === 0}
-					<p class="unassigned-badge">{$t('unassignedLabel')}</p>
-				{:else}
-					<div class="assigned-chips">
-						{#each assignedIds as id (id)}
-							{@const p = $participants.find((x) => x.id === id)}
-							{#if p}
-								<span class="mini-chip" style:--chip-color={$participantColors.get(id)}>{p.name}</span>
-							{/if}
-						{/each}
-					</div>
-				{/if}
-
-				{#if expandedItemId === item.id}
-					<div class="expanded-panel">
-						<p class="panel-label">{$t('assignWholeItem')}</p>
-						<GroupAssignmentPicker
-							assignment={item.units[0].assignment}
-							onchange={(next) => setItemAssignment(item.id, next)}
-						/>
-						{#if item.quantity > 1}
-							{#each item.units as unit, i (i)}
-								<p class="panel-label">{$t('unitLabel')} {i + 1}</p>
+				{#if expandedItemId === item.id && item.quantity > 1}
+					<div class="unit-list">
+						{#each item.units as unit, i (i)}
+							<div class="unit-row">
+								<span class="unit-label">{$t('unitLabel')} {i + 1}</span>
 								<GroupAssignmentPicker
 									assignment={unit.assignment}
 									onchange={(next) => setUnitAssignment(item.id, i, next)}
 								/>
-							{/each}
-						{/if}
+							</div>
+						{/each}
 					</div>
 				{/if}
 			</li>
@@ -213,86 +208,111 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.4rem;
 	}
 
 	.item-row {
-		border-radius: 12px;
-		padding: 0.75rem;
-		background: color-mix(in srgb, var(--color-text-on-surface) 4%, transparent);
+		border-radius: 10px;
+		padding: 0.5rem 0.6rem;
+		background: color-mix(in srgb, var(--row-color, var(--color-text-on-surface)) 10%, transparent);
+		border-left: 3px solid var(--row-color, transparent);
+		transition: background-color 0.15s ease, border-color 0.15s ease;
 	}
 
-	.item-summary {
+	.item-row.is-unassigned {
+		opacity: 0.6;
+	}
+
+	.row-main {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 		flex-wrap: wrap;
+		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+	}
+
+	.chevron {
+		width: 1.5rem;
+		flex: none;
+		padding: 0.2em;
+		border: none;
+		background: transparent;
+		transition: transform 0.15s ease;
+	}
+
+	.chevron.is-expanded {
+		transform: rotate(90deg);
+	}
+
+	.chevron-spacer {
+		width: 1.5rem;
+		flex: none;
 	}
 
 	.item-name {
-		flex: 1;
+		flex: 1 1 10ch;
 		min-width: 8ch;
 	}
 
+	.item-qty {
+		opacity: 0.6;
+	}
+
 	.item-quantity {
-		width: 4ch;
+		width: 2.5ch;
 	}
 
 	.item-price {
-		width: 7ch;
+		width: 6ch;
 	}
 
 	.item-name,
 	.item-quantity,
 	.item-price {
 		font: inherit;
-		padding: 0.4em 0.6em;
-		border-radius: 8px;
-		border: 1px solid color-mix(in srgb, var(--color-text-on-surface) 25%, transparent);
+		font-family: inherit;
+		padding: 0.2em 0.3em;
+		border-radius: 6px;
+		border: 1px solid transparent;
+		background: transparent;
+		color: inherit;
 	}
 
-	.expand-toggle {
-		transition: transform 0.15s ease;
+	.item-name:hover,
+	.item-quantity:hover,
+	.item-price:hover {
+		background: color-mix(in srgb, var(--color-text-on-surface) 6%, transparent);
 	}
 
-	.expand-toggle.is-expanded {
-		transform: rotate(180deg);
+	.item-name:focus,
+	.item-quantity:focus,
+	.item-price:focus {
+		outline: none;
+		border-color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-text-on-surface) 6%, transparent);
 	}
 
-	.unassigned-badge {
-		margin: 0.5rem 0 0;
-		color: var(--color-error);
-		font-weight: 600;
-		font-size: 0.9rem;
-	}
-
-	.assigned-chips {
+	.unit-list {
+		margin: 0.5rem 0 0.25rem 1.5rem;
+		padding-left: 0.75rem;
+		border-left: 1px solid color-mix(in srgb, var(--color-text-on-surface) 15%, transparent);
 		display: flex;
-		gap: 0.4rem;
-		margin-top: 0.5rem;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.unit-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 		flex-wrap: wrap;
 	}
 
-	.mini-chip {
-		font-size: 0.85rem;
+	.unit-label {
+		font-size: 0.8rem;
 		font-weight: 600;
-		padding: 0.15em 0.7em;
-		border-radius: 999px;
-		background: var(--chip-color);
-		color: #1a1a1a;
-	}
-
-	.expanded-panel {
-		margin-top: 0.75rem;
-		padding-top: 0.75rem;
-		border-top: 1px solid color-mix(in srgb, var(--color-text-on-surface) 15%, transparent);
-	}
-
-	.panel-label {
-		font-weight: 600;
-		font-size: 0.85rem;
-		opacity: 0.75;
-		margin: 0.75rem 0 0.4rem;
+		opacity: 0.7;
+		min-width: 5ch;
 	}
 
 	.add-item-form {
@@ -300,6 +320,7 @@
 		gap: 0.5rem;
 		flex-wrap: wrap;
 		align-items: center;
+		margin-top: 1rem;
 	}
 
 	.add-item-form input {
