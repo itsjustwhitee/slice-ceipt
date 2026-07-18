@@ -1,9 +1,11 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
 	import { locale, t } from '$lib/i18n';
-	import { step, resetSession } from '$lib/stores/receipt';
+	import { step, mode, resetSession } from '$lib/stores/receipt';
 	import Uploader from '$lib/components/Uploader.svelte';
 	import SetupStep from '$lib/components/SetupStep.svelte';
+	import GroupItemList from '$lib/components/GroupItemList.svelte';
+	import SingleItemList from '$lib/components/SingleItemList.svelte';
 </script>
 
 <main>
@@ -16,6 +18,12 @@
 		<Uploader />
 	{:else if $step === 'setup'}
 		<SetupStep />
+	{:else if $step === 'items'}
+		{#if $mode === 'group'}
+			<GroupItemList />
+		{:else}
+			<SingleItemList />
+		{/if}
 	{:else}
 		<div class="card">
 			<h1>{$t('itemsPlaceholder')}</h1>
