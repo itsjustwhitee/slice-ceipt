@@ -68,4 +68,10 @@
 		border-radius: 8px;
 		border: 1px solid color-mix(in srgb, var(--color-text-on-surface) 25%, transparent);
 	}
+
+	.fraction-picker button.is-selected {
+		background: var(--color-accent);
+		border-color: var(--color-accent);
+		color: #1a1a1a;
+	}
 </style>
