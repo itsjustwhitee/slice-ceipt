@@ -72,8 +72,13 @@
 		const first = units[0].fraction;
 		const allSame = units.every((u) => sameFraction(u.fraction, first));
 		if (!allSame) return $t('mixedShare');
-		if (first === null) return $t('nonMio');
+		if (first === null) return '';
+		if (first.num === 1 && first.den === 1) return '';
 		return first.den === 100 ? `${first.num}%` : `${first.num}/${first.den}`;
+	}
+
+	function toggleInclude(itemId: string, currentlyIncluded: boolean) {
+		setItemFraction(itemId, currentlyIncluded ? null : { num: 1, den: 1 });
 	}
 </script>
 
@@ -92,14 +97,38 @@
 
 	<ul class="item-list">
 		{#each $singleItems as item (item.id)}
-			<li class="item-row">
-				<div class="item-summary">
+			{@const included = item.units[0].fraction !== null}
+			{@const summary = summarizeFraction(item.units)}
+			<li class="item-row" class:is-unassigned={!included}>
+				<div class="row-main">
+					{#if item.quantity > 1}
+						<button
+							type="button"
+							class="chevron"
+							class:is-expanded={expandedItemId === item.id}
+							aria-label={expandedItemId === item.id ? $t('collapse') : $t('expand')}
+							title={expandedItemId === item.id ? $t('collapse') : $t('expand')}
+							onclick={() => toggleExpanded(item.id)}
+						>
+							▸
+						</button>
+					{:else}
+						<span class="chevron-spacer"></span>
+					{/if}
+					<input
+						type="checkbox"
+						class="include-checkbox"
+						aria-label={$t('nonMio')}
+						checked={included}
+						onclick={() => toggleInclude(item.id, included)}
+					/>
 					<input
 						class="item-name"
 						type="text"
 						value={item.name}
 						onchange={(e) => updateItemName(item.id, (e.target as HTMLInputElement).value)}
 					/>
+					<span class="item-qty">×</span>
 					<input
 						class="item-quantity"
 						type="number"
@@ -115,16 +144,11 @@
 						value={(item.unitPriceCents / 100).toFixed(2)}
 						onchange={(e) => handlePriceChange(item.id, (e.target as HTMLInputElement).value)}
 					/>
-					<button
-						type="button"
-						class="expand-toggle"
-						class:is-expanded={expandedItemId === item.id}
-						aria-label={expandedItemId === item.id ? $t('collapse') : $t('expand')}
-						title={expandedItemId === item.id ? $t('collapse') : $t('expand')}
-						onclick={() => toggleExpanded(item.id)}
-					>
-						▾
-					</button>
+					<SingleFractionPicker
+						fraction={item.units[0].fraction}
+						onchange={(next) => setItemFraction(item.id, next)}
+					/>
+					{#if summary}<span class="fraction-display">{summary}</span>{/if}
 					<button
 						type="button"
 						class="icon-button is-danger"
@@ -136,24 +160,25 @@
 					</button>
 				</div>
 
-				<p class="share-badge">{summarizeFraction(item.units)}</p>
-
-				{#if expandedItemId === item.id}
-					<div class="expanded-panel">
-						<p class="panel-label">{$t('assignWholeItem')}</p>
-						<SingleFractionPicker
-							fraction={item.units[0].fraction}
-							onchange={(next) => setItemFraction(item.id, next)}
-						/>
-						{#if item.quantity > 1}
-							{#each item.units as unit, i (i)}
-								<p class="panel-label">{$t('unitLabel')} {i + 1}</p>
+				{#if expandedItemId === item.id && item.quantity > 1}
+					<div class="unit-list">
+						{#each item.units as unit, i (i)}
+							{@const unitIncluded = unit.fraction !== null}
+							<div class="unit-row">
+								<input
+									type="checkbox"
+									class="include-checkbox"
+									aria-label={$t('nonMio')}
+									checked={unitIncluded}
+									onclick={() => setUnitFraction(item.id, i, unitIncluded ? null : { num: 1, den: 1 })}
+								/>
+								<span class="unit-label">{$t('unitLabel')} {i + 1}</span>
 								<SingleFractionPicker
 									fraction={unit.fraction}
 									onchange={(next) => setUnitFraction(item.id, i, next)}
 								/>
-							{/each}
-						{/if}
+							</div>
+						{/each}
 					</div>
 				{/if}
 			</li>
@@ -205,70 +230,126 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.4rem;
 	}
 
 	.item-row {
-		border-radius: 12px;
-		padding: 0.75rem;
-		background: color-mix(in srgb, var(--color-text-on-surface) 4%, transparent);
+		border-radius: 10px;
+		padding: 0.5rem 0.6rem;
+		background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+		border-left: 3px solid var(--color-accent);
+		transition: background-color 0.15s ease, border-color 0.15s ease;
 	}
 
-	.item-summary {
+	.item-row.is-unassigned {
+		opacity: 0.6;
+		background: transparent;
+		border-left-color: transparent;
+	}
+
+	.row-main {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 		flex-wrap: wrap;
+		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+	}
+
+	.chevron {
+		width: 1.5rem;
+		flex: none;
+		padding: 0.2em;
+		border: none;
+		background: transparent;
+		transition: transform 0.15s ease;
+	}
+
+	.chevron.is-expanded {
+		transform: rotate(90deg);
+	}
+
+	.chevron-spacer {
+		width: 1.5rem;
+		flex: none;
+	}
+
+	.include-checkbox {
+		flex: none;
+		width: 1.15rem;
+		height: 1.15rem;
+		accent-color: var(--color-accent);
 	}
 
 	.item-name {
-		flex: 1;
+		flex: 1 1 10ch;
 		min-width: 8ch;
 	}
 
+	.item-qty {
+		opacity: 0.6;
+	}
+
 	.item-quantity {
-		width: 4ch;
+		width: 2.5ch;
 	}
 
 	.item-price {
-		width: 7ch;
+		width: 6ch;
 	}
 
 	.item-name,
 	.item-quantity,
 	.item-price {
 		font: inherit;
-		padding: 0.4em 0.6em;
-		border-radius: 8px;
-		border: 1px solid color-mix(in srgb, var(--color-text-on-surface) 25%, transparent);
+		font-family: inherit;
+		padding: 0.2em 0.3em;
+		border-radius: 6px;
+		border: 1px solid transparent;
+		background: transparent;
+		color: inherit;
 	}
 
-	.expand-toggle {
-		transition: transform 0.15s ease;
+	.item-name:hover,
+	.item-quantity:hover,
+	.item-price:hover {
+		background: color-mix(in srgb, var(--color-text-on-surface) 6%, transparent);
 	}
 
-	.expand-toggle.is-expanded {
-		transform: rotate(180deg);
+	.item-name:focus,
+	.item-quantity:focus,
+	.item-price:focus {
+		outline: none;
+		border-color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-text-on-surface) 6%, transparent);
 	}
 
-	.share-badge {
-		margin: 0.5rem 0 0;
-		font-weight: 600;
-		font-size: 0.9rem;
-		opacity: 0.85;
-	}
-
-	.expanded-panel {
-		margin-top: 0.75rem;
-		padding-top: 0.75rem;
-		border-top: 1px solid color-mix(in srgb, var(--color-text-on-surface) 15%, transparent);
-	}
-
-	.panel-label {
-		font-weight: 600;
+	.fraction-display {
 		font-size: 0.85rem;
+		font-weight: 600;
 		opacity: 0.75;
-		margin: 0.75rem 0 0.4rem;
+	}
+
+	.unit-list {
+		margin: 0.5rem 0 0.25rem 1.5rem;
+		padding-left: 0.75rem;
+		border-left: 1px solid color-mix(in srgb, var(--color-text-on-surface) 15%, transparent);
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.unit-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.unit-label {
+		font-size: 0.8rem;
+		font-weight: 600;
+		opacity: 0.7;
+		min-width: 5ch;
 	}
 
 	.add-item-form {
@@ -276,6 +357,7 @@
 		gap: 0.5rem;
 		flex-wrap: wrap;
 		align-items: center;
+		margin-top: 1rem;
 	}
 
 	.add-item-form input {

@@ -28,9 +28,6 @@
 </script>
 
 <div class="fraction-picker">
-	<button type="button" class:is-selected={fraction === null} onclick={() => onchange(null)}>
-		{$t('nonMio')}
-	</button>
 	{#each quickDenominators as den (den)}
 		<button type="button" class:is-selected={isQuickFraction(den)} onclick={() => onchange({ num: 1, den })}>
 			1/{den}
@@ -44,7 +41,6 @@
 		}}
 	>
 		<input type="text" placeholder={$t('customSharePlaceholder')} bind:value={customInput} />
-		<button type="submit">{$t('applyShare')}</button>
 	</form>
 </div>
 
@@ -52,21 +48,24 @@
 	.fraction-picker {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.4rem;
 		flex-wrap: wrap;
 	}
 
-	.custom-form {
-		display: flex;
-		gap: 0.4rem;
+	.fraction-picker button {
+		font-size: 0.9rem;
+		padding: 0.25em 0.85em;
 	}
 
 	.custom-form input {
 		font: inherit;
-		width: 8ch;
-		padding: 0.4em 0.6em;
+		font-size: 0.9rem;
+		width: 6ch;
+		padding: 0.3em 0.5em;
 		border-radius: 8px;
 		border: 1px solid color-mix(in srgb, var(--color-text-on-surface) 25%, transparent);
+		background: transparent;
+		color: inherit;
 	}
 
 	.fraction-picker button.is-selected {
