@@ -39,7 +39,12 @@ const en = {
 	collapse: 'Hide details',
 	assignWholeItem: 'Assign the whole item',
 	unitLabel: 'Unit',
-	itemsContinue: 'Continue'
+	itemsContinue: 'Continue',
+	nonMio: 'Not mine',
+	customSharePlaceholder: 'e.g. 2/5 or 40%',
+	applyShare: 'Apply',
+	mixedShare: 'Mixed',
+	yourTotal: 'Your total'
 };
 
 export default en;

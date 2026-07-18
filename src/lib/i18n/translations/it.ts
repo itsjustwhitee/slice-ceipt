@@ -41,7 +41,12 @@ const it: Dictionary = {
 	collapse: 'Nascondi dettagli',
 	assignWholeItem: "Assegna l'intero articolo",
 	unitLabel: 'Unità',
-	itemsContinue: 'Continua'
+	itemsContinue: 'Continua',
+	nonMio: 'Non mio',
+	customSharePlaceholder: 'es. 2/5 o 40%',
+	applyShare: 'Applica',
+	mixedShare: 'Misto',
+	yourTotal: 'Il tuo totale'
 };
 
 export default it;
