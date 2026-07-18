@@ -3,7 +3,7 @@ const en = {
 	uploadTitle: 'Upload your receipt',
 	uploadDropzone: 'Drag a photo or PDF here, or tap to choose',
 	uploadTakePhoto: 'Take a photo',
-	uploadSkip: "Skip — I'll enter items manually",
+	uploadSkip: 'Skip',
 	extractionInProgress: 'Reading your receipt…',
 	extractionErrorTitle: "Couldn't read the receipt",
 	extractionRetry: 'Try again',

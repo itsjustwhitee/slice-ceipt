@@ -2,6 +2,9 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
 	import { extractionStatus, extractionError, loadReceipt, skipExtraction } from '$lib/stores/receipt';
+	import CameraIcon from '$lib/icons/CameraIcon.svelte';
+	import SkipIcon from '$lib/icons/SkipIcon.svelte';
+	import UploadIcon from '$lib/icons/UploadIcon.svelte';
 
 	let fileInput: HTMLInputElement;
 	let cameraInput: HTMLInputElement;
@@ -29,7 +32,14 @@
 		{#if $extractionError}<p class="status-detail">{$extractionError}</p>{/if}
 		<div class="actions">
 			<button onclick={() => fileInput.click()}>{$t('extractionRetry')}</button>
-			<button onclick={skipExtraction}>{$t('extractionContinueManually')}</button>
+			<button
+				class="icon-button"
+				aria-label={$t('extractionContinueManually')}
+				title={$t('extractionContinueManually')}
+				onclick={skipExtraction}
+			>
+				<SkipIcon />
+			</button>
 		</div>
 	{:else}
 		<div
@@ -46,11 +56,26 @@
 			ondragleave={() => (isDragOver = false)}
 			ondrop={handleDrop}
 		>
+			<UploadIcon size={28} />
 			<p>{$t('uploadDropzone')}</p>
 		</div>
 		<div class="actions">
-			<button onclick={() => cameraInput.click()}>{$t('uploadTakePhoto')}</button>
-			<button onclick={skipExtraction}>{$t('uploadSkip')}</button>
+			<button
+				class="icon-button"
+				aria-label={$t('uploadTakePhoto')}
+				title={$t('uploadTakePhoto')}
+				onclick={() => cameraInput.click()}
+			>
+				<CameraIcon />
+			</button>
+			<button
+				class="icon-button"
+				aria-label={$t('uploadSkip')}
+				title={$t('uploadSkip')}
+				onclick={skipExtraction}
+			>
+				<SkipIcon />
+			</button>
 		</div>
 	{/if}
 
@@ -73,6 +98,10 @@
 
 <style>
 	.dropzone {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
 		border: 2px dashed color-mix(in srgb, var(--color-text-on-surface) 25%, transparent);
 		border-radius: 12px;
 		padding: 3rem 1.5rem;
@@ -98,7 +127,7 @@
 	}
 
 	.status-error {
-		color: #c0392b;
+		color: var(--color-error);
 	}
 
 	.status-detail {
