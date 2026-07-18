@@ -4,6 +4,8 @@
 	import { mode, singleModeCount, setSingleModeCount, isSetupValid, confirmSetup } from '$lib/stores/receipt';
 	import { participants, addParticipant, removeParticipant } from '$lib/stores/participants';
 	import { presets, savePreset, deletePreset, applyPreset } from '$lib/stores/presets';
+	import AddIcon from '$lib/icons/AddIcon.svelte';
+	import BinIcon from '$lib/icons/BinIcon.svelte';
 
 	let newParticipantName = $state('');
 	let newPresetName = $state('');
@@ -44,9 +46,13 @@
 					<li>
 						<span>{participant.name}</span>
 						<button
+							class="icon-button is-danger"
 							aria-label={$t('removeParticipant')}
-							onclick={() => removeParticipant(participant.id)}>✕</button
+							title={$t('removeParticipant')}
+							onclick={() => removeParticipant(participant.id)}
 						>
+							<BinIcon size={16} />
+						</button>
 					</li>
 				{/each}
 			</ul>
@@ -62,7 +68,14 @@
 					placeholder={$t('participantNamePlaceholder')}
 					bind:value={newParticipantName}
 				/>
-				<button type="submit">{$t('addParticipant')}</button>
+				<button
+					class="icon-button"
+					type="submit"
+					aria-label={$t('addParticipant')}
+					title={$t('addParticipant')}
+				>
+					<AddIcon size={16} />
+				</button>
 			</form>
 		</section>
 
@@ -75,7 +88,14 @@
 							<span>{preset.name} ({preset.participantNames.join(', ')})</span>
 							<div class="preset-actions">
 								<button onclick={() => applyPreset(preset.id)}>{$t('applyPreset')}</button>
-								<button onclick={() => deletePreset(preset.id)}>{$t('deletePreset')}</button>
+								<button
+									class="icon-button is-danger"
+									aria-label={$t('deletePreset')}
+									title={$t('deletePreset')}
+									onclick={() => deletePreset(preset.id)}
+								>
+									<BinIcon size={16} />
+								</button>
 							</div>
 						</li>
 					{/each}
@@ -177,7 +197,7 @@
 	}
 
 	.status-error {
-		color: #c0392b;
+		color: var(--color-error);
 		font-weight: 600;
 	}
 
