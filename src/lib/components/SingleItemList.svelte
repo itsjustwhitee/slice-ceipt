@@ -308,7 +308,15 @@
 	}
 
 	.item-quantity {
-		width: 2.5ch;
+		width: 3ch;
+		appearance: textfield;
+		-moz-appearance: textfield;
+	}
+
+	.item-quantity::-webkit-inner-spin-button,
+	.item-quantity::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
 	}
 
 	.item-price {
