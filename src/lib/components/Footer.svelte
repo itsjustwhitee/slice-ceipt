@@ -102,15 +102,22 @@
 	}
 
 	.personal-logo-link {
+		position: relative;
 		margin-top: 0.5rem;
 		display: inline-flex;
-		border-radius: 50%;
-		box-shadow: 0 0 20px 4px color-mix(in srgb, var(--color-accent) 35%, transparent);
-		transition: box-shadow 0.15s ease;
 	}
 
-	.personal-logo-link:hover {
-		box-shadow: 0 0 24px 6px color-mix(in srgb, var(--color-accent) 55%, transparent);
+	.personal-logo-link::before {
+		content: '';
+		position: absolute;
+		inset: -0.9rem;
+		z-index: -1;
+		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 55%, transparent) 0%, transparent 70%);
+		transition: background 0.15s ease;
+	}
+
+	.personal-logo-link:hover::before {
+		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 75%, transparent) 0%, transparent 75%);
 	}
 
 	.personal-logo {

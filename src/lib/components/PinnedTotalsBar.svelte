@@ -50,8 +50,8 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		max-width: 640px;
-		width: 100%;
+		width: auto;
+		max-width: 100%;
 		padding: 0.6rem 0.75rem;
 		border-radius: 999px;
 	}

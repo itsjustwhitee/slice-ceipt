@@ -23,17 +23,18 @@
 </script>
 
 <div class="card">
-	<button
-		class="icon-button copy-trigger"
-		type="button"
-		aria-label={copied ? $t('copied') : $t('copySummary')}
-		title={copied ? $t('copied') : $t('copySummary')}
-		onclick={copy}
-	>
-		<CopyIcon size={16} />
-	</button>
-
-	<h1>{$t('summaryTitle')}</h1>
+	<div class="summary-header">
+		<h1>{$t('summaryTitle')}</h1>
+		<button
+			class="icon-button copy-trigger"
+			type="button"
+			aria-label={copied ? $t('copied') : $t('copySummary')}
+			title={copied ? $t('copied') : $t('copySummary')}
+			onclick={copy}
+		>
+			<CopyIcon size={16} />
+		</button>
+	</div>
 
 	<ul class="person-list">
 		<li class="person-card">
@@ -65,14 +66,15 @@
 </div>
 
 <style>
-	.card {
-		position: relative;
+	.summary-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
 	}
 
-	.copy-trigger {
-		position: absolute;
-		top: 1.5rem;
-		right: 1.5rem;
+	.summary-header h1 {
+		margin: 0;
 	}
 
 	.person-list {

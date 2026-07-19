@@ -243,7 +243,7 @@
 	title={$t('addItem')}
 	onclick={() => (addModalOpen = true)}
 >
-	<AddIcon size={20} />
+	<AddIcon size={24} />
 </button>
 
 <AddItemModal open={addModalOpen} onadd={handleAddItem} onclose={() => (addModalOpen = false)} />
