@@ -19,8 +19,11 @@ const QUANTITY_MARKER =
 // Many Italian receipts print a per-line VAT rate between the item name and
 // its price (e.g. "PASSATA DI POMODORO 4,00% 0,99") — this is the item's tax
 // category, not part of its name, and must be stripped before the name is
-// used, the same way a quantity marker is.
-const VAT_PERCENTAGE = /\d{1,2}[.,]\d{2}\s*%\s*$/;
+// used, the same way a quantity marker is. Some real receipts' extracted
+// text puts a space after the decimal separator ("4, 00%" rather than
+// "4,00%") — allow optional whitespace there too, or the rate is left
+// stuck to the name instead of being stripped.
+const VAT_PERCENTAGE = /\d{1,2}\s*[.,]\s*\d{2}\s*%\s*$/;
 
 /**
  * Splits one already-confirmed item line (from `extractItemLines`) into its

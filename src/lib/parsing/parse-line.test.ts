@@ -76,6 +76,14 @@ describe('extractNameAndPrice', () => {
 		});
 	});
 
+	it('strips a trailing VAT rate even when the extracted text has a space after the decimal separator (real receipt quirk, e.g. "4, 00%")', () => {
+		expect(extractNameAndPrice('M-T POMOD. DATT F. FIORE 4, 00% 6,96')).toEqual({
+			name: 'M-T POMOD. DATT F. FIORE',
+			unitPriceCents: 696,
+			quantity: 1
+		});
+	});
+
 	it('strips a trailing VAT rate on a discount line too', () => {
 		expect(extractNameAndPrice('SCONTO % CLIENTI 40,00% 4,00% -1,40')).toEqual({
 			name: 'SCONTO % CLIENTI 40,00%',
