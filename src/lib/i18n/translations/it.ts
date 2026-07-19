@@ -29,6 +29,7 @@ const it: Dictionary = {
 	setupNeedMoreParticipants: 'Aggiungi almeno 2 partecipanti',
 	startOver: 'Ricomincia',
 	unassignedLabel: 'Non assegnato',
+	onlyMine: 'Solo mia',
 	bulkApply: 'Imposta divisione default',
 	bulkApplyButton: 'Applica a tutti gli articoli',
 	itemNamePlaceholder: 'Nome articolo',
@@ -36,6 +37,8 @@ const it: Dictionary = {
 	quantityLabel: 'Quantità',
 	addItem: 'Aggiungi articolo',
 	deleteItem: 'Elimina',
+	cancel: 'Annulla',
+	close: 'Chiudi',
 	expand: 'Dettagli',
 	collapse: 'Nascondi dettagli',
 	unitLabel: 'Unità',
@@ -43,6 +46,7 @@ const it: Dictionary = {
 	nonMio: 'Non mio',
 	customSharePlaceholder: 'es. 2/5 o 40%',
 	customShare: 'Quota personalizzata',
+	customShareNeedsTwo: 'Seleziona almeno 2 persone per personalizzare le quote',
 	mixedShare: 'Misto',
 	yourTotal: 'Totale',
 	backToItems: 'Torna agli articoli',
@@ -52,9 +56,17 @@ const it: Dictionary = {
 	summaryTitle: 'Riepilogo',
 	footerPrivacy: 'SliceCeipt funziona interamente nel tuo browser. Nessun dato dello scontrino, immagine o informazione personale viene mai caricato, salvato o trasmesso a un server. Niente viene raccolto, registrato o condiviso con nessuno.',
 	footerLicenseNote: 'SliceCeipt è software libero, distribuito secondo i termini della GNU General Public License v3.0.',
+	footerInstallNote: 'SliceCeipt può essere installata sul tuo dispositivo per un accesso rapido e offline.',
+	footerInstallHow: 'Come si installa?',
 	footerViewLicense: 'Leggi la licenza',
 	footerSource: 'Codice sorgente',
-	footerMadeBy: 'Realizzato da itsjustwhitee'
+	footerMadeBy: 'Realizzato da itsjustwhitee',
+	footerPersonalLogoAlt: 'itsjustwhitee',
+	installModalTitle: 'Installare SliceCeipt',
+	installIntro: "SliceCeipt è una Progressive Web App: installala una volta e si comporterà come un'app nativa, funzionando anche offline senza la barra del browser.",
+	installStepAndroid: 'Android (Chrome): tocca il menu (⋮) e scegli "Installa app" oppure "Aggiungi a schermata Home".',
+	installStepIos: 'iPhone/iPad (Safari): tocca l\'icona Condividi, poi "Aggiungi a Home".',
+	installStepDesktop: 'Desktop (Chrome/Edge): clicca sull\'icona di installazione nella barra degli indirizzi, oppure apri il menu e scegli "Installa SliceCeipt".'
 };
 
 export default it;

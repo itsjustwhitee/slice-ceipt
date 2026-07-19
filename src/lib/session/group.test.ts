@@ -3,6 +3,7 @@ import {
 	createGroupItemsFromParsed,
 	computeGroupTotals,
 	computeGroupItemization,
+	aggregateItemAssignment,
 	type GroupItem
 } from './group';
 
@@ -173,5 +174,22 @@ describe('computeGroupTotals', () => {
 			const sum = itemization.reduce((acc, i) => acc + i.shareCents, 0);
 			expect(sum).toBe(totals.totals.get(id));
 		}
+	});
+});
+
+describe('aggregateItemAssignment', () => {
+	it('sums each participant\'s weight across every unit of an item', () => {
+		const units = [
+			{ assignment: new Map([['alice', 1]]) },
+			{ assignment: new Map([['alice', 1], ['bob', 2]]) }
+		];
+		const result = aggregateItemAssignment(units);
+		expect(result.get('alice')).toBe(2);
+		expect(result.get('bob')).toBe(2);
+	});
+
+	it('returns an empty map when no unit has any assignment', () => {
+		const units = [{ assignment: new Map() }, { assignment: new Map() }];
+		expect(aggregateItemAssignment(units).size).toBe(0);
 	});
 });

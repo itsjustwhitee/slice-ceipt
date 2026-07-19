@@ -1,21 +1,46 @@
 <!-- src/lib/components/Footer.svelte -->
 <script lang="ts">
 	import { t } from '$lib/i18n';
+	import personalLogo from '$lib/assets/personal-logo.svg';
+	import DocIcon from '$lib/icons/DocIcon.svelte';
+	import CodeIcon from '$lib/icons/CodeIcon.svelte';
+	import UserIcon from '$lib/icons/UserIcon.svelte';
+	import InstallInfoModal from './InstallInfoModal.svelte';
+
+	let installModalOpen = $state(false);
 </script>
 
 <footer class="app-footer">
 	<p>{$t('footerPrivacy')}</p>
 	<p>{$t('footerLicenseNote')}</p>
+	<p>
+		{$t('footerInstallNote')}
+		<button type="button" class="install-how" onclick={() => (installModalOpen = true)}>
+			{$t('footerInstallHow')}
+		</button>
+	</p>
 	<div class="footer-links">
-		<a href="/LICENSE.txt" target="_blank" rel="noopener noreferrer">{$t('footerViewLicense')}</a>
+		<a href="/LICENSE.txt" target="_blank" rel="noopener noreferrer">
+			<DocIcon size={14} />
+			{$t('footerViewLicense')}
+		</a>
 		<span class="footer-sep">·</span>
 		<a href="https://github.com/itsjustwhitee/slice-ceipt" target="_blank" rel="noopener noreferrer">
+			<CodeIcon size={14} />
 			{$t('footerSource')}
 		</a>
 		<span class="footer-sep">·</span>
-		<a href="https://justwhitee.org" target="_blank" rel="noopener noreferrer">{$t('footerMadeBy')}</a>
+		<a href="https://justwhitee.org" target="_blank" rel="noopener noreferrer">
+			<UserIcon size={14} />
+			{$t('footerMadeBy')}
+		</a>
 	</div>
+	<a class="personal-logo-link" href="https://justwhitee.org" target="_blank" rel="noopener noreferrer">
+		<img class="personal-logo" src={personalLogo} alt={$t('footerPersonalLogoAlt')} />
+	</a>
 </footer>
+
+<InstallInfoModal open={installModalOpen} onclose={() => (installModalOpen = false)} />
 
 <style>
 	.app-footer {
@@ -27,11 +52,29 @@
 		text-align: center;
 		display: flex;
 		flex-direction: column;
+		align-items: center;
 		gap: 0.4rem;
 	}
 
 	.app-footer p {
 		margin: 0;
+	}
+
+	.install-how {
+		display: inline;
+		border: none;
+		background: none;
+		padding: 0;
+		margin: 0;
+		font: inherit;
+		font-size: inherit;
+		color: var(--color-accent);
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	.install-how:hover {
+		color: var(--color-accent-hover);
 	}
 
 	.footer-links {
@@ -43,15 +86,34 @@
 	}
 
 	.app-footer a {
-		color: var(--color-text-muted);
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		color: var(--color-accent);
 		text-decoration: underline;
 	}
 
 	.app-footer a:hover {
-		color: var(--color-accent);
+		color: var(--color-accent-hover);
 	}
 
 	.footer-sep {
 		opacity: 0.5;
+	}
+
+	.personal-logo-link {
+		margin-top: 0.5rem;
+		display: inline-flex;
+	}
+
+	.personal-logo {
+		width: 2rem;
+		height: 2rem;
+		opacity: 0.85;
+		transition: opacity 0.15s ease;
+	}
+
+	.personal-logo-link:hover .personal-logo {
+		opacity: 1;
 	}
 </style>

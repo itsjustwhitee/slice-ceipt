@@ -17,6 +17,10 @@
 		return fraction !== null && fraction.num === 1 && fraction.den === den;
 	}
 
+	function toggleQuickFraction(den: number) {
+		onchange(isQuickFraction(den) ? null : { num: 1, den });
+	}
+
 	function applyCustom() {
 		const parsed = parseFractionInput(customInput);
 		if (parsed) onchange(parsed);
@@ -29,7 +33,7 @@
 
 <div class="fraction-picker">
 	{#each quickDenominators as den (den)}
-		<button type="button" class:is-selected={isQuickFraction(den)} onclick={() => onchange({ num: 1, den })}>
+		<button type="button" class:is-selected={isQuickFraction(den)} onclick={() => toggleQuickFraction(den)}>
 			1/{den}
 		</button>
 	{/each}

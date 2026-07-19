@@ -2,6 +2,7 @@ export {
 	createGroupItemsFromParsed,
 	computeGroupTotals,
 	computeGroupItemization,
+	aggregateItemAssignment,
 	type GroupItem,
 	type GroupUnitState
 } from './group';

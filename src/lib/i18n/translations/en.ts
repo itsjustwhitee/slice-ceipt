@@ -27,6 +27,7 @@ const en = {
 	setupNeedMoreParticipants: 'Add at least 2 participants',
 	startOver: 'Start over',
 	unassignedLabel: 'Unassigned',
+	onlyMine: 'Only mine',
 	bulkApply: 'Set default split',
 	bulkApplyButton: 'Apply to all items',
 	itemNamePlaceholder: 'Item name',
@@ -34,6 +35,8 @@ const en = {
 	quantityLabel: 'Qty',
 	addItem: 'Add item',
 	deleteItem: 'Delete',
+	cancel: 'Cancel',
+	close: 'Close',
 	expand: 'Details',
 	collapse: 'Hide details',
 	unitLabel: 'Unit',
@@ -41,6 +44,7 @@ const en = {
 	nonMio: 'Not mine',
 	customSharePlaceholder: 'e.g. 2/5 or 40%',
 	customShare: 'Custom share',
+	customShareNeedsTwo: 'Select at least 2 people to customize shares',
 	mixedShare: 'Mixed',
 	yourTotal: 'Total',
 	backToItems: 'Back to items',
@@ -50,9 +54,17 @@ const en = {
 	summaryTitle: 'Summary',
 	footerPrivacy: 'SliceCeipt runs entirely in your browser. No receipt data, images, or personal information is ever uploaded, stored, or transmitted to any server. Nothing is collected, logged, or shared with anyone.',
 	footerLicenseNote: 'SliceCeipt is free software, licensed under the GNU General Public License v3.0.',
+	footerInstallNote: 'SliceCeipt can be installed on your device for quick, offline access.',
+	footerInstallHow: 'How do I install it?',
 	footerViewLicense: 'View the license',
 	footerSource: 'Source code',
-	footerMadeBy: 'Made by itsjustwhitee'
+	footerMadeBy: 'Made by itsjustwhitee',
+	footerPersonalLogoAlt: 'itsjustwhitee',
+	installModalTitle: 'Installing SliceCeipt',
+	installIntro: 'SliceCeipt is a Progressive Web App: install it once and it behaves like a native app, working offline with no browser bar.',
+	installStepAndroid: 'Android (Chrome): tap the menu (⋮) and choose "Install app" or "Add to Home screen".',
+	installStepIos: 'iPhone/iPad (Safari): tap the Share icon, then "Add to Home Screen".',
+	installStepDesktop: 'Desktop (Chrome/Edge): click the install icon in the address bar, or open the menu and choose "Install SliceCeipt".'
 };
 
 export default en;
