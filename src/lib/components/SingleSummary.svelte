@@ -25,15 +25,18 @@
 <div class="card">
 	<div class="summary-header">
 		<h1>{$t('summaryTitle')}</h1>
-		<button
-			class="icon-button copy-trigger"
-			type="button"
-			aria-label={copied ? $t('copied') : $t('copySummary')}
-			title={copied ? $t('copied') : $t('copySummary')}
-			onclick={copy}
-		>
-			<CopyIcon size={16} />
-		</button>
+		<div class="header-actions">
+			<button
+				class="icon-button copy-trigger"
+				type="button"
+				aria-label={copied ? $t('copied') : $t('copySummary')}
+				title={copied ? $t('copied') : $t('copySummary')}
+				onclick={copy}
+			>
+				<CopyIcon size={16} />
+			</button>
+			<ShareBar text={summaryText} />
+		</div>
 	</div>
 
 	<ul class="person-list">
@@ -55,8 +58,6 @@
 		</li>
 	</ul>
 
-	<ShareBar text={summaryText} />
-
 	<div class="summary-actions">
 		<button class="start-over" type="button" onclick={resetSession}>
 			<NewReceiptIcon size={18} />
@@ -75,6 +76,12 @@
 
 	.summary-header h1 {
 		margin: 0;
+	}
+
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.person-list {

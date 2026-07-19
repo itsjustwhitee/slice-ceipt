@@ -2,6 +2,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { t } from '$lib/i18n';
+	import ShareIcon from '$lib/icons/ShareIcon.svelte';
 
 	interface Props {
 		text: string;
@@ -18,13 +19,13 @@
 </script>
 
 {#if browser && 'share' in navigator}
-	<div class="share-bar">
-		<button type="button" onclick={share}>{$t('shareSummary')}</button>
-	</div>
+	<button
+		type="button"
+		class="icon-button"
+		aria-label={$t('shareSummary')}
+		title={$t('shareSummary')}
+		onclick={share}
+	>
+		<ShareIcon size={16} />
+	</button>
 {/if}
-
-<style>
-	.share-bar {
-		margin-top: 1.5rem;
-	}
-</style>
