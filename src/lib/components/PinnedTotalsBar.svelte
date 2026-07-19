@@ -14,15 +14,13 @@
 </script>
 
 <div class="pinned-bar">
-	<div class="card pills">
-		<div class="pills-scroll">
-			{#each pills as pill (pill.id)}
-				<div class="pill" style:--pill-color={pill.color ?? 'var(--color-accent)'}>
-					<span class="pill-label">{pill.label}</span>
-					<span class="pill-amount">{pill.amountText}</span>
-				</div>
-			{/each}
-		</div>
+	<div class="pills">
+		{#each pills as pill (pill.id)}
+			<div class="pill" style:--pill-color={pill.color ?? 'var(--color-accent)'}>
+				<span class="pill-label">{pill.label}</span>
+				<span class="pill-amount">{pill.amountText}</span>
+			</div>
+		{/each}
 		{#if trailingPill}
 			<div class="pill is-danger">
 				<span class="pill-label">{trailingPill.label}</span>
@@ -40,7 +38,7 @@
 		bottom: 0;
 		display: flex;
 		justify-content: center;
-		padding: 0 1.5rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+		padding: 0 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
 		pointer-events: none;
 		z-index: 20;
 	}
@@ -48,20 +46,11 @@
 	.pills {
 		pointer-events: auto;
 		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
 		align-items: center;
 		gap: 0.5rem;
-		width: auto;
 		max-width: 100%;
-		padding: 0.6rem 0.75rem;
-		border-radius: 999px;
-	}
-
-	.pills-scroll {
-		display: flex;
-		gap: 0.5rem;
-		flex: 1 1 auto;
-		min-width: 0;
-		overflow-x: auto;
 	}
 
 	.pill {
@@ -72,6 +61,7 @@
 		padding: 0.3em 0.9em;
 		border-radius: 999px;
 		border: 2px solid var(--pill-color);
+		background: color-mix(in srgb, var(--pill-color) 15%, var(--color-surface));
 		color: var(--color-text-on-surface);
 		font-family: var(--font-mono);
 		font-weight: 700;
@@ -85,7 +75,6 @@
 	}
 
 	.pill.is-danger {
-		margin-left: auto;
 		background: var(--color-error);
 		border-color: var(--color-error);
 		color: #fff;
