@@ -103,7 +103,7 @@
 		padding: 3rem 1.5rem;
 		text-align: center;
 		cursor: pointer;
-		transition: border-color 0.15s ease, background-color 0.15s ease;
+		transition: border-color 0.25s ease-out, background-color 0.25s ease-out;
 	}
 
 	.dropzone.is-drag-over {

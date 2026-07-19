@@ -71,6 +71,7 @@
 		color: var(--color-accent);
 		text-decoration: underline;
 		cursor: pointer;
+		transition: color 0.25s ease-out;
 	}
 
 	.install-how:hover {
@@ -91,6 +92,7 @@
 		gap: 0.3rem;
 		color: var(--color-accent);
 		text-decoration: underline;
+		transition: color 0.25s ease-out;
 	}
 
 	.app-footer a:hover {
@@ -110,21 +112,21 @@
 	.personal-logo-link::before {
 		content: '';
 		position: absolute;
-		inset: -0.9rem;
+		inset: -0.75rem;
 		z-index: -1;
-		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 55%, transparent) 0%, transparent 70%);
-		transition: background 0.15s ease;
+		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent) 0%, transparent 70%);
+		transition: background 0.25s ease-out;
 	}
 
 	.personal-logo-link:hover::before {
-		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 75%, transparent) 0%, transparent 75%);
+		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 32%, transparent) 0%, transparent 75%);
 	}
 
 	.personal-logo {
 		width: 2rem;
 		height: 2rem;
 		opacity: 0.85;
-		transition: opacity 0.15s ease;
+		transition: opacity 0.25s ease-out;
 	}
 
 	.personal-logo-link:hover .personal-logo {

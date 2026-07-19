@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	createSingleItemsFromParsed,
 	computeSingleTotal,
+	computeSingleGrandTotal,
 	computeSingleItemization,
 	type SingleItem
 } from './single';
@@ -31,6 +32,26 @@ describe('createSingleItemsFromParsed', () => {
 			4
 		);
 		expect(items[0].units[0].fraction).toEqual({ num: 1, den: 4 });
+	});
+});
+
+describe('computeSingleGrandTotal', () => {
+	it('sums every item at its full price times quantity, ignoring fractions entirely', () => {
+		const items = createSingleItemsFromParsed(
+			[
+				{ name: 'PANE', unitPriceCents: 250, quantity: 1 },
+				{ name: 'BIRRA', unitPriceCents: 150, quantity: 3 }
+			],
+			3
+		);
+		// left as "non mio" (fraction: null) by createSingleItemsFromParsed, per default
+		expect(computeSingleGrandTotal(items)).toBe(250 + 150 * 3);
+	});
+
+	it('is unaffected by how much of each item is marked as the users own', () => {
+		const items = createSingleItemsFromParsed([{ name: 'PANE', unitPriceCents: 250, quantity: 1 }], 3);
+		items[0].units[0].fraction = { num: 1, den: 2 };
+		expect(computeSingleGrandTotal(items)).toBe(250);
 	});
 });
 

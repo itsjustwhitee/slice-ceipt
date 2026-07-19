@@ -15,6 +15,7 @@
 	} from '$lib/stores/single-items';
 	import { formatCents } from '$lib/money';
 	import type { Fraction } from '$lib/money';
+	import { computeSingleGrandTotal } from '$lib/session';
 	import { showToast } from '$lib/stores/toast';
 	import SingleFractionPicker from './SingleFractionPicker.svelte';
 	import AddItemModal from './AddItemModal.svelte';
@@ -24,6 +25,7 @@
 	import BinIcon from '$lib/icons/BinIcon.svelte';
 	import PlusIcon from '$lib/icons/PlusIcon.svelte';
 	import MinusIcon from '$lib/icons/MinusIcon.svelte';
+	import GearIcon from '$lib/icons/GearIcon.svelte';
 
 	let expandedItemId = $state<string | null>(null);
 	let bulkPanelOpen = $state(false);
@@ -109,11 +111,21 @@
 	let pinnedPills = $derived([
 		{ id: 'me', label: $t('yourTotal'), amountText: formatCents($singleTotal, $currency, $locale) }
 	]);
+
+	let unassignedPill = $derived.by(() => {
+		const rest = computeSingleGrandTotal($singleItems) - $singleTotal;
+		return rest > 0
+			? { id: 'unassigned', label: $t('unassignedLabel'), amountText: formatCents(rest, $currency, $locale) }
+			: undefined;
+	});
 </script>
 
 <div class="card">
 	<div class="toolbar">
-		<button type="button" onclick={toggleBulkPanel}>{$t('bulkApply')}</button>
+		<button type="button" class="bulk-apply-trigger" onclick={toggleBulkPanel}>
+			<GearIcon size={14} />
+			{$t('bulkApply')}
+		</button>
 	</div>
 
 	{#if bulkPanelOpen}
@@ -254,7 +266,7 @@
 	onconfirm={confirmDelete}
 	oncancel={() => (deleteTarget = null)}
 />
-<PinnedTotalsBar pills={pinnedPills} />
+<PinnedTotalsBar pills={pinnedPills} trailingPill={unassignedPill} />
 
 <style>
 	.card {
@@ -264,9 +276,15 @@
 	.toolbar {
 		display: flex;
 		align-items: center;
-		justify-content: flex-start;
+		justify-content: flex-end;
 		flex-wrap: wrap;
 		gap: 0.75rem;
+	}
+
+	.bulk-apply-trigger {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.bulk-panel {
@@ -297,7 +315,7 @@
 		background: color-mix(in srgb, var(--color-accent) 8%, transparent);
 		border-left: 3px solid var(--color-accent);
 		border-bottom: 1px solid color-mix(in srgb, var(--color-text-on-surface) 10%, transparent);
-		transition: background-color 0.15s ease, border-color 0.15s ease;
+		transition: background-color 0.25s ease-out, border-color 0.25s ease-out;
 	}
 
 	.item-row:first-child {
@@ -405,6 +423,7 @@
 		border: 1px solid transparent;
 		background: transparent;
 		color: inherit;
+		transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
 	}
 
 	.item-name:hover,

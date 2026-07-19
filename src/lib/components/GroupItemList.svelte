@@ -26,6 +26,7 @@
 	import BinIcon from '$lib/icons/BinIcon.svelte';
 	import PlusIcon from '$lib/icons/PlusIcon.svelte';
 	import MinusIcon from '$lib/icons/MinusIcon.svelte';
+	import GearIcon from '$lib/icons/GearIcon.svelte';
 
 	let expandedItemId = $state<string | null>(null);
 	let bulkPanelOpen = $state(false);
@@ -124,7 +125,10 @@
 
 <div class="card">
 	<div class="toolbar">
-		<button type="button" onclick={toggleBulkPanel}>{$t('bulkApply')}</button>
+		<button type="button" class="bulk-apply-trigger" onclick={toggleBulkPanel}>
+			<GearIcon size={14} />
+			{$t('bulkApply')}
+		</button>
 	</div>
 
 	{#if bulkPanelOpen}
@@ -263,9 +267,15 @@
 	.toolbar {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		justify-content: flex-end;
 		flex-wrap: wrap;
 		gap: 0.75rem;
+	}
+
+	.bulk-apply-trigger {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.bulk-panel {
@@ -288,7 +298,7 @@
 		padding: 0.6rem 0.6rem 0.6rem calc(0.6rem + 4px);
 		background: color-mix(in srgb, var(--row-color, var(--color-text-on-surface)) 10%, transparent);
 		border-bottom: 1px solid color-mix(in srgb, var(--color-text-on-surface) 10%, transparent);
-		transition: background-color 0.15s ease, border-color 0.15s ease;
+		transition: background-color 0.25s ease-out, border-color 0.25s ease-out;
 	}
 
 	/*
@@ -412,6 +422,7 @@
 		border: 1px solid transparent;
 		background: transparent;
 		color: inherit;
+		transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
 	}
 
 	.item-name:hover,

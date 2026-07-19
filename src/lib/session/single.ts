@@ -50,6 +50,16 @@ export function computeSingleTotal(items: SingleItem[]): number {
 	return calculateSingleSplit(units);
 }
 
+/**
+ * The full receipt total, independent of any fraction — every unit's
+ * price counted once, regardless of whether (or how much of) it's the
+ * user's. Used to show "the rest of the bill" (what isn't yours) in
+ * single mode's pinned bar, mirroring group mode's unassigned total.
+ */
+export function computeSingleGrandTotal(items: SingleItem[]): number {
+	return items.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0);
+}
+
 export interface ItemShare {
 	name: string;
 	shareCents: number;

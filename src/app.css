@@ -51,9 +51,9 @@ button {
 	padding: 0.5em 1.25em;
 	cursor: pointer;
 	transition:
-		background-color 0.15s ease,
-		border-color 0.15s ease,
-		color 0.15s ease;
+		background-color 0.25s ease-out,
+		border-color 0.25s ease-out,
+		color 0.25s ease-out;
 }
 
 button:not(:disabled):hover {

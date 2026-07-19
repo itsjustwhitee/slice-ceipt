@@ -9,6 +9,7 @@ export {
 export {
 	createSingleItemsFromParsed,
 	computeSingleTotal,
+	computeSingleGrandTotal,
 	computeSingleItemization,
 	type SingleItem,
 	type SingleUnitState
