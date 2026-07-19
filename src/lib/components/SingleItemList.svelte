@@ -300,7 +300,7 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 0.5rem;
-		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+		font-family: var(--font-mono);
 	}
 
 	.row-lead,

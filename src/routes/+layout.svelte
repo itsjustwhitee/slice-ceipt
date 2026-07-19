@@ -17,7 +17,7 @@
 </script>
 
 <svelte:head>
-	<title>SliceCeipt — split a shared receipt with friends</title>
+	<title>SliceCeipt</title>
 	<meta
 		name="description"
 		content="Snap a photo of a shared receipt, or upload a PDF, and split it fairly among everyone at the table. Runs entirely in your browser: free, no sign-up, no data ever leaves your device."

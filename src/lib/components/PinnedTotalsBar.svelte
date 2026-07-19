@@ -55,7 +55,7 @@
 		border-radius: 999px;
 		border: 2px solid var(--pill-color);
 		color: var(--color-text-on-surface);
-		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+		font-family: var(--font-mono);
 		font-weight: 700;
 		white-space: nowrap;
 	}

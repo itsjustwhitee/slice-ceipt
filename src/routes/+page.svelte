@@ -1,7 +1,7 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
-	import { locale } from '$lib/i18n';
-	import { step, mode } from '$lib/stores/receipt';
+	import { t, locale } from '$lib/i18n';
+	import { step, mode, resetSession } from '$lib/stores/receipt';
 	import Uploader from '$lib/components/Uploader.svelte';
 	import SetupStep from '$lib/components/SetupStep.svelte';
 	import GroupItemList from '$lib/components/GroupItemList.svelte';
@@ -14,7 +14,16 @@
 
 <main>
 	<div class="top-bar">
-		<Logo size={32} />
+		<button
+			type="button"
+			class="logo-button"
+			aria-label={$t('startOver')}
+			title={$t('startOver')}
+			onclick={resetSession}
+		>
+			<Logo size={32} />
+			<span class="wordmark">SliceCeipt</span>
+		</button>
 		<div class="lang-switch">
 			<button class:is-active={$locale === 'en'} onclick={() => locale.set('en')}>EN</button>
 			<button class:is-active={$locale === 'it'} onclick={() => locale.set('it')}>IT</button>
@@ -52,6 +61,22 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 1.5rem;
+	}
+
+	.logo-button,
+	.logo-button:hover {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		border: none;
+		background: transparent;
+		padding: 0;
+	}
+
+	.wordmark {
+		font-family: var(--font-wordmark);
+		font-size: 1.35rem;
+		color: var(--color-text);
 	}
 
 	.lang-switch {

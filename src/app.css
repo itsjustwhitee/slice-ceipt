@@ -8,6 +8,17 @@
 	--color-accent: #ff7910;
 	--color-accent-hover: #e06a0e;
 	--color-error: #c0392b;
+	--font-sans:
+		'M PLUS Rounded 1c',
+		-apple-system,
+		BlinkMacSystemFont,
+		'Segoe UI',
+		Roboto,
+		'Helvetica Neue',
+		Arial,
+		sans-serif;
+	--font-mono: 'Courier Prime', 'SF Mono', Consolas, Menlo, monospace;
+	--font-wordmark: 'Mochiy Pop One', var(--font-sans);
 }
 
 * {
@@ -19,14 +30,7 @@ body {
 	min-height: 100vh;
 	background: var(--color-bg);
 	color: var(--color-text);
-	font-family:
-		-apple-system,
-		BlinkMacSystemFont,
-		'Segoe UI',
-		Roboto,
-		'Helvetica Neue',
-		Arial,
-		sans-serif;
+	font-family: var(--font-sans);
 	line-height: 1.5;
 }
 

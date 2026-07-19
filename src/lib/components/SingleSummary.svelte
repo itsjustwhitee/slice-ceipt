@@ -57,7 +57,7 @@
 	.your-total {
 		font-weight: 700;
 		font-size: 1.1rem;
-		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+		font-family: var(--font-mono);
 	}
 
 	.item-breakdown {
@@ -67,7 +67,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
-		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+		font-family: var(--font-mono);
 	}
 
 	.item-breakdown li {

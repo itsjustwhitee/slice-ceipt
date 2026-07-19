@@ -17,6 +17,7 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.test
+.vscode
 
 # Vite
 vite.config.js.timestamp-*
@@ -25,10 +26,11 @@ vite.config.ts.timestamp-*
 # Design source files (proprietary/editable-source, not build assets)
 *.af
 
-# AI/agent material — never committed (see Claude.md)
+# AI/agent material 
 idea.md
 Claude.md
 CLAUDE.md
 .claude/
 docs/superpowers/
 .history/
+.superpowers

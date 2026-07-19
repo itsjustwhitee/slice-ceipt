@@ -115,7 +115,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+		font-family: var(--font-mono);
 	}
 
 	.person-name {
@@ -134,7 +134,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+		font-family: var(--font-mono);
 	}
 
 	.item-breakdown li {
