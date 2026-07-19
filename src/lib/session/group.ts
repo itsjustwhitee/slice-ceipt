@@ -93,3 +93,19 @@ export function computeGroupItemization(
 	}
 	return result;
 }
+
+/**
+ * Sums each participant's weight across every unit of an item — used by the
+ * item list to decide a row's color (flat for one participant, a
+ * proportional gradient for two or more) without duplicating the
+ * per-unit-weight-summing logic in the component itself.
+ */
+export function aggregateItemAssignment(units: { assignment: Map<string, number> }[]): Map<string, number> {
+	const totals = new Map<string, number>();
+	for (const unit of units) {
+		for (const [participantId, weight] of unit.assignment) {
+			totals.set(participantId, (totals.get(participantId) ?? 0) + weight);
+		}
+	}
+	return totals;
+}
