@@ -4,7 +4,7 @@ import { extractTextFromImage } from './ocr';
 export interface ExtractDeps {
 	extractTextFromPdfTextLayer: (data: ArrayBuffer) => Promise<string>;
 	renderPdfPagesToImages: (data: ArrayBuffer) => Promise<Blob[]>;
-	extractTextFromImage: (image: Blob | File) => Promise<string>;
+	extractTextFromImage: (image: Blob | File, onProgress?: (fraction: number) => void) => Promise<string>;
 }
 
 const defaultDeps: ExtractDeps = {
@@ -32,17 +32,33 @@ const MIN_MEANINGFUL_TEXT_LENGTH = 20;
  */
 export async function extractReceiptText(
 	file: File,
-	deps: ExtractDeps = defaultDeps
+	deps: ExtractDeps = defaultDeps,
+	onProgress: (fraction: number) => void = () => {}
 ): Promise<string> {
 	if (file.type === 'application/pdf') {
 		const data = await file.arrayBuffer();
 		const textLayerResult = await deps.extractTextFromPdfTextLayer(data);
 		if (textLayerResult.trim().length >= MIN_MEANINGFUL_TEXT_LENGTH) {
+			onProgress(1);
 			return textLayerResult;
 		}
 		const images = await deps.renderPdfPagesToImages(data);
-		const pageTexts = await Promise.all(images.map((image) => deps.extractTextFromImage(image)));
+		// Each page OCRs concurrently and reports its own 0-1 progress
+		// independently; the overall bar shows the average across pages
+		// rather than jumping per-page.
+		const pageProgress = new Array(images.length).fill(0);
+		const reportAverage = () => {
+			onProgress(pageProgress.reduce((sum, p) => sum + p, 0) / pageProgress.length);
+		};
+		const pageTexts = await Promise.all(
+			images.map((image, i) =>
+				deps.extractTextFromImage(image, (fraction) => {
+					pageProgress[i] = fraction;
+					reportAverage();
+				})
+			)
+		);
 		return pageTexts.join('\n');
 	}
-	return deps.extractTextFromImage(file);
+	return deps.extractTextFromImage(file, onProgress);
 }

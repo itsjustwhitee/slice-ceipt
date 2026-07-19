@@ -9,12 +9,19 @@
 
 	let newParticipantName = $state('');
 	let newPresetName = $state('');
+	let participantNameInput = $state<HTMLInputElement | null>(null);
 
 	function submitAddParticipant() {
 		const name = newParticipantName.trim();
 		if (!name) return;
 		addParticipant(name);
 		newParticipantName = '';
+		// On mobile, tapping the submit button (or its Enter-key equivalent)
+		// blurs the input and dismisses the keyboard, which reads as "nothing
+		// happened" since the field is now empty and no longer focused —
+		// refocusing keeps the keyboard up so the next name can be typed
+		// straight away, without an extra tap.
+		participantNameInput?.focus();
 	}
 
 	function submitSavePreset() {
@@ -64,6 +71,7 @@
 				}}
 			>
 				<input
+					bind:this={participantNameInput}
 					type="text"
 					placeholder={$t('participantNamePlaceholder')}
 					bind:value={newParticipantName}

@@ -7,6 +7,7 @@ import {
 	singleModeCount,
 	extractionStatus,
 	extractionError,
+	extractionProgress,
 	parsedItems,
 	groupItems,
 	singleItems,
@@ -54,6 +55,28 @@ describe('receipt session store', () => {
 		expect(get(extractionError)).toBeNull();
 		expect(get(parsedItems).map((i) => i.name)).toEqual(['Bread', 'Milk']);
 		expect(get(step)).toBe('setup');
+	});
+
+	it('loadReceipt tracks OCR progress through to completion', async () => {
+		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
+		const progressDeps: ExtractDeps = {
+			...fakeDeps,
+			extractTextFromImage: async (_image, onProgress) => {
+				onProgress?.(0.5);
+				onProgress?.(1);
+				return 'Bread 2.50\n';
+			}
+		};
+		await loadReceipt(file, progressDeps);
+		expect(get(extractionProgress)).toBe(1);
+	});
+
+	it('loadReceipt resets progress to 0 at the start of a new extraction', async () => {
+		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
+		extractionProgress.set(0.75);
+		await loadReceipt(file, fakeDeps);
+		// fakeDeps never calls onProgress, so it should stay at the reset value (0), not the stale 0.75
+		expect(get(extractionProgress)).toBe(0);
 	});
 
 	it('loadReceipt records an error and stays on the upload step on failure', async () => {

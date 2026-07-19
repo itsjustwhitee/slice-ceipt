@@ -22,6 +22,8 @@ export const mode = writable<Mode>('group');
 export const singleModeCount = writable<number>(MIN_PARTICIPANTS);
 export const extractionStatus = writable<ExtractionStatus>('idle');
 export const extractionError = writable<string | null>(null);
+/** 0-1, only meaningful while `extractionStatus` is `'extracting'` — see `loadReceipt`. */
+export const extractionProgress = writable<number>(0);
 export const parsedItems = writable<ParsedItem[]>([]);
 export const groupItems = writable<GroupItem[]>([]);
 export const singleItems = writable<SingleItem[]>([]);
@@ -62,8 +64,12 @@ export function setSingleModeCount(count: number): void {
 export async function loadReceipt(file: File, deps?: ExtractDeps): Promise<void> {
 	extractionStatus.set('extracting');
 	extractionError.set(null);
+	extractionProgress.set(0);
 	try {
-		const text = deps ? await extractReceiptText(file, deps) : await extractReceiptText(file);
+		const onProgress = (fraction: number) => extractionProgress.set(fraction);
+		const text = deps
+			? await extractReceiptText(file, deps, onProgress)
+			: await extractReceiptText(file, undefined, onProgress);
 		parsedItems.set(parseReceiptText(text));
 		extractionStatus.set('idle');
 		step.set('setup');
@@ -78,6 +84,7 @@ export function skipExtraction(): void {
 	parsedItems.set([]);
 	extractionStatus.set('idle');
 	extractionError.set(null);
+	extractionProgress.set(0);
 	step.set('setup');
 }
 
@@ -127,6 +134,7 @@ export function resetSession(): void {
 	step.set('upload');
 	extractionStatus.set('idle');
 	extractionError.set(null);
+	extractionProgress.set(0);
 	parsedItems.set([]);
 	groupItems.set([]);
 	singleItems.set([]);

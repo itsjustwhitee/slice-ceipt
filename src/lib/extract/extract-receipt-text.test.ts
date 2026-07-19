@@ -33,7 +33,7 @@ describe('extractReceiptText', () => {
 		const result = await extractReceiptText(file, deps);
 		expect(result).toBe('OCR RESULT');
 		expect(deps.renderPdfPagesToImages).toHaveBeenCalledOnce();
-		expect(deps.extractTextFromImage).toHaveBeenCalledWith(fakeBlob);
+		expect(deps.extractTextFromImage).toHaveBeenCalledWith(fakeBlob, expect.any(Function));
 	});
 
 	it('falls back to OCR when the PDF text layer is present but below the meaningful-length threshold', async () => {
@@ -68,5 +68,52 @@ describe('extractReceiptText', () => {
 		expect(result).toBe('PHOTO OCR RESULT');
 		expect(deps.extractTextFromPdfTextLayer).not.toHaveBeenCalled();
 		expect(deps.renderPdfPagesToImages).not.toHaveBeenCalled();
+	});
+
+	it('forwards a photo OCR progress callback straight through to extractTextFromImage', async () => {
+		const deps = makeDeps({
+			extractTextFromImage: vi.fn().mockImplementation(async (_image, onProgress) => {
+				onProgress?.(0.5);
+				onProgress?.(1);
+				return 'PHOTO OCR RESULT';
+			})
+		});
+		const file = new File([new ArrayBuffer(10)], 'photo.jpg', { type: 'image/jpeg' });
+		const seen: number[] = [];
+		await extractReceiptText(file, deps, (fraction) => seen.push(fraction));
+		expect(seen).toEqual([0.5, 1]);
+	});
+
+	it('reports progress as 1 immediately when the PDF text layer already has meaningful content', async () => {
+		const deps = makeDeps({
+			extractTextFromPdfTextLayer: vi.fn().mockResolvedValue('PANE 2,50\nTOTALE 2,50')
+		});
+		const file = new File([new ArrayBuffer(10)], 'receipt.pdf', { type: 'application/pdf' });
+		const seen: number[] = [];
+		await extractReceiptText(file, deps, (fraction) => seen.push(fraction));
+		expect(seen).toEqual([1]);
+	});
+
+	it('averages per-page progress across a multi-page scanned PDF instead of jumping per page', async () => {
+		const deps = makeDeps({
+			extractTextFromPdfTextLayer: vi.fn().mockResolvedValue(''),
+			renderPdfPagesToImages: vi.fn().mockResolvedValue([new Blob(['a']), new Blob(['b'])]),
+			extractTextFromImage: vi
+				.fn()
+				.mockImplementationOnce(async (_image, onProgress) => {
+					onProgress?.(1);
+					return 'PAGE ONE';
+				})
+				.mockImplementationOnce(async (_image, onProgress) => {
+					onProgress?.(0.5);
+					return 'PAGE TWO';
+				})
+		});
+		const file = new File([new ArrayBuffer(10)], 'scanned.pdf', { type: 'application/pdf' });
+		const seen: number[] = [];
+		await extractReceiptText(file, deps, (fraction) => seen.push(fraction));
+		// page one finishes (1) while page two is still at its start (0) -> average 0.5,
+		// then page two reaches 0.5 -> average (1 + 0.5) / 2 = 0.75
+		expect(seen).toEqual([0.5, 0.75]);
 	});
 });

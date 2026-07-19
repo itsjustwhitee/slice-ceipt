@@ -126,6 +126,10 @@
 			<GearIcon size={14} />
 			{$t('bulkApply')}
 		</button>
+		<button type="button" class="add-item-trigger" onclick={() => (addModalOpen = true)}>
+			<AddIcon size={20} />
+			{$t('addItem')}
+		</button>
 	</div>
 
 	{#if bulkPanelOpen}
@@ -249,16 +253,6 @@
 	<button class="continue" type="button" onclick={() => step.set('summary')}>{$t('itemsContinue')}</button>
 </div>
 
-<button
-	class="add-item-trigger"
-	type="button"
-	aria-label={$t('addItem')}
-	title={$t('addItem')}
-	onclick={() => (addModalOpen = true)}
->
-	<AddIcon size={24} />
-</button>
-
 <AddItemModal open={addModalOpen} onadd={handleAddItem} onclose={() => (addModalOpen = false)} />
 <ConfirmDialog
 	open={deleteTarget !== null}
@@ -281,7 +275,8 @@
 		gap: 0.75rem;
 	}
 
-	.bulk-apply-trigger {
+	.bulk-apply-trigger,
+	.add-item-trigger {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -472,23 +467,5 @@
 	.continue {
 		margin-top: 1.5rem;
 		width: 100%;
-	}
-
-	.add-item-trigger {
-		position: fixed;
-		right: 1.5rem;
-		bottom: 5.5rem;
-		width: 3.2rem;
-		height: 3.2rem;
-		flex: none;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 999px;
-		background: var(--color-accent);
-		border-color: var(--color-accent);
-		color: #1a1a1a;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-		z-index: 21;
 	}
 </style>

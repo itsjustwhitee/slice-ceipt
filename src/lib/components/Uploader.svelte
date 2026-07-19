@@ -1,7 +1,13 @@
 <!-- src/lib/components/Uploader.svelte -->
 <script lang="ts">
 	import { t } from '$lib/i18n';
-	import { extractionStatus, extractionError, loadReceipt, skipExtraction } from '$lib/stores/receipt';
+	import {
+		extractionStatus,
+		extractionError,
+		extractionProgress,
+		loadReceipt,
+		skipExtraction
+	} from '$lib/stores/receipt';
 	import CameraIcon from '$lib/icons/CameraIcon.svelte';
 	import SkipIcon from '$lib/icons/SkipIcon.svelte';
 	import UploadIcon from '$lib/icons/UploadIcon.svelte';
@@ -27,6 +33,15 @@
 
 	{#if $extractionStatus === 'extracting'}
 		<p class="status">{$t('extractionInProgress')}</p>
+		<div
+			class="progress-track"
+			role="progressbar"
+			aria-valuenow={Math.round($extractionProgress * 100)}
+			aria-valuemin="0"
+			aria-valuemax="100"
+		>
+			<div class="progress-fill" style:width="{$extractionProgress * 100}%"></div>
+		</div>
 	{:else if $extractionStatus === 'error'}
 		<p class="status status-error">{$t('extractionErrorTitle')}</p>
 		{#if $extractionError}<p class="status-detail">{$extractionError}</p>{/if}
@@ -127,6 +142,21 @@
 
 	.status {
 		font-weight: 600;
+	}
+
+	.progress-track {
+		margin-top: 1rem;
+		height: 0.5rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-text-on-surface) 12%, transparent);
+		overflow: hidden;
+	}
+
+	.progress-fill {
+		height: 100%;
+		border-radius: 999px;
+		background: var(--color-accent);
+		transition: width 0.2s ease-out;
 	}
 
 	.status-error {
