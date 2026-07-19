@@ -112,14 +112,14 @@
 	.personal-logo-link::before {
 		content: '';
 		position: absolute;
-		inset: -0.75rem;
+		inset: -0.5rem;
 		z-index: -1;
-		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent) 0%, transparent 70%);
+		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 12%, transparent) 0%, transparent 70%);
 		transition: background 0.25s ease-out;
 	}
 
 	.personal-logo-link:hover::before {
-		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 32%, transparent) 0%, transparent 75%);
+		background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 18%, transparent) 0%, transparent 75%);
 	}
 
 	.personal-logo {

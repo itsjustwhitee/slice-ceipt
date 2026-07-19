@@ -81,6 +81,7 @@
 					type="submit"
 					aria-label={$t('addParticipant')}
 					title={$t('addParticipant')}
+					onpointerdown={(e) => e.preventDefault()}
 				>
 					<AddIcon size={16} />
 				</button>

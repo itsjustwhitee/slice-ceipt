@@ -122,13 +122,23 @@
 
 <div class="card">
 	<div class="toolbar">
-		<button type="button" class="bulk-apply-trigger" onclick={toggleBulkPanel}>
-			<GearIcon size={14} />
-			{$t('bulkApply')}
+		<button
+			type="button"
+			class="bulk-apply-trigger"
+			aria-label={$t('bulkApply')}
+			title={$t('bulkApply')}
+			onclick={toggleBulkPanel}
+		>
+			<GearIcon size={16} />
 		</button>
-		<button type="button" class="add-item-trigger" onclick={() => (addModalOpen = true)}>
-			<AddIcon size={20} />
-			{$t('addItem')}
+		<button
+			type="button"
+			class="add-item-trigger"
+			aria-label={$t('addItem')}
+			title={$t('addItem')}
+			onclick={() => (addModalOpen = true)}
+		>
+			<AddIcon size={16} />
 		</button>
 	</div>
 
@@ -139,7 +149,7 @@
 				{$t('onlyMine')}
 			</label>
 			<SingleFractionPicker fraction={bulkFraction} onchange={(next) => (bulkFraction = next)} />
-			<button type="button" onclick={applyBulk}>{$t('bulkApplyButton')}</button>
+			<button type="button" class="bulk-apply-button" onclick={applyBulk}>{$t('bulkApplyButton')}</button>
 		</div>
 	{/if}
 
@@ -295,6 +305,10 @@
 		gap: 0.5rem;
 		margin-bottom: 0.75rem;
 		font-weight: 600;
+	}
+
+	.bulk-apply-button {
+		margin-top: 0.75rem;
 	}
 
 	.item-list {

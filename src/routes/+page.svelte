@@ -111,7 +111,7 @@
 		border-radius: 999px;
 		background: var(--color-surface);
 		color: var(--color-text-on-surface);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 		z-index: 25;
 	}
 

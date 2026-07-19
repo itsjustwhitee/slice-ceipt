@@ -125,20 +125,30 @@
 
 <div class="card">
 	<div class="toolbar">
-		<button type="button" class="bulk-apply-trigger" onclick={toggleBulkPanel}>
-			<GearIcon size={14} />
-			{$t('bulkApply')}
+		<button
+			type="button"
+			class="bulk-apply-trigger"
+			aria-label={$t('bulkApply')}
+			title={$t('bulkApply')}
+			onclick={toggleBulkPanel}
+		>
+			<GearIcon size={16} />
 		</button>
-		<button type="button" class="add-item-trigger" onclick={() => (addModalOpen = true)}>
-			<AddIcon size={20} />
-			{$t('addItem')}
+		<button
+			type="button"
+			class="add-item-trigger"
+			aria-label={$t('addItem')}
+			title={$t('addItem')}
+			onclick={() => (addModalOpen = true)}
+		>
+			<AddIcon size={16} />
 		</button>
 	</div>
 
 	{#if bulkPanelOpen}
 		<div class="bulk-panel">
 			<GroupAssignmentPicker assignment={bulkAssignment} onchange={(next) => (bulkAssignment = next)} />
-			<button type="button" onclick={applyBulk}>{$t('bulkApplyButton')}</button>
+			<button type="button" class="bulk-apply-button" onclick={applyBulk}>{$t('bulkApplyButton')}</button>
 		</div>
 	{/if}
 
@@ -278,6 +288,10 @@
 		padding: 1rem;
 		border-radius: 12px;
 		background: color-mix(in srgb, var(--color-text-on-surface) 6%, transparent);
+	}
+
+	.bulk-apply-button {
+		margin-top: 0.75rem;
 	}
 
 	.item-list {

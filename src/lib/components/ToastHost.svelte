@@ -32,7 +32,7 @@
 		border-radius: 999px;
 		font-weight: 600;
 		font-size: 0.9rem;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 		background: var(--color-surface);
 		color: var(--color-text-on-surface);
 		border: 2px solid var(--color-accent);
