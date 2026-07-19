@@ -16,18 +16,19 @@
 	import { formatCents } from '$lib/money';
 	import type { Fraction } from '$lib/money';
 	import SingleFractionPicker from './SingleFractionPicker.svelte';
+	import AddItemModal from './AddItemModal.svelte';
+	import PinnedTotalsBar from './PinnedTotalsBar.svelte';
 	import AddIcon from '$lib/icons/AddIcon.svelte';
 	import BinIcon from '$lib/icons/BinIcon.svelte';
+	import PlusIcon from '$lib/icons/PlusIcon.svelte';
+	import MinusIcon from '$lib/icons/MinusIcon.svelte';
 
 	let expandedItemId = $state<string | null>(null);
 	let bulkPanelOpen = $state(false);
 	let bulkFraction = $state<Fraction | null>(null);
 	let editingPriceId = $state<string | null>(null);
 	let priceDraft = $state('');
-
-	let newItemName = $state('');
-	let newItemPrice = $state('');
-	let newItemQuantity = $state('1');
+	let addModalOpen = $state(false);
 
 	function toggleExpanded(itemId: string) {
 		expandedItemId = expandedItemId === itemId ? null : itemId;
@@ -63,16 +64,9 @@
 		editingPriceId = null;
 	}
 
-	function submitAddItem() {
-		const name = newItemName.trim();
-		const priceCents = Math.round(Number(newItemPrice) * 100);
-		const quantity = Math.round(Number(newItemQuantity));
-		if (!name || !Number.isFinite(priceCents) || priceCents <= 0 || !Number.isFinite(quantity) || quantity < 1)
-			return;
-		addItem(name, priceCents, quantity);
-		newItemName = '';
-		newItemPrice = '';
-		newItemQuantity = '1';
+	function handleAddItem(input: { name: string; unitPriceCents: number; quantity: number }) {
+		addItem(input.name, input.unitPriceCents, input.quantity);
+		addModalOpen = false;
 	}
 
 	function sameFraction(a: Fraction | null, b: Fraction | null): boolean {
@@ -92,16 +86,29 @@
 	function toggleInclude(itemId: string, currentlyIncluded: boolean) {
 		setItemFraction(itemId, currentlyIncluded ? null : { num: 1, den: 1 });
 	}
+
+	let bulkOnlyMine = $derived(sameFraction(bulkFraction, { num: 1, den: 1 }));
+
+	function toggleBulkOnlyMine() {
+		bulkFraction = bulkOnlyMine ? null : { num: 1, den: 1 };
+	}
+
+	let pinnedPills = $derived([
+		{ id: 'me', label: $t('yourTotal'), amountText: formatCents($singleTotal, $currency, $locale) }
+	]);
 </script>
 
 <div class="card">
 	<div class="toolbar">
 		<button type="button" onclick={toggleBulkPanel}>{$t('bulkApply')}</button>
-		<p class="your-total">{$t('yourTotal')}: {formatCents($singleTotal, $currency, $locale)}</p>
 	</div>
 
 	{#if bulkPanelOpen}
 		<div class="bulk-panel">
+			<label class="only-mine">
+				<input type="checkbox" checked={bulkOnlyMine} onclick={toggleBulkOnlyMine} />
+				{$t('onlyMine')}
+			</label>
 			<SingleFractionPicker fraction={bulkFraction} onchange={(next) => (bulkFraction = next)} />
 			<button type="button" onclick={applyBulk}>{$t('bulkApplyButton')}</button>
 		</div>
@@ -113,69 +120,78 @@
 			{@const summary = summarizeFraction(item.units)}
 			<li class="item-row" class:is-unassigned={!included}>
 				<div class="row-main">
-					{#if item.quantity > 1}
+					<div class="row-lead">
+						<input
+							type="checkbox"
+							class="include-checkbox"
+							aria-label={$t('nonMio')}
+							checked={included}
+							onclick={() => toggleInclude(item.id, included)}
+						/>
+					</div>
+					<div class="row-fields">
+						<input
+							class="item-name"
+							type="text"
+							value={item.name}
+							onchange={(e) => updateItemName(item.id, (e.target as HTMLInputElement).value)}
+						/>
+						<span class="item-qty">×</span>
+						<input
+							class="item-quantity"
+							type="number"
+							min="1"
+							value={item.quantity}
+							onchange={(e) => handleQuantityChange(item.id, (e.target as HTMLInputElement).value)}
+						/>
+						<input
+							class="item-price"
+							type="text"
+							inputmode="decimal"
+							value={editingPriceId === item.id
+								? priceDraft
+								: formatCents(item.unitPriceCents, $currency, $locale)}
+							onfocus={() => startEditPrice(item.id, item.unitPriceCents)}
+							oninput={(e) => (priceDraft = (e.target as HTMLInputElement).value)}
+							onblur={() => commitPrice(item.id)}
+							onkeydown={(e) => {
+								if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
+							}}
+						/>
+						<SingleFractionPicker
+							fraction={item.units[0].fraction}
+							onchange={(next) => setItemFraction(item.id, next)}
+						/>
+						{#if summary}<span class="fraction-display">{summary}</span>{/if}
+					</div>
+					<div class="row-trail">
+						{#if item.quantity > 1}
+							<button
+								type="button"
+								class="expand-toggle"
+								aria-label={expandedItemId === item.id ? $t('collapse') : $t('expand')}
+								title={expandedItemId === item.id ? $t('collapse') : $t('expand')}
+								onclick={() => toggleExpanded(item.id)}
+							>
+								{#if expandedItemId === item.id}
+									<MinusIcon size={14} />
+								{:else}
+									<PlusIcon size={14} />
+								{/if}
+							</button>
+						{:else}
+							<span class="expand-spacer"></span>
+						{/if}
 						<button
 							type="button"
-							class="chevron"
-							class:is-expanded={expandedItemId === item.id}
-							aria-label={expandedItemId === item.id ? $t('collapse') : $t('expand')}
-							title={expandedItemId === item.id ? $t('collapse') : $t('expand')}
-							onclick={() => toggleExpanded(item.id)}
+							class="icon-button is-danger"
+							aria-label={$t('deleteItem')}
+							title={$t('deleteItem')}
+							onclick={() => deleteItem(item.id)}
 						>
-							▸
+							<BinIcon size={16} />
 						</button>
-					{:else}
-						<span class="chevron-spacer"></span>
-					{/if}
-					<input
-						type="checkbox"
-						class="include-checkbox"
-						aria-label={$t('nonMio')}
-						checked={included}
-						onclick={() => toggleInclude(item.id, included)}
-					/>
-					<input
-						class="item-name"
-						type="text"
-						value={item.name}
-						onchange={(e) => updateItemName(item.id, (e.target as HTMLInputElement).value)}
-					/>
-					<span class="item-qty">×</span>
-					<input
-						class="item-quantity"
-						type="number"
-						min="1"
-						value={item.quantity}
-						onchange={(e) => handleQuantityChange(item.id, (e.target as HTMLInputElement).value)}
-					/>
-					<input
-						class="item-price"
-						type="text"
-						inputmode="decimal"
-						value={editingPriceId === item.id
-							? priceDraft
-							: formatCents(item.unitPriceCents, $currency, $locale)}
-						onfocus={() => startEditPrice(item.id, item.unitPriceCents)}
-						oninput={(e) => (priceDraft = (e.target as HTMLInputElement).value)}
-						onblur={() => commitPrice(item.id)}
-						onkeydown={(e) => {
-							if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
-						}}
-					/>
-					<SingleFractionPicker
-						fraction={item.units[0].fraction}
-						onchange={(next) => setItemFraction(item.id, next)}
-					/>
-					{#if summary}<span class="fraction-display">{summary}</span>{/if}
-					<button
-						type="button"
-						class="icon-button is-danger"
-						aria-label={$t('deleteItem')}
-						title={$t('deleteItem')}
-						onclick={() => deleteItem(item.id)}
-					>
-						<BinIcon size={16} />
-					</button>
+					</div>
 				</div>
 
 				{#if expandedItemId === item.id && item.quantity > 1}
@@ -203,36 +219,33 @@
 		{/each}
 	</ul>
 
-	<form
-		class="add-item-form"
-		onsubmit={(e) => {
-			e.preventDefault();
-			submitAddItem();
-		}}
+	<button
+		class="icon-button add-item-trigger"
+		type="button"
+		aria-label={$t('addItem')}
+		title={$t('addItem')}
+		onclick={() => (addModalOpen = true)}
 	>
-		<input type="text" placeholder={$t('itemNamePlaceholder')} bind:value={newItemName} />
-		<input type="number" min="0" step="0.01" placeholder={$t('priceLabel')} bind:value={newItemPrice} />
-		<input type="number" min="1" placeholder={$t('quantityLabel')} bind:value={newItemQuantity} />
-		<button class="icon-button" type="submit" aria-label={$t('addItem')} title={$t('addItem')}>
-			<AddIcon size={16} />
-		</button>
-	</form>
+		<AddIcon size={16} />
+	</button>
 
 	<button class="continue" type="button" onclick={() => step.set('summary')}>{$t('itemsContinue')}</button>
 </div>
 
+<AddItemModal open={addModalOpen} onadd={handleAddItem} onclose={() => (addModalOpen = false)} />
+<PinnedTotalsBar pills={pinnedPills} />
+
 <style>
+	.card {
+		padding-bottom: 7rem;
+	}
+
 	.toolbar {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		justify-content: flex-start;
 		flex-wrap: wrap;
 		gap: 0.75rem;
-	}
-
-	.your-total {
-		font-weight: 600;
-		opacity: 0.85;
 	}
 
 	.bulk-panel {
@@ -242,21 +255,39 @@
 		background: color-mix(in srgb, var(--color-text-on-surface) 6%, transparent);
 	}
 
+	.only-mine {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+		font-weight: 600;
+	}
+
 	.item-list {
 		list-style: none;
 		margin: 1.5rem 0;
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
 	}
 
 	.item-row {
-		border-radius: 10px;
-		padding: 0.5rem 0.6rem;
+		padding: 0.6rem 0.6rem;
 		background: color-mix(in srgb, var(--color-accent) 8%, transparent);
 		border-left: 3px solid var(--color-accent);
+		border-bottom: 1px solid color-mix(in srgb, var(--color-text-on-surface) 10%, transparent);
 		transition: background-color 0.15s ease, border-color 0.15s ease;
+	}
+
+	.item-row:first-child {
+		border-top-left-radius: 10px;
+		border-top-right-radius: 10px;
+	}
+
+	.item-row:last-child {
+		border-bottom: none;
+		border-bottom-left-radius: 10px;
+		border-bottom-right-radius: 10px;
 	}
 
 	.item-row.is-unassigned {
@@ -267,28 +298,43 @@
 
 	.row-main {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: 0.5rem;
-		flex-wrap: wrap;
 		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
 	}
 
-	.chevron {
-		width: 1.5rem;
+	.row-lead,
+	.row-trail {
 		flex: none;
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding-top: 0.15rem;
+	}
+
+	.row-fields {
+		flex: 1 1 auto;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.expand-toggle,
+	.expand-spacer {
+		width: 1.5rem;
+		height: 1.5rem;
+		flex: none;
+	}
+
+	.expand-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		padding: 0.2em;
 		border: none;
 		background: transparent;
-		transition: transform 0.15s ease;
-	}
-
-	.chevron.is-expanded {
-		transform: rotate(90deg);
-	}
-
-	.chevron-spacer {
-		width: 1.5rem;
-		flex: none;
 	}
 
 	.include-checkbox {
@@ -378,19 +424,8 @@
 		min-width: 5ch;
 	}
 
-	.add-item-form {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-		align-items: center;
+	.add-item-trigger {
 		margin-top: 1rem;
-	}
-
-	.add-item-form input {
-		font: inherit;
-		padding: 0.5em 0.75em;
-		border-radius: 8px;
-		border: 1px solid color-mix(in srgb, var(--color-text-on-surface) 25%, transparent);
 	}
 
 	.continue {
