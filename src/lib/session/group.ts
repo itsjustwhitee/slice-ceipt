@@ -19,7 +19,7 @@ export interface GroupItem {
  * Builds session items from the parser's output, decomposing each into one
  * `GroupUnitState` per unit of quantity (per spec §5: every Item is always
  * decomposed into individual Units). Plain items start unassigned (empty
- * `assignment` map) — the UI must flag these until the user acts. A
+ * `assignment` map). The UI must flag these until the user acts. A
  * whole-receipt-discount pseudo-item defaults to being pre-split equally
  * across every current participant (weight 1 each), per spec §3.4/§4.3,
  * since it applies to the whole purchase rather than needing per-item
@@ -46,7 +46,7 @@ export function createGroupItemsFromParsed(
 
 /**
  * Flattens every item's units into `$lib/money`'s flat unit list and
- * delegates to `calculateGroupSplit` — this file never reimplements any
+ * delegates to `calculateGroupSplit`. This file never reimplements any
  * money math, it only bridges session state to the already-tested engine.
  */
 export function computeGroupTotals(
@@ -68,8 +68,8 @@ export interface ItemShare {
  * Per-item breakdown of one participant's share, computed the same way
  * `calculateGroupSplit` computes totals (same per-unit `splitAmongWeights`
  * call, same `participantOrder` for tie-breaking) so summing every
- * returned `shareCents` reproduces that participant's total exactly —
- * this never reimplements the split math, only itemizes it per item.
+ * returned `shareCents` reproduces that participant's total exactly.
+ * This never reimplements the split math, only itemizes it per item.
  */
 export function computeGroupItemization(
 	items: GroupItem[],
@@ -95,7 +95,7 @@ export function computeGroupItemization(
 }
 
 /**
- * Sums each participant's weight across every unit of an item — used by the
+ * Sums each participant's weight across every unit of an item. Used by the
  * item list to decide a row's color (flat for one participant, a
  * proportional gradient for two or more) without duplicating the
  * per-unit-weight-summing logic in the component itself.

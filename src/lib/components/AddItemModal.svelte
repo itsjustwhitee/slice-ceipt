@@ -40,7 +40,7 @@
 	<div class="modal-backdrop" onclick={onclose}>
 		<!-- svelte-ignore a11y_interactive_supports_focus -->
 		<div
-			class="modal"
+			class="card modal"
 			role="dialog"
 			aria-modal="true"
 			aria-label={$t('addItem')}
@@ -84,13 +84,9 @@
 	}
 
 	.modal {
-		background: var(--color-surface);
-		color: var(--color-text-on-surface);
-		border-radius: 16px;
 		padding: 1.5rem;
 		width: 100%;
 		max-width: 22rem;
-		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
 	}
 
 	.modal h2 {

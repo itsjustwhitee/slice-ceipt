@@ -10,7 +10,7 @@ function round2(value: number): number {
 /**
  * Builds a CSS `linear-gradient` proportional to each share's weight, using
  * hard color stops (each color spans exactly its own band, no blending at
- * the boundary) rather than a smooth blend — a blended gradient would muddy
+ * the boundary) rather than a smooth blend. A blended gradient would muddy
  * the boundary between two participants' colors, making it harder to read
  * "who has how much of this," which is the whole point of coloring the row.
  * Returns `undefined` when there's nothing to color (no positive-weight

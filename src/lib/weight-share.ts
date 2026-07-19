@@ -1,6 +1,6 @@
 /**
  * Rounded display percentage per participant, purely for the group
- * custom-share panel's live feedback label — the actual split still runs
+ * custom-share panel's live feedback label. The actual split still runs
  * through `splitAmongWeights`'s exact BigInt math; this is not used for
  * any money calculation.
  */
