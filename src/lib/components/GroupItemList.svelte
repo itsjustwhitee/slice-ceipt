@@ -79,7 +79,7 @@
 	}
 
 	function colorOf(id: string): string {
-		return $participantColors.get(id) ?? '#888888';
+		return $participantColors.get(id) ?? 'var(--color-text-muted)';
 	}
 
 	function tintOf(id: string): string {
