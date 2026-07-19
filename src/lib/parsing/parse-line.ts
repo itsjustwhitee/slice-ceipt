@@ -37,7 +37,7 @@ export function extractNameAndPrice(line: string): ParsedLine | null {
 
 	const priceMatch = line.match(TRAILING_PRICE);
 	const nameWithVat = line.slice(0, line.length - (priceMatch?.[0].length ?? 0)).trim();
-	const nameWithMarker = nameWithVat.replace(VAT_PERCENTAGE, '').trim();
+	const nameWithMarker = nameWithVat.replace(VAT_PERCENTAGE, '').replace(/\s+/g, ' ').trim();
 
 	const markerMatch = nameWithMarker.match(QUANTITY_MARKER);
 	if (!markerMatch) {

@@ -81,16 +81,46 @@ export function skipExtraction(): void {
 	step.set('setup');
 }
 
-/** Builds the mode-appropriate item tree from the parsed items and advances to the item-tree step. Called once, when the user confirms mode + participants/count. */
+/**
+ * Builds the mode-appropriate item tree from the parsed items and advances
+ * to the item-tree step. Only builds from scratch the first time for the
+ * current mode — if the user already has a group/single item tree (they
+ * went `items` -> `setup` via `goBack` and are now confirming again), this
+ * reuses it instead of rebuilding, so edits, manual items, and assignments
+ * already made aren't discarded. Adding a participant needs no special
+ * handling (they simply become selectable in the existing tree); removing
+ * one is likewise handled for free by the split engine, which already
+ * ignores any assignment entry for an id no longer in the current
+ * participant list. Switching `mode` is the one case that still rebuilds
+ * from scratch, since a group item tree and a single item tree are
+ * different shapes.
+ */
 export function confirmSetup(): void {
 	if (!get(isSetupValid)) return;
 	const parsed = get(parsedItems);
 	if (get(mode) === 'group') {
-		groupItems.set(createGroupItemsFromParsed(parsed, get(participants).map((p) => p.id)));
+		if (get(groupItems).length === 0) {
+			groupItems.set(createGroupItemsFromParsed(parsed, get(participants).map((p) => p.id)));
+		}
 	} else {
-		singleItems.set(createSingleItemsFromParsed(parsed, get(singleModeCount)));
+		if (get(singleItems).length === 0) {
+			singleItems.set(createSingleItemsFromParsed(parsed, get(singleModeCount)));
+		}
 	}
 	step.set('items');
+}
+
+/**
+ * Steps back one stage (`setup` -> `upload`, `items` -> `setup`, `summary`
+ * -> `items`) without discarding any work, unlike `resetSession` — nothing
+ * here clears `parsedItems`/`groupItems`/`singleItems`. Re-confirming setup
+ * afterward is handled by `confirmSetup` itself (see its own doc comment).
+ */
+export function goBack(): void {
+	const current = get(step);
+	if (current === 'setup') step.set('upload');
+	else if (current === 'items') step.set('setup');
+	else if (current === 'summary') step.set('items');
 }
 
 export function resetSession(): void {

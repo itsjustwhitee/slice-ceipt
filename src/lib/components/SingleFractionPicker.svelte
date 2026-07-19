@@ -21,6 +21,15 @@
 		onchange(isQuickFraction(den) ? null : { num: 1, den });
 	}
 
+	function isCustomFraction(f: Fraction | null): boolean {
+		if (f === null || (f.num === 1 && f.den === 1)) return false;
+		return !(f.num === 1 && quickDenominators.includes(f.den));
+	}
+
+	function formatFraction(f: Fraction): string {
+		return f.den === 100 ? `${f.num}%` : `${f.num}/${f.den}`;
+	}
+
 	function applyCustom() {
 		const parsed = parseFractionInput(customInput);
 		if (parsed) onchange(parsed);
@@ -29,6 +38,13 @@
 	let quickDenominators = $derived(
 		Array.from({ length: Math.max(0, $singleModeCount - 1) }, (_, i) => i + 2)
 	);
+
+	// Keeps the custom field showing the active custom fraction (e.g. after a
+	// bulk apply, or on first render for an item that already has one) rather
+	// than sitting blank until the user types into it themselves.
+	$effect(() => {
+		customInput = isCustomFraction(fraction) ? formatFraction(fraction as Fraction) : '';
+	});
 </script>
 
 <div class="fraction-picker">
@@ -44,7 +60,12 @@
 			applyCustom();
 		}}
 	>
-		<input type="text" placeholder={$t('customSharePlaceholder')} bind:value={customInput} />
+		<input
+			type="text"
+			class:is-selected={isCustomFraction(fraction)}
+			placeholder={$t('customSharePlaceholder')}
+			bind:value={customInput}
+		/>
 	</form>
 </div>
 
@@ -76,5 +97,11 @@
 		background: var(--color-accent);
 		border-color: var(--color-accent);
 		color: #1a1a1a;
+	}
+
+	.custom-form input.is-selected {
+		background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+		border-color: var(--color-accent);
+		font-weight: 700;
 	}
 </style>

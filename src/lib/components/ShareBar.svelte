@@ -8,14 +8,6 @@
 	}
 	let { text }: Props = $props();
 
-	let copied = $state(false);
-
-	async function copy() {
-		await navigator.clipboard.writeText(text);
-		copied = true;
-		setTimeout(() => (copied = false), 2000);
-	}
-
 	async function share() {
 		try {
 			await navigator.share({ text });
@@ -25,18 +17,14 @@
 	}
 </script>
 
-<div class="share-bar">
-	<button type="button" onclick={copy}>{copied ? $t('copied') : $t('copySummary')}</button>
-	{#if browser && 'share' in navigator}
+{#if browser && 'share' in navigator}
+	<div class="share-bar">
 		<button type="button" onclick={share}>{$t('shareSummary')}</button>
-	{/if}
-</div>
+	</div>
+{/if}
 
 <style>
 	.share-bar {
-		display: flex;
-		gap: 0.75rem;
 		margin-top: 1.5rem;
-		flex-wrap: wrap;
 	}
 </style>

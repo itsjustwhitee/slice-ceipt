@@ -17,9 +17,11 @@
 		addItem
 	} from '$lib/stores/group-items';
 	import { formatCents } from '$lib/money';
+	import { showToast } from '$lib/stores/toast';
 	import GroupAssignmentPicker from './GroupAssignmentPicker.svelte';
 	import AddItemModal from './AddItemModal.svelte';
 	import PinnedTotalsBar from './PinnedTotalsBar.svelte';
+	import ConfirmDialog from './ConfirmDialog.svelte';
 	import AddIcon from '$lib/icons/AddIcon.svelte';
 	import BinIcon from '$lib/icons/BinIcon.svelte';
 	import PlusIcon from '$lib/icons/PlusIcon.svelte';
@@ -31,6 +33,7 @@
 	let editingPriceId = $state<string | null>(null);
 	let priceDraft = $state('');
 	let addModalOpen = $state(false);
+	let deleteTarget = $state<{ id: string; name: string } | null>(null);
 
 	function toggleExpanded(itemId: string) {
 		expandedItemId = expandedItemId === itemId ? null : itemId;
@@ -69,6 +72,19 @@
 	function handleAddItem(input: { name: string; unitPriceCents: number; quantity: number }) {
 		addItem(input.name, input.unitPriceCents, input.quantity);
 		addModalOpen = false;
+		showToast($t('toastItemAdded').replace('{name}', input.name), 'success');
+	}
+
+	function requestDelete(itemId: string, name: string) {
+		deleteTarget = { id: itemId, name };
+	}
+
+	function confirmDelete() {
+		if (!deleteTarget) return;
+		const { id, name } = deleteTarget;
+		deleteItem(id);
+		deleteTarget = null;
+		showToast($t('toastItemDeleted').replace('{name}', name), 'danger');
 	}
 
 	function itemShares(units: { assignment: Map<string, number> }[]): { id: string; weight: number }[] {
@@ -94,14 +110,21 @@
 			color: $participantColors.get(p.id)
 		}))
 	);
+
+	let unassignedPill = $derived(
+		$groupTotals.unassignedTotalCents > 0
+			? {
+					id: 'unassigned',
+					label: $t('unassignedLabel'),
+					amountText: formatCents($groupTotals.unassignedTotalCents, $currency, $locale)
+				}
+			: undefined
+	);
 </script>
 
 <div class="card">
 	<div class="toolbar">
 		<button type="button" onclick={toggleBulkPanel}>{$t('bulkApply')}</button>
-		<p class="unassigned-total">
-			{$t('unassignedLabel')}: {formatCents($groupTotals.unassignedTotalCents, $currency, $locale)}
-		</p>
 	</div>
 
 	{#if bulkPanelOpen}
@@ -117,7 +140,7 @@
 			{@const isMulti = shares.length > 1}
 			{@const rowColor = shares.length === 1 ? colorOf(shares[0].id) : undefined}
 			{@const gradientBar = isMulti ? buildRowGradient(shares, colorOf, 'to bottom') : undefined}
-			{@const gradientBg = isMulti ? buildRowGradient(shares, tintOf, 'to right') : undefined}
+			{@const gradientBg = isMulti ? buildRowGradient(shares, tintOf, 'to right', true) : undefined}
 			<li
 				class="item-row"
 				class:is-unassigned={shares.length === 0}
@@ -134,14 +157,16 @@
 							value={item.name}
 							onchange={(e) => updateItemName(item.id, (e.target as HTMLInputElement).value)}
 						/>
-						<span class="item-qty">×</span>
-						<input
-							class="item-quantity"
-							type="number"
-							min="1"
-							value={item.quantity}
-							onchange={(e) => handleQuantityChange(item.id, (e.target as HTMLInputElement).value)}
-						/>
+						<div class="qty-group">
+							<span class="item-qty">×</span>
+							<input
+								class="item-quantity"
+								type="number"
+								min="1"
+								value={item.quantity}
+								onchange={(e) => handleQuantityChange(item.id, (e.target as HTMLInputElement).value)}
+							/>
+						</div>
 						<input
 							class="item-price"
 							type="text"
@@ -171,9 +196,9 @@
 								onclick={() => toggleExpanded(item.id)}
 							>
 								{#if expandedItemId === item.id}
-									<MinusIcon size={14} />
+									<MinusIcon size={11} />
 								{:else}
-									<PlusIcon size={14} />
+									<PlusIcon size={11} />
 								{/if}
 							</button>
 						{:else}
@@ -184,7 +209,7 @@
 							class="icon-button is-danger"
 							aria-label={$t('deleteItem')}
 							title={$t('deleteItem')}
-							onclick={() => deleteItem(item.id)}
+							onclick={() => requestDelete(item.id, item.name)}
 						>
 							<BinIcon size={16} />
 						</button>
@@ -208,21 +233,27 @@
 		{/each}
 	</ul>
 
-	<button
-		class="icon-button add-item-trigger"
-		type="button"
-		aria-label={$t('addItem')}
-		title={$t('addItem')}
-		onclick={() => (addModalOpen = true)}
-	>
-		<AddIcon size={16} />
-	</button>
-
 	<button class="continue" type="button" onclick={() => step.set('summary')}>{$t('itemsContinue')}</button>
 </div>
 
+<button
+	class="add-item-trigger"
+	type="button"
+	aria-label={$t('addItem')}
+	title={$t('addItem')}
+	onclick={() => (addModalOpen = true)}
+>
+	<AddIcon size={20} />
+</button>
+
 <AddItemModal open={addModalOpen} onadd={handleAddItem} onclose={() => (addModalOpen = false)} />
-<PinnedTotalsBar pills={pinnedPills} />
+<ConfirmDialog
+	open={deleteTarget !== null}
+	message={deleteTarget ? $t('confirmDeleteItem').replace('{name}', deleteTarget.name) : ''}
+	onconfirm={confirmDelete}
+	oncancel={() => (deleteTarget = null)}
+/>
+<PinnedTotalsBar pills={pinnedPills} trailingPill={unassignedPill} />
 
 <style>
 	.card {
@@ -235,11 +266,6 @@
 		justify-content: space-between;
 		flex-wrap: wrap;
 		gap: 0.75rem;
-	}
-
-	.unassigned-total {
-		font-weight: 600;
-		opacity: 0.85;
 	}
 
 	.bulk-panel {
@@ -259,11 +285,28 @@
 
 	.item-row {
 		position: relative;
-		padding: 0.6rem 0.6rem;
+		padding: 0.6rem 0.6rem 0.6rem calc(0.6rem + 4px);
 		background: color-mix(in srgb, var(--row-color, var(--color-text-on-surface)) 10%, transparent);
-		border-left: 4px solid var(--row-color, transparent);
 		border-bottom: 1px solid color-mix(in srgb, var(--color-text-on-surface) 10%, transparent);
 		transition: background-color 0.15s ease, border-color 0.15s ease;
+	}
+
+	/*
+	 * The color strip is always this ::before (never a border-left) so its
+	 * position is identical in both the flat and gradient cases. A
+	 * border-left's box is inset by the element's own padding box, which is
+	 * NOT where an absolutely-positioned child's `left: 0` lands (that's the
+	 * padding edge) — mixing the two, as an earlier version did, put the
+	 * gradient strip a few pixels to the right of the flat-color strip.
+	 */
+	.item-row::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 4px;
+		background: var(--row-color, transparent);
 	}
 
 	.item-row:first-child {
@@ -282,23 +325,16 @@
 	}
 
 	.item-row.is-multi-assigned {
-		border-left-color: transparent;
 		background: var(--row-gradient-bg, transparent);
 	}
 
 	.item-row.is-multi-assigned::before {
-		content: '';
-		position: absolute;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		width: 4px;
 		background: var(--row-gradient-bar);
 	}
 
 	.row-main {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: 0.5rem;
 		font-family: var(--font-mono);
 	}
@@ -317,7 +353,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.4rem;
-		padding-top: 0.15rem;
 	}
 
 	.expand-toggle,
@@ -339,6 +374,12 @@
 	.item-name {
 		flex: 1 1 10ch;
 		min-width: 8ch;
+	}
+
+	.qty-group {
+		display: flex;
+		align-items: center;
+		gap: 0.15rem;
 	}
 
 	.item-qty {
@@ -410,12 +451,26 @@
 		min-width: 5ch;
 	}
 
-	.add-item-trigger {
-		margin-top: 1rem;
-	}
-
 	.continue {
 		margin-top: 1.5rem;
 		width: 100%;
+	}
+
+	.add-item-trigger {
+		position: fixed;
+		right: 1.5rem;
+		bottom: 5.5rem;
+		width: 3.2rem;
+		height: 3.2rem;
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 999px;
+		background: var(--color-accent);
+		border-color: var(--color-accent);
+		color: #1a1a1a;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+		z-index: 21;
 	}
 </style>

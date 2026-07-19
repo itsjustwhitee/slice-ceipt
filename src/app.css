@@ -9,7 +9,7 @@
 	--color-accent-hover: #e06a0e;
 	--color-error: #c0392b;
 	--font-sans:
-		'M PLUS Rounded 1c',
+		'Catamaran',
 		-apple-system,
 		BlinkMacSystemFont,
 		'Segoe UI',
@@ -56,8 +56,10 @@ button {
 		color 0.15s ease;
 }
 
-button:hover {
+button:not(:disabled):hover {
+	background: var(--color-accent);
 	border-color: var(--color-accent);
+	color: #1a1a1a;
 }
 
 button.is-active {
@@ -85,7 +87,9 @@ button:focus-visible {
 }
 
 .icon-button.is-danger:hover {
+	background: var(--color-error);
 	border-color: var(--color-error);
+	color: #fff;
 }
 
 .card {

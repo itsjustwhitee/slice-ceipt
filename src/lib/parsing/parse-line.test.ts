@@ -10,6 +10,14 @@ describe('extractNameAndPrice', () => {
 		});
 	});
 
+	it('collapses repeated internal whitespace in a name with no quantity marker', () => {
+		expect(extractNameAndPrice('PANE    INTEGRALE   2,50')).toEqual({
+			name: 'PANE INTEGRALE',
+			unitPriceCents: 250,
+			quantity: 1
+		});
+	});
+
 	it('matches idea.md example exactly: "3x Birra Ichnusa 50cl" at 4,50 total -> 1,50/unit, qty 3', () => {
 		expect(extractNameAndPrice('3X BIRRA ICHNUSA 50CL   4,50')).toEqual({
 			name: 'BIRRA ICHNUSA 50CL',

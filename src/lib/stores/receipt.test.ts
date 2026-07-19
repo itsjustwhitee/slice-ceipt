@@ -18,9 +18,11 @@ import {
 	isSetupValid,
 	confirmSetup,
 	resetSession,
+	goBack,
 	MIN_PARTICIPANTS
 } from './receipt';
-import { participants, setParticipantNames } from './participants';
+import { participants, setParticipantNames, addParticipant, removeParticipant } from './participants';
+import { setItemAssignment } from './group-items';
 
 const fakeDeps: ExtractDeps = {
 	extractTextFromPdfTextLayer: async () => '',
@@ -121,6 +123,90 @@ describe('receipt session store', () => {
 		confirmSetup();
 		expect(get(step)).toBe('upload');
 		expect(get(groupItems)).toEqual([]);
+	});
+
+	it('goBack steps back one stage without clearing any data', () => {
+		mode.set('group');
+		setParticipantNames(['Alice', 'Bob']);
+		parsedItems.set([{ name: 'Bread', unitPriceCents: 300, quantity: 1 }]);
+
+		step.set('setup');
+		goBack();
+		expect(get(step)).toBe('upload');
+		expect(get(parsedItems)).toHaveLength(1);
+
+		step.set('items');
+		goBack();
+		expect(get(step)).toBe('setup');
+
+		step.set('summary');
+		goBack();
+		expect(get(step)).toBe('items');
+	});
+
+	it('confirmSetup reuses the existing group item tree instead of rebuilding when re-confirming (goBack then forward)', () => {
+		mode.set('group');
+		setParticipantNames(['Alice', 'Bob']);
+		parsedItems.set([{ name: 'Bread', unitPriceCents: 300, quantity: 1 }]);
+		confirmSetup();
+		const [alice] = get(participants);
+		setItemAssignment(get(groupItems)[0].id, new Map([[alice.id, 1]]));
+
+		goBack();
+		expect(get(step)).toBe('setup');
+		confirmSetup();
+
+		expect(get(step)).toBe('items');
+		expect(get(groupItems)[0].units[0].assignment.get(alice.id)).toBe(1);
+	});
+
+	it('confirmSetup keeps existing assignments when a new participant is added after goBack', () => {
+		mode.set('group');
+		setParticipantNames(['Alice', 'Bob']);
+		parsedItems.set([{ name: 'Bread', unitPriceCents: 300, quantity: 1 }]);
+		confirmSetup();
+		const [alice] = get(participants);
+		setItemAssignment(get(groupItems)[0].id, new Map([[alice.id, 1]]));
+
+		goBack();
+		addParticipant('Chiara');
+		confirmSetup();
+
+		expect(get(participants)).toHaveLength(3);
+		expect(get(groupItems)[0].units[0].assignment.get(alice.id)).toBe(1);
+		expect(get(groupTotals).totals.get(alice.id)).toBe(300);
+	});
+
+	it('confirmSetup recalculates totals correctly when a participant is removed after goBack', () => {
+		mode.set('group');
+		setParticipantNames(['Alice', 'Bob']);
+		parsedItems.set([{ name: 'Bread', unitPriceCents: 300, quantity: 1 }]);
+		confirmSetup();
+		const [alice, bob] = get(participants);
+		setItemAssignment(get(groupItems)[0].id, new Map([[alice.id, 1], [bob.id, 1]]));
+		expect(get(groupTotals).totals.get(alice.id)).toBe(150);
+
+		goBack();
+		removeParticipant(bob.id);
+		confirmSetup();
+
+		expect(get(participants)).toHaveLength(1);
+		expect(get(groupTotals).totals.get(alice.id)).toBe(300);
+	});
+
+	it('confirmSetup rebuilds from scratch when the mode changes after goBack', () => {
+		mode.set('group');
+		setParticipantNames(['Alice', 'Bob']);
+		parsedItems.set([{ name: 'Bread', unitPriceCents: 300, quantity: 1 }]);
+		confirmSetup();
+
+		goBack();
+		mode.set('single');
+		singleModeCount.set(2);
+		confirmSetup();
+
+		expect(get(singleItems)).toHaveLength(1);
+		expect(get(step)).toBe('items');
 	});
 
 	it('resetSession clears items and returns to the upload step', () => {

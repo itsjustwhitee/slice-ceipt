@@ -3,12 +3,12 @@
 	import { t, locale } from '$lib/i18n';
 	import { currency } from '$lib/stores/currency';
 	import { participants, participantColors } from '$lib/stores/participants';
-	import { groupItems, groupTotals, resetSession, step } from '$lib/stores/receipt';
+	import { groupItems, groupTotals, resetSession } from '$lib/stores/receipt';
 	import { computeGroupItemization } from '$lib/session';
 	import { formatCents } from '$lib/money';
 	import { formatGroupSummaryText } from '$lib/format-summary';
 	import ShareBar from './ShareBar.svelte';
-	import BackIcon from '$lib/icons/BackIcon.svelte';
+	import CopyIcon from '$lib/icons/CopyIcon.svelte';
 	import NewReceiptIcon from '$lib/icons/NewReceiptIcon.svelte';
 
 	let people = $derived(
@@ -31,9 +31,27 @@
 			$locale
 		)
 	);
+
+	let copied = $state(false);
+
+	async function copy() {
+		await navigator.clipboard.writeText(summaryText);
+		copied = true;
+		setTimeout(() => (copied = false), 2000);
+	}
 </script>
 
 <div class="card">
+	<button
+		class="icon-button copy-trigger"
+		type="button"
+		aria-label={copied ? $t('copied') : $t('copySummary')}
+		title={copied ? $t('copied') : $t('copySummary')}
+		onclick={copy}
+	>
+		<CopyIcon size={16} />
+	</button>
+
 	<h1>{$t('summaryTitle')}</h1>
 
 	{#if $groupTotals.unassignedTotalCents > 0}
@@ -68,28 +86,24 @@
 	<ShareBar text={summaryText} />
 
 	<div class="summary-actions">
-		<button
-			class="icon-button back-to-items"
-			type="button"
-			aria-label={$t('backToItems')}
-			title={$t('backToItems')}
-			onclick={() => step.set('items')}
-		>
-			<BackIcon size={18} />
-		</button>
-		<button
-			class="icon-button start-over"
-			type="button"
-			aria-label={$t('startOver')}
-			title={$t('startOver')}
-			onclick={resetSession}
-		>
+		<button class="start-over" type="button" onclick={resetSession}>
 			<NewReceiptIcon size={18} />
+			{$t('startOver')}
 		</button>
 	</div>
 </div>
 
 <style>
+	.card {
+		position: relative;
+	}
+
+	.copy-trigger {
+		position: absolute;
+		top: 1.5rem;
+		right: 1.5rem;
+	}
+
 	.unassigned-note {
 		color: var(--color-error);
 		font-weight: 600;
@@ -145,15 +159,14 @@
 	}
 
 	.summary-actions {
-		display: flex;
-		gap: 0.75rem;
 		margin-top: 1.5rem;
 	}
 
-	.summary-actions button {
-		flex: 1;
+	.start-over {
+		width: 100%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		gap: 0.6rem;
 	}
 </style>

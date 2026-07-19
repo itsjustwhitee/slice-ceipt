@@ -31,4 +31,16 @@ describe('buildRowGradient', () => {
 			'linear-gradient(to right, #222222 0%, #222222 100%)'
 		);
 	});
+
+	it('builds one blended stop per share at its band midpoint when soft is true', () => {
+		expect(buildRowGradient([{ id: 'a', weight: 1 }, { id: 'b', weight: 1 }], colorOf, 'to right', true)).toBe(
+			'linear-gradient(to right, #111111 25%, #222222 75%)'
+		);
+	});
+
+	it('weights soft midpoints proportionally too, not just evenly', () => {
+		expect(buildRowGradient([{ id: 'a', weight: 1 }, { id: 'b', weight: 2 }], colorOf, 'to right', true)).toBe(
+			'linear-gradient(to right, #111111 16.67%, #222222 66.66%)'
+		);
+	});
 });

@@ -7,18 +7,28 @@
 	}
 	interface Props {
 		pills: Pill[];
+		/** Always visible, never part of the scrollable region — e.g. the unassigned total. */
+		trailingPill?: Pill;
 	}
-	let { pills }: Props = $props();
+	let { pills, trailingPill }: Props = $props();
 </script>
 
 <div class="pinned-bar">
 	<div class="card pills">
-		{#each pills as pill (pill.id)}
-			<div class="pill" style:--pill-color={pill.color ?? 'var(--color-accent)'}>
-				<span class="pill-label">{pill.label}</span>
-				<span class="pill-amount">{pill.amountText}</span>
+		<div class="pills-scroll">
+			{#each pills as pill (pill.id)}
+				<div class="pill" style:--pill-color={pill.color ?? 'var(--color-accent)'}>
+					<span class="pill-label">{pill.label}</span>
+					<span class="pill-amount">{pill.amountText}</span>
+				</div>
+			{/each}
+		</div>
+		{#if trailingPill}
+			<div class="pill is-danger">
+				<span class="pill-label">{trailingPill.label}</span>
+				<span class="pill-amount">{trailingPill.amountText}</span>
 			</div>
-		{/each}
+		{/if}
 	</div>
 </div>
 
@@ -38,12 +48,20 @@
 	.pills {
 		pointer-events: auto;
 		display: flex;
+		align-items: center;
 		gap: 0.5rem;
 		max-width: 640px;
 		width: 100%;
-		overflow-x: auto;
 		padding: 0.6rem 0.75rem;
 		border-radius: 999px;
+	}
+
+	.pills-scroll {
+		display: flex;
+		gap: 0.5rem;
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow-x: auto;
 	}
 
 	.pill {
@@ -64,5 +82,16 @@
 		color: var(--pill-color);
 		font-size: 0.85rem;
 		font-weight: 600;
+	}
+
+	.pill.is-danger {
+		margin-left: auto;
+		background: var(--color-error);
+		border-color: var(--color-error);
+		color: #fff;
+	}
+
+	.pill.is-danger .pill-label {
+		color: #ffe5e0;
 	}
 </style>

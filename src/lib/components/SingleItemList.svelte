@@ -15,9 +15,11 @@
 	} from '$lib/stores/single-items';
 	import { formatCents } from '$lib/money';
 	import type { Fraction } from '$lib/money';
+	import { showToast } from '$lib/stores/toast';
 	import SingleFractionPicker from './SingleFractionPicker.svelte';
 	import AddItemModal from './AddItemModal.svelte';
 	import PinnedTotalsBar from './PinnedTotalsBar.svelte';
+	import ConfirmDialog from './ConfirmDialog.svelte';
 	import AddIcon from '$lib/icons/AddIcon.svelte';
 	import BinIcon from '$lib/icons/BinIcon.svelte';
 	import PlusIcon from '$lib/icons/PlusIcon.svelte';
@@ -29,6 +31,7 @@
 	let editingPriceId = $state<string | null>(null);
 	let priceDraft = $state('');
 	let addModalOpen = $state(false);
+	let deleteTarget = $state<{ id: string; name: string } | null>(null);
 
 	function toggleExpanded(itemId: string) {
 		expandedItemId = expandedItemId === itemId ? null : itemId;
@@ -67,6 +70,19 @@
 	function handleAddItem(input: { name: string; unitPriceCents: number; quantity: number }) {
 		addItem(input.name, input.unitPriceCents, input.quantity);
 		addModalOpen = false;
+		showToast($t('toastItemAdded').replace('{name}', input.name), 'success');
+	}
+
+	function requestDelete(itemId: string, name: string) {
+		deleteTarget = { id: itemId, name };
+	}
+
+	function confirmDelete() {
+		if (!deleteTarget) return;
+		const { id, name } = deleteTarget;
+		deleteItem(id);
+		deleteTarget = null;
+		showToast($t('toastItemDeleted').replace('{name}', name), 'danger');
 	}
 
 	function sameFraction(a: Fraction | null, b: Fraction | null): boolean {
@@ -77,10 +93,7 @@
 	function summarizeFraction(units: { fraction: Fraction | null }[]): string {
 		const first = units[0].fraction;
 		const allSame = units.every((u) => sameFraction(u.fraction, first));
-		if (!allSame) return $t('mixedShare');
-		if (first === null) return '';
-		if (first.num === 1 && first.den === 1) return '';
-		return first.den === 100 ? `${first.num}%` : `${first.num}/${first.den}`;
+		return allSame ? '' : $t('mixedShare');
 	}
 
 	function toggleInclude(itemId: string, currentlyIncluded: boolean) {
@@ -136,14 +149,16 @@
 							value={item.name}
 							onchange={(e) => updateItemName(item.id, (e.target as HTMLInputElement).value)}
 						/>
-						<span class="item-qty">×</span>
-						<input
-							class="item-quantity"
-							type="number"
-							min="1"
-							value={item.quantity}
-							onchange={(e) => handleQuantityChange(item.id, (e.target as HTMLInputElement).value)}
-						/>
+						<div class="qty-group">
+							<span class="item-qty">×</span>
+							<input
+								class="item-quantity"
+								type="number"
+								min="1"
+								value={item.quantity}
+								onchange={(e) => handleQuantityChange(item.id, (e.target as HTMLInputElement).value)}
+							/>
+						</div>
 						<input
 							class="item-price"
 							type="text"
@@ -174,9 +189,9 @@
 								onclick={() => toggleExpanded(item.id)}
 							>
 								{#if expandedItemId === item.id}
-									<MinusIcon size={14} />
+									<MinusIcon size={11} />
 								{:else}
-									<PlusIcon size={14} />
+									<PlusIcon size={11} />
 								{/if}
 							</button>
 						{:else}
@@ -187,7 +202,7 @@
 							class="icon-button is-danger"
 							aria-label={$t('deleteItem')}
 							title={$t('deleteItem')}
-							onclick={() => deleteItem(item.id)}
+							onclick={() => requestDelete(item.id, item.name)}
 						>
 							<BinIcon size={16} />
 						</button>
@@ -219,20 +234,26 @@
 		{/each}
 	</ul>
 
-	<button
-		class="icon-button add-item-trigger"
-		type="button"
-		aria-label={$t('addItem')}
-		title={$t('addItem')}
-		onclick={() => (addModalOpen = true)}
-	>
-		<AddIcon size={16} />
-	</button>
-
 	<button class="continue" type="button" onclick={() => step.set('summary')}>{$t('itemsContinue')}</button>
 </div>
 
+<button
+	class="add-item-trigger"
+	type="button"
+	aria-label={$t('addItem')}
+	title={$t('addItem')}
+	onclick={() => (addModalOpen = true)}
+>
+	<AddIcon size={20} />
+</button>
+
 <AddItemModal open={addModalOpen} onadd={handleAddItem} onclose={() => (addModalOpen = false)} />
+<ConfirmDialog
+	open={deleteTarget !== null}
+	message={deleteTarget ? $t('confirmDeleteItem').replace('{name}', deleteTarget.name) : ''}
+	onconfirm={confirmDelete}
+	oncancel={() => (deleteTarget = null)}
+/>
 <PinnedTotalsBar pills={pinnedPills} />
 
 <style>
@@ -298,7 +319,7 @@
 
 	.row-main {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: 0.5rem;
 		font-family: var(--font-mono);
 	}
@@ -309,7 +330,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.4rem;
-		padding-top: 0.15rem;
 	}
 
 	.row-fields {
@@ -347,6 +367,12 @@
 	.item-name {
 		flex: 1 1 10ch;
 		min-width: 8ch;
+	}
+
+	.qty-group {
+		display: flex;
+		align-items: center;
+		gap: 0.15rem;
 	}
 
 	.item-qty {
@@ -424,12 +450,26 @@
 		min-width: 5ch;
 	}
 
-	.add-item-trigger {
-		margin-top: 1rem;
-	}
-
 	.continue {
 		margin-top: 1.5rem;
 		width: 100%;
+	}
+
+	.add-item-trigger {
+		position: fixed;
+		right: 1.5rem;
+		bottom: 5.5rem;
+		width: 3.2rem;
+		height: 3.2rem;
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 999px;
+		background: var(--color-accent);
+		border-color: var(--color-accent);
+		color: #1a1a1a;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+		z-index: 21;
 	}
 </style>

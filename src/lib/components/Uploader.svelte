@@ -60,13 +60,9 @@
 			<p>{$t('uploadDropzone')}</p>
 		</div>
 		<div class="actions">
-			<button
-				class="icon-button"
-				aria-label={$t('uploadTakePhoto')}
-				title={$t('uploadTakePhoto')}
-				onclick={() => cameraInput.click()}
-			>
-				<CameraIcon />
+			<button type="button" class="take-photo" onclick={() => cameraInput.click()}>
+				<CameraIcon size={18} />
+				{$t('uploadTakePhoto')}
 			</button>
 			<button
 				class="icon-button"
@@ -117,9 +113,16 @@
 
 	.actions {
 		display: flex;
+		align-items: center;
 		gap: 0.75rem;
 		margin-top: 1.25rem;
 		flex-wrap: wrap;
+	}
+
+	.take-photo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.status {

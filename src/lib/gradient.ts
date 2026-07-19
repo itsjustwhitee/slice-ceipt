@@ -14,12 +14,17 @@ function round2(value: number): number {
  * the boundary between two participants' colors, making it harder to read
  * "who has how much of this," which is the whole point of coloring the row.
  * Returns `undefined` when there's nothing to color (no positive-weight
- * shares).
+ * shares). Pass `soft: true` for a background wash instead of a legend: it
+ * places one stop per share at its band's midpoint (still spaced
+ * proportionally to weight) so CSS blends smoothly between them, trading
+ * the hard stops' exact-proportion legibility for a softer look where
+ * precision isn't the point.
  */
 export function buildRowGradient(
 	shares: WeightedShare[],
 	colorOf: (id: string) => string,
-	direction: string = 'to right'
+	direction: string = 'to right',
+	soft: boolean = false
 ): string | undefined {
 	const positive = shares.filter((s) => s.weight > 0);
 	if (positive.length === 0) return undefined;
@@ -32,7 +37,11 @@ export function buildRowGradient(
 		cursor += share.weight;
 		const end = round2((cursor / total) * 100);
 		const color = colorOf(share.id);
-		stops.push(`${color} ${start}%`, `${color} ${end}%`);
+		if (soft) {
+			stops.push(`${color} ${round2((start + end) / 2)}%`);
+		} else {
+			stops.push(`${color} ${start}%`, `${color} ${end}%`);
+		}
 	}
 	return `linear-gradient(${direction}, ${stops.join(', ')})`;
 }
