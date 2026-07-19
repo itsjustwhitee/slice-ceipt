@@ -1,5 +1,6 @@
 <!-- src/lib/components/SetupStep.svelte -->
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { t } from '$lib/i18n';
 	import { mode, singleModeCount, setSingleModeCount, isSetupValid, confirmSetup } from '$lib/stores/receipt';
 	import { participants, addParticipant, removeParticipant } from '$lib/stores/participants';
@@ -11,17 +12,22 @@
 	let newPresetName = $state('');
 	let participantNameInput = $state<HTMLInputElement | null>(null);
 
-	function submitAddParticipant() {
+	async function submitAddParticipant() {
 		const name = newParticipantName.trim();
 		if (!name) return;
 		addParticipant(name);
 		newParticipantName = '';
-		// On mobile, tapping the submit button (or its Enter-key equivalent)
-		// blurs the input and dismisses the keyboard, which reads as "nothing
-		// happened" since the field is now empty and no longer focused —
-		// refocusing keeps the keyboard up so the next name can be typed
-		// straight away, without an extra tap.
-		participantNameInput?.focus();
+		// Adding a participant inserts a new <li> above this input, which on
+		// some Android browsers dismisses the on-screen keyboard as a side
+		// effect of the DOM mutation/reflow, independent of anything stealing
+		// focus directly. Refocusing synchronously (in the same tick as that
+		// mutation) isn't enough — the keyboard-dismiss race loses either way.
+		// Waiting for Svelte's DOM patch to finish (tick) and then a full
+		// paint (requestAnimationFrame) before refocusing gives the browser a
+		// settled DOM to focus into, so the next name can be typed without an
+		// extra tap.
+		await tick();
+		requestAnimationFrame(() => participantNameInput?.focus());
 	}
 
 	function submitSavePreset() {
@@ -48,21 +54,6 @@
 	{#if $mode === 'group'}
 		<section>
 			<h2>{$t('participantsTitle')}</h2>
-			<ul class="participant-list">
-				{#each $participants as participant (participant.id)}
-					<li>
-						<span>{participant.name}</span>
-						<button
-							class="icon-button is-danger"
-							aria-label={$t('removeParticipant')}
-							title={$t('removeParticipant')}
-							onclick={() => removeParticipant(participant.id)}
-						>
-							<BinIcon size={16} />
-						</button>
-					</li>
-				{/each}
-			</ul>
 			<form
 				class="inline-form"
 				onsubmit={(e) => {
@@ -86,6 +77,21 @@
 					<AddIcon size={16} />
 				</button>
 			</form>
+			<ul class="participant-list">
+				{#each $participants as participant (participant.id)}
+					<li>
+						<span>{participant.name}</span>
+						<button
+							class="icon-button is-danger"
+							aria-label={$t('removeParticipant')}
+							title={$t('removeParticipant')}
+							onclick={() => removeParticipant(participant.id)}
+						>
+							<BinIcon size={16} />
+						</button>
+					</li>
+				{/each}
+			</ul>
 		</section>
 
 		<section>
