@@ -7,6 +7,8 @@
 	import { formatCents } from '$lib/money';
 	import { formatSingleSummaryText } from '$lib/format-summary';
 	import ShareBar from './ShareBar.svelte';
+	import BackIcon from '$lib/icons/BackIcon.svelte';
+	import NewReceiptIcon from '$lib/icons/NewReceiptIcon.svelte';
 
 	let items = $derived(computeSingleItemization($singleItems));
 	let summaryText = $derived(formatSingleSummaryText($singleTotal, items, $currency, $locale));
@@ -30,10 +32,24 @@
 	<ShareBar text={summaryText} />
 
 	<div class="summary-actions">
-		<button class="back-to-items" type="button" onclick={() => step.set('items')}>
-			{$t('backToItems')}
+		<button
+			class="icon-button back-to-items"
+			type="button"
+			aria-label={$t('backToItems')}
+			title={$t('backToItems')}
+			onclick={() => step.set('items')}
+		>
+			<BackIcon size={18} />
 		</button>
-		<button class="start-over" type="button" onclick={resetSession}>{$t('startOver')}</button>
+		<button
+			class="icon-button start-over"
+			type="button"
+			aria-label={$t('startOver')}
+			title={$t('startOver')}
+			onclick={resetSession}
+		>
+			<NewReceiptIcon size={18} />
+		</button>
 	</div>
 </div>
 
@@ -41,6 +57,7 @@
 	.your-total {
 		font-weight: 700;
 		font-size: 1.1rem;
+		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
 	}
 
 	.item-breakdown {
@@ -50,6 +67,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
+		font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
 	}
 
 	.item-breakdown li {
@@ -68,5 +86,8 @@
 
 	.summary-actions button {
 		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>
