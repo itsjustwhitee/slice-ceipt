@@ -2,6 +2,7 @@
 <script lang="ts">
 	import { participants, participantColors } from '$lib/stores/participants';
 	import { t } from '$lib/i18n';
+	import { weightPercentages } from '$lib/weight-share';
 	import GearIcon from '$lib/icons/GearIcon.svelte';
 
 	interface Props {
@@ -22,17 +23,23 @@
 		onchange(next);
 	}
 
-	function adjustWeight(participantId: string, delta: number) {
-		const current = assignment.get(participantId) ?? 1;
+	function setWeight(participantId: string, weight: number) {
+		const safeWeight = Math.max(1, Math.round(weight));
 		const next = new Map(assignment);
-		next.set(participantId, Math.max(1, current + delta));
+		next.set(participantId, safeWeight);
 		onchange(next);
 	}
 
-	let showCustomShare = $derived(assignment.size > 1);
+	function adjustWeight(participantId: string, delta: number) {
+		const current = assignment.get(participantId) ?? 1;
+		setWeight(participantId, current + delta);
+	}
+
+	let canCustomize = $derived(assignment.size > 1);
+	let percentages = $derived(weightPercentages(assignment));
 
 	$effect(() => {
-		if (!showCustomShare) sharePanelOpen = false;
+		if (!canCustomize) sharePanelOpen = false;
 	});
 </script>
 
@@ -49,21 +56,20 @@
 			{participant.name}
 		</button>
 	{/each}
-	{#if showCustomShare}
-		<button
-			type="button"
-			class="icon-button gear-toggle"
-			class:is-active={sharePanelOpen}
-			aria-label={$t('customShare')}
-			title={$t('customShare')}
-			onclick={() => (sharePanelOpen = !sharePanelOpen)}
-		>
-			<GearIcon size={14} />
-		</button>
-	{/if}
+	<button
+		type="button"
+		class="icon-button gear-toggle"
+		class:is-active={sharePanelOpen}
+		disabled={!canCustomize}
+		aria-label={canCustomize ? $t('customShare') : $t('customShareNeedsTwo')}
+		title={canCustomize ? $t('customShare') : $t('customShareNeedsTwo')}
+		onclick={() => (sharePanelOpen = !sharePanelOpen)}
+	>
+		<GearIcon size={14} />
+	</button>
 </div>
 
-{#if showCustomShare && sharePanelOpen}
+{#if canCustomize && sharePanelOpen}
 	<div class="share-panel">
 		{#each $participants as participant (participant.id)}
 			{@const weight = assignment.get(participant.id)}
@@ -74,9 +80,16 @@
 					</span>
 					<div class="weight-stepper">
 						<button type="button" onclick={() => adjustWeight(participant.id, -1)}>−</button>
-						<span>{weight}</span>
+						<input
+							type="number"
+							min="1"
+							class="weight-input"
+							value={weight}
+							onchange={(e) => setWeight(participant.id, Number((e.target as HTMLInputElement).value))}
+						/>
 						<button type="button" onclick={() => adjustWeight(participant.id, 1)}>+</button>
 					</div>
+					<span class="share-percent">{percentages.get(participant.id) ?? 0}%</span>
 				</div>
 			{/if}
 		{/each}
@@ -110,6 +123,15 @@
 		border-radius: 999px;
 	}
 
+	.gear-toggle:disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+
+	.gear-toggle:disabled:hover {
+		border-color: color-mix(in srgb, currentColor 25%, transparent);
+	}
+
 	.share-panel {
 		flex-basis: 100%;
 		display: flex;
@@ -139,9 +161,31 @@
 		gap: 0.3rem;
 	}
 
-	.weight-stepper span {
-		min-width: 1.5ch;
+	.weight-input {
+		width: 3ch;
 		text-align: center;
+		font: inherit;
 		font-weight: 700;
+		padding: 0.2em 0;
+		border-radius: 6px;
+		border: 1px solid color-mix(in srgb, var(--color-text-on-surface) 25%, transparent);
+		background: transparent;
+		color: inherit;
+		appearance: textfield;
+		-moz-appearance: textfield;
+	}
+
+	.weight-input::-webkit-inner-spin-button,
+	.weight-input::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	.share-percent {
+		min-width: 3.5ch;
+		text-align: right;
+		font-size: 0.85rem;
+		font-weight: 700;
+		opacity: 0.75;
 	}
 </style>
