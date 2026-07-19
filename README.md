@@ -56,3 +56,7 @@ Ideas not yet implemented, roughly in order of how much they'd help:
 - **Export the summary as an image or PDF**, not just copy/native-share text: nicer for sending in a chat that doesn't render plain text well.
 - **A light theme.** Colors are already centralized as CSS custom properties (`src/app.css`), so this is a matter of defining a second palette and a toggle, not restructuring styles.
 - **Wider receipt-format coverage.** The parser's header/footer/discount heuristics (`src/lib/parsing`) are tuned against real Italian receipts; broadening them against other countries' formats would make OCR extraction useful to more people.
+
+## Contributing
+
+Bug reports and pull requests are welcome. You can reach me also through contacts on my profile or on [my website](https://justwhitee.org/#cta).
