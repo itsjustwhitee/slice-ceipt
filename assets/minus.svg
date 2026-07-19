@@ -3,7 +3,7 @@
 <svg width="100%" height="100%" viewBox="0 0 800 800" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
     <g id="Page-1" transform="matrix(24.324808,0,0,24.324808,10.803069,302.700767)">
         <g id="Icon-Set-Filled" transform="matrix(1,0,0,1,-414,-1049)">
-            <path id="minus" d="M442,1051.467C442.847,1051.467 443.533,1052.153 443.533,1053C443.533,1053.847 442.847,1054.533 442,1054.533L418,1054.533C417.153,1054.533 416.467,1053.847 416.467,1053C416.467,1052.153 417.153,1051.467 418,1051.467L442,1051.467Z" style="fill:rgb(44,44,48);"/>
+            <path id="minus" d="M442,1050.85C443.187,1050.85 444.15,1051.812 444.15,1053C444.15,1054.188 443.187,1055.15 442,1055.15L418,1055.15C416.813,1055.15 415.85,1054.188 415.85,1053C415.85,1051.812 416.813,1050.85 418,1050.85L442,1050.85Z" style="fill:rgb(44,44,48);"/>
         </g>
     </g>
 </svg>

@@ -1,12 +1,14 @@
 export const PARTICIPANT_COLORS = [
-	'#3d5a80',
-	'#34d7ac',
+	'#1c8dd4',
+	'#34d7d4',
 	'#96de21',
-	'#a82f73',
-	'#f8b469',
-	'#522b3d',
+	'#cb2b86',
+	'#f8c51f',
+	'#911fe2',
 	'#d52941',
-	'#c490d1'
+	'#d52eff',
+	'#ff8800',
+	'#0008ff'
 ];
 
 export function participantColor(index: number): string {
