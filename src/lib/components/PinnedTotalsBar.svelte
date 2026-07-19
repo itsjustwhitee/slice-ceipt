@@ -14,7 +14,7 @@
 </script>
 
 <div class="pinned-bar">
-	<div class="pills">
+	<div class="card pills">
 		{#each pills as pill (pill.id)}
 			<div class="pill" style:--pill-color={pill.color ?? 'var(--color-accent)'}>
 				<span class="pill-label">{pill.label}</span>
@@ -51,6 +51,8 @@
 		align-items: center;
 		gap: 0.5rem;
 		max-width: 100%;
+		padding: 0.6rem 0.75rem;
+		border-radius: 20px;
 	}
 
 	.pill {
@@ -61,7 +63,6 @@
 		padding: 0.3em 0.9em;
 		border-radius: 999px;
 		border: 2px solid var(--pill-color);
-		background: color-mix(in srgb, var(--pill-color) 15%, var(--color-surface));
 		color: var(--color-text-on-surface);
 		font-family: var(--font-mono);
 		font-weight: 700;
