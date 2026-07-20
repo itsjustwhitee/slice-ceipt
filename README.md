@@ -59,4 +59,5 @@ Ideas not yet implemented, roughly in order of how much they'd help:
 
 ## Contributing
 
-Bug reports and pull requests are welcome. You can reach me also through contacts on my profile or on [my website](https://justwhitee.org/#cta).
+Bug reports and pull requests are welcome.\
+You can reach me also through contacts on my profile or on [my website](https://justwhitee.org/#cta).
