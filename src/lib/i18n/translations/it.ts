@@ -3,6 +3,10 @@ import type { Dictionary } from './en';
 const it: Dictionary = {
 	welcome: 'Benvenuto su SliceCeipt',
 	uploadTitle: 'Carica lo scontrino',
+	uploadIntro: 'Dividi qualsiasi scontrino in tre semplici passaggi:',
+	uploadStep1: 'Carica una foto o un PDF dello scontrino',
+	uploadStep2: 'Aggiungi i partecipanti e assegna gli articoli',
+	uploadStep3: 'Ottieni il totale di ciascuno, pronto da condividere',
 	uploadDropzone: 'Trascina qui una foto o un PDF, oppure tocca per scegliere',
 	uploadTakePhoto: 'Scatta una foto',
 	uploadSkip: 'Salta',

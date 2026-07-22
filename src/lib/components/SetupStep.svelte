@@ -7,6 +7,7 @@
 	import { presets, savePreset, deletePreset, applyPreset } from '$lib/stores/presets';
 	import AddIcon from '$lib/icons/AddIcon.svelte';
 	import BinIcon from '$lib/icons/BinIcon.svelte';
+	import BookmarkIcon from '$lib/icons/BookmarkIcon.svelte';
 
 	let newParticipantName = $state('');
 	let newPresetName = $state('');
@@ -123,7 +124,14 @@
 				}}
 			>
 				<input type="text" placeholder={$t('presetNamePlaceholder')} bind:value={newPresetName} />
-				<button type="submit">{$t('savePreset')}</button>
+				<button
+					class="icon-button"
+					type="submit"
+					aria-label={$t('savePreset')}
+					title={$t('savePreset')}
+				>
+					<BookmarkIcon size={16} />
+				</button>
 			</form>
 		</section>
 	{:else}

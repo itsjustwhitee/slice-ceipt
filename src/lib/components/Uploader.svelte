@@ -57,6 +57,14 @@
 			</button>
 		</div>
 	{:else}
+		<div class="intro">
+			<p class="intro-lead">{$t('uploadIntro')}</p>
+			<ol class="intro-steps">
+				<li><span class="step-num">1</span><span>{$t('uploadStep1')}</span></li>
+				<li><span class="step-num">2</span><span>{$t('uploadStep2')}</span></li>
+				<li><span class="step-num">3</span><span>{$t('uploadStep3')}</span></li>
+			</ol>
+		</div>
 		<div
 			class="dropzone"
 			class:is-drag-over={isDragOver}
@@ -108,6 +116,41 @@
 </div>
 
 <style>
+	.intro-lead {
+		margin: 0 0 0.75rem;
+		opacity: 0.85;
+	}
+
+	.intro-steps {
+		list-style: none;
+		margin: 0 0 1.5rem;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.intro-steps li {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+	}
+
+	.step-num {
+		flex: none;
+		width: 1.6rem;
+		height: 1.6rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background: var(--color-accent);
+		color: #1a1a1a;
+		font-family: var(--font-mono);
+		font-weight: 700;
+		font-size: 0.85rem;
+	}
+
 	.dropzone {
 		display: flex;
 		flex-direction: column;

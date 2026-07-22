@@ -1,6 +1,10 @@
 const en = {
 	welcome: 'Welcome to SliceCeipt',
 	uploadTitle: 'Upload your receipt',
+	uploadIntro: 'Split any receipt in three easy steps:',
+	uploadStep1: 'Upload a photo or PDF of the receipt',
+	uploadStep2: 'Add participants and assign items',
+	uploadStep3: "Get everyone's total, ready to share",
 	uploadDropzone: 'Drag a photo or PDF here, or tap to choose',
 	uploadTakePhoto: 'Take a photo',
 	uploadSkip: 'Skip',
