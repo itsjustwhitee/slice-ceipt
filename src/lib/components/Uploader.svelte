@@ -6,19 +6,34 @@
 		extractionError,
 		extractionProgress,
 		loadReceipt,
+		loadReceiptFromPhotos,
 		skipExtraction
 	} from '$lib/stores/receipt';
+	import { pendingPhotos, addPhotos } from '$lib/stores/photos';
+	import { showToast } from '$lib/stores/toast';
 	import CameraIcon from '$lib/icons/CameraIcon.svelte';
 	import SkipIcon from '$lib/icons/SkipIcon.svelte';
 	import UploadIcon from '$lib/icons/UploadIcon.svelte';
+	import PhotoBatchReview from './PhotoBatchReview.svelte';
+	import PhotoCropEditor from './PhotoCropEditor.svelte';
 
 	let fileInput: HTMLInputElement;
 	let cameraInput: HTMLInputElement;
 	let isDragOver = $state(false);
+	let editingPhotoId = $state<string | null>(null);
+
+	let editingPhoto = $derived($pendingPhotos.find((p) => p.id === editingPhotoId));
+	let editingIndex = $derived($pendingPhotos.findIndex((p) => p.id === editingPhotoId));
 
 	function handleFiles(files: FileList | null) {
-		const file = files?.[0];
-		if (file) void loadReceipt(file);
+		const list = files ? Array.from(files) : [];
+		if (list.length === 0) return;
+		const pdf = list.find((f) => f.type === 'application/pdf');
+		if (pdf) {
+			void loadReceipt(pdf);
+			return;
+		}
+		addPhotos(list);
 	}
 
 	function handleDrop(event: DragEvent) {
@@ -26,12 +41,27 @@
 		isDragOver = false;
 		handleFiles(event.dataTransfer?.files ?? null);
 	}
+
+	function retryExtraction() {
+		if ($pendingPhotos.length > 0) {
+			void loadReceiptFromPhotos($pendingPhotos);
+		} else {
+			fileInput.click();
+		}
+	}
+
+	function confirmEdit() {
+		if (editingPhoto) {
+			const name = $t('photoLabel').replace('{n}', String(editingIndex + 1));
+			showToast($t('toastPhotoCorrected').replace('{name}', name), 'success');
+		}
+		editingPhotoId = null;
+	}
 </script>
 
 <div class="card">
-	<h1>{$t('uploadTitle')}</h1>
-
 	{#if $extractionStatus === 'extracting'}
+		<h1>{$t('uploadTitle')}</h1>
 		<p class="status">{$t('extractionInProgress')}</p>
 		<div
 			class="progress-track"
@@ -43,10 +73,11 @@
 			<div class="progress-fill" style:width="{$extractionProgress * 100}%"></div>
 		</div>
 	{:else if $extractionStatus === 'error'}
+		<h1>{$t('uploadTitle')}</h1>
 		<p class="status status-error">{$t('extractionErrorTitle')}</p>
 		{#if $extractionError}<p class="status-detail">{$extractionError}</p>{/if}
 		<div class="actions">
-			<button onclick={() => fileInput.click()}>{$t('extractionRetry')}</button>
+			<button onclick={retryExtraction}>{$t('extractionRetry')}</button>
 			<button
 				class="icon-button"
 				aria-label={$t('extractionContinueManually')}
@@ -56,7 +87,22 @@
 				<SkipIcon />
 			</button>
 		</div>
+	{:else if editingPhoto}
+		<PhotoCropEditor
+			photo={editingPhoto}
+			label={$t('photoLabel').replace('{n}', String(editingIndex + 1))}
+			onconfirm={confirmEdit}
+			oncancel={() => (editingPhotoId = null)}
+		/>
+	{:else if $pendingPhotos.length > 0}
+		<PhotoBatchReview
+			onedit={(id) => (editingPhotoId = id)}
+			onaddcamera={() => cameraInput.click()}
+			onaddimport={() => fileInput.click()}
+			oncontinue={() => void loadReceiptFromPhotos($pendingPhotos)}
+		/>
 	{:else}
+		<h1>{$t('uploadTitle')}</h1>
 		<div class="intro">
 			<p class="intro-lead">{$t('uploadIntro')}</p>
 			<ol class="intro-steps">
@@ -102,6 +148,7 @@
 		bind:this={fileInput}
 		type="file"
 		accept="image/*,application/pdf"
+		multiple
 		hidden
 		onchange={(e) => handleFiles((e.target as HTMLInputElement).files)}
 	/>
