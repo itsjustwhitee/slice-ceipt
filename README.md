@@ -50,8 +50,6 @@ Pushes to `main` build and deploy automatically to GitHub Pages via [`.github/wo
 
 Ideas not yet implemented, roughly in order of how much they'd help:
 
-- **Photo cropping before OCR.** A small in-browser crop step after taking/choosing a photo, so a crooked shot or a background-heavy photo doesn't confuse extraction.
-- **Multi-photo upload.** Let a receipt that doesn't fit in one frame (or spans multiple printed sections) be captured as several photos and stitched into one item list.
 - **More locales.** The i18n layer is just a dictionary lookup (`src/lib/i18n`), so adding a language is mostly translation work, not architecture work.
 - **Export the summary as an image or PDF**, not just copy/native-share text: nicer for sending in a chat that doesn't render plain text well.
 - **A light theme.** Colors are already centralized as CSS custom properties (`src/app.css`), so this is a matter of defining a second palette and a toggle, not restructuring styles.
