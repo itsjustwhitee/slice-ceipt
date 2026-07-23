@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { get } from 'svelte/store';
 import type { ExtractDeps } from '$lib/extract';
 import {
@@ -15,6 +15,7 @@ import {
 	singleTotal,
 	setSingleModeCount,
 	loadReceipt,
+	loadReceiptFromPhotos,
 	skipExtraction,
 	isSetupValid,
 	confirmSetup,
@@ -24,6 +25,7 @@ import {
 } from './receipt';
 import { participants, setParticipantNames, addParticipant, removeParticipant } from './participants';
 import { setItemAssignment } from './group-items';
+import { pendingPhotos, addPhotos } from './photos';
 
 const fakeDeps: ExtractDeps = {
 	extractTextFromPdfTextLayer: async () => '',
@@ -91,6 +93,40 @@ describe('receipt session store', () => {
 		expect(get(extractionStatus)).toBe('error');
 		expect(get(extractionError)).toBe('ocr failed');
 		expect(get(step)).toBe('upload');
+	});
+
+	it('loadReceiptFromPhotos extracts each photo, joins the text, parses, and advances to setup', async () => {
+		const photos = [
+			{ id: 'p1', blob: new Blob(['x']), lastCorners: null },
+			{ id: 'p2', blob: new Blob(['y']), lastCorners: null }
+		];
+		const deps: ExtractDeps = {
+			...fakeDeps,
+			extractTextFromImage: vi.fn().mockResolvedValueOnce('Bread 2.50\n').mockResolvedValueOnce('Milk 1.20\n')
+		};
+		await loadReceiptFromPhotos(photos, deps);
+		expect(get(parsedItems).map((i) => i.name)).toEqual(['Bread', 'Milk']);
+		expect(get(step)).toBe('setup');
+	});
+
+	it('loadReceiptFromPhotos records an error and stays on the upload step on failure', async () => {
+		const photos = [{ id: 'p1', blob: new Blob(['x']), lastCorners: null }];
+		const deps: ExtractDeps = {
+			...fakeDeps,
+			extractTextFromImage: async () => {
+				throw new Error('ocr failed');
+			}
+		};
+		await loadReceiptFromPhotos(photos, deps);
+		expect(get(extractionStatus)).toBe('error');
+		expect(get(extractionError)).toBe('ocr failed');
+		expect(get(step)).toBe('upload');
+	});
+
+	it('resetSession also clears the pending photo batch', () => {
+		addPhotos([new File([new Uint8Array([1])], 'a.jpg', { type: 'image/jpeg' })]);
+		resetSession();
+		expect(get(pendingPhotos)).toEqual([]);
 	});
 
 	it('skipExtraction leaves items empty and advances to setup', () => {

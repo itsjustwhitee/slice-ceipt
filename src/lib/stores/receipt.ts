@@ -1,5 +1,5 @@
 import { derived, get, writable } from 'svelte/store';
-import { extractReceiptText, type ExtractDeps } from '$lib/extract';
+import { extractReceiptText, extractTextFromImages, type ExtractDeps } from '$lib/extract';
 import { parseReceiptText, type ParsedItem } from '$lib/parsing';
 import {
 	createGroupItemsFromParsed,
@@ -10,6 +10,7 @@ import {
 	type SingleItem
 } from '$lib/session';
 import { participants } from './participants';
+import { clearPhotos, type PendingPhoto } from './photos';
 
 export type Mode = 'group' | 'single';
 export type Step = 'upload' | 'setup' | 'items' | 'summary';
@@ -79,6 +80,31 @@ export async function loadReceipt(file: File, deps?: ExtractDeps): Promise<void>
 	}
 }
 
+/**
+ * Same status/error/progress semantics as `loadReceipt`, but for a batch of
+ * already-selected (and optionally cropped/corrected) photos instead of a
+ * single `File`: OCRs each photo concurrently, joins the text, and parses
+ * once — mirroring how a multi-page scanned PDF is already handled.
+ */
+export async function loadReceiptFromPhotos(photos: PendingPhoto[], deps?: ExtractDeps): Promise<void> {
+	extractionStatus.set('extracting');
+	extractionError.set(null);
+	extractionProgress.set(0);
+	try {
+		const onProgress = (fraction: number) => extractionProgress.set(fraction);
+		const images = photos.map((p) => p.blob);
+		const text = deps
+			? await extractTextFromImages(images, deps.extractTextFromImage, onProgress)
+			: await extractTextFromImages(images, undefined, onProgress);
+		parsedItems.set(parseReceiptText(text));
+		extractionStatus.set('idle');
+		step.set('setup');
+	} catch (err) {
+		extractionStatus.set('error');
+		extractionError.set(err instanceof Error ? err.message : String(err));
+	}
+}
+
 /** Per spec's "falls back gracefully... or is skipped": bypasses extraction entirely, leaving items empty for full manual entry in the item tree. */
 export function skipExtraction(): void {
 	parsedItems.set([]);
@@ -138,4 +164,5 @@ export function resetSession(): void {
 	parsedItems.set([]);
 	groupItems.set([]);
 	singleItems.set([]);
+	clearPhotos();
 }
