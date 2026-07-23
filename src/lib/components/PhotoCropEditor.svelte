@@ -63,9 +63,7 @@
 			scale = Math.min(1, DISPLAY_MAX / bitmap.width);
 			displayWidth = Math.round(bitmap.width * scale);
 			displayHeight = Math.round(bitmap.height * scale);
-			handles = photo.lastCorners
-				? (photo.lastCorners.map(([x, y]): Point => [x * scale, y * scale]) as Quad)
-				: defaultHandles(displayWidth, displayHeight);
+			handles = defaultHandles(displayWidth, displayHeight);
 			drawSource();
 		});
 		return () => {
