@@ -1,5 +1,6 @@
 import { extractTextFromPdfTextLayer, renderPdfPagesToImages } from './pdf';
 import { extractTextFromImage } from './ocr';
+import { extractTextFromImages } from './ocr-batch';
 
 export interface ExtractDeps {
 	extractTextFromPdfTextLayer: (data: ArrayBuffer) => Promise<string>;
@@ -43,22 +44,7 @@ export async function extractReceiptText(
 			return textLayerResult;
 		}
 		const images = await deps.renderPdfPagesToImages(data);
-		// Each page OCRs concurrently and reports its own 0-1 progress
-		// independently; the overall bar shows the average across pages
-		// rather than jumping per-page.
-		const pageProgress = new Array(images.length).fill(0);
-		const reportAverage = () => {
-			onProgress(pageProgress.reduce((sum, p) => sum + p, 0) / pageProgress.length);
-		};
-		const pageTexts = await Promise.all(
-			images.map((image, i) =>
-				deps.extractTextFromImage(image, (fraction) => {
-					pageProgress[i] = fraction;
-					reportAverage();
-				})
-			)
-		);
-		return pageTexts.join('\n');
+		return extractTextFromImages(images, deps.extractTextFromImage, onProgress);
 	}
 	return deps.extractTextFromImage(file, onProgress);
 }
