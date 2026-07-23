@@ -75,6 +75,7 @@ export async function loadReceipt(file: File, deps?: ExtractDeps): Promise<void>
 		extractionStatus.set('idle');
 		step.set('setup');
 	} catch (err) {
+		console.error('Receipt extraction failed:', err);
 		extractionStatus.set('error');
 		extractionError.set(err instanceof Error ? err.message : String(err));
 	}
@@ -100,6 +101,7 @@ export async function loadReceiptFromPhotos(photos: PendingPhoto[], deps?: Extra
 		extractionStatus.set('idle');
 		step.set('setup');
 	} catch (err) {
+		console.error('Receipt extraction failed:', err);
 		extractionStatus.set('error');
 		extractionError.set(err instanceof Error ? err.message : String(err));
 	}

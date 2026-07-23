@@ -3,7 +3,6 @@
 	import { t } from '$lib/i18n';
 	import {
 		extractionStatus,
-		extractionError,
 		extractionProgress,
 		loadReceipt,
 		loadReceiptFromPhotos,
@@ -16,6 +15,7 @@
 	import UploadIcon from '$lib/icons/UploadIcon.svelte';
 	import PhotoBatchReview from './PhotoBatchReview.svelte';
 	import PhotoCropEditor from './PhotoCropEditor.svelte';
+	import ExtractionErrorModal from './ExtractionErrorModal.svelte';
 
 	let fileInput: HTMLInputElement;
 	let cameraInput: HTMLInputElement;
@@ -74,21 +74,6 @@
 			aria-valuemax="100"
 		>
 			<div class="progress-fill" style:width="{$extractionProgress * 100}%"></div>
-		</div>
-	{:else if $extractionStatus === 'error'}
-		<h1>{$t('uploadTitle')}</h1>
-		<p class="status status-error">{$t('extractionErrorTitle')}</p>
-		{#if $extractionError}<p class="status-detail">{$extractionError}</p>{/if}
-		<div class="actions">
-			<button onclick={retryExtraction}>{$t('extractionRetry')}</button>
-			<button
-				class="icon-button"
-				aria-label={$t('extractionContinueManually')}
-				title={$t('extractionContinueManually')}
-				onclick={skipExtraction}
-			>
-				<SkipIcon />
-			</button>
 		</div>
 	{:else if editingPhoto}
 		<PhotoCropEditor
@@ -164,6 +149,10 @@
 		onchange={(e) => handleFiles((e.target as HTMLInputElement).files)}
 	/>
 </div>
+
+{#if $extractionStatus === 'error'}
+	<ExtractionErrorModal onretry={retryExtraction} onskip={skipExtraction} />
+{/if}
 
 <style>
 	.intro-lead {
@@ -250,15 +239,5 @@
 		border-radius: 999px;
 		background: var(--color-accent);
 		transition: width 0.2s ease-out;
-	}
-
-	.status-error {
-		color: var(--color-error);
-	}
-
-	.status-detail {
-		color: var(--color-text-on-surface);
-		opacity: 0.7;
-		font-size: 0.9rem;
 	}
 </style>
