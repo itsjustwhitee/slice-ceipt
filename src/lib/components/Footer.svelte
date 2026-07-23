@@ -10,6 +10,16 @@
 	import InstallInfoModal from './InstallInfoModal.svelte';
 
 	let installModalOpen = $state(false);
+
+	// See Logo.svelte for why this is a $state corrected in an $effect rather
+	// than a direct $theme-bound expression in the template (Svelte's
+	// hydration reconciliation would otherwise keep the SSR'd dark-theme
+	// image stuck after a reload with light theme saved).
+	let personalLogoSrc = $state(personalLogo);
+
+	$effect(() => {
+		personalLogoSrc = $theme === 'light' ? personalLogoOutlined : personalLogo;
+	});
 </script>
 
 <footer class="app-footer">
@@ -38,11 +48,7 @@
 		</a>
 	</div>
 	<a class="personal-logo-link" href="https://justwhitee.org" target="_blank" rel="noopener noreferrer">
-		<img
-			class="personal-logo"
-			src={$theme === 'light' ? personalLogoOutlined : personalLogo}
-			alt={$t('footerPersonalLogoAlt')}
-		/>
+		<img class="personal-logo" src={personalLogoSrc} alt={$t('footerPersonalLogoAlt')} />
 	</a>
 </footer>
 
