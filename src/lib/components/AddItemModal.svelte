@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
-	import { parseNewItemInput } from '$lib/new-item-input';
+	import { parseNewItemInput, type NewItemInput } from '$lib/new-item-input';
 
 	interface Props {
 		open: boolean;
@@ -12,23 +12,42 @@
 	let name = $state('');
 	let price = $state('');
 	let quantity = $state('1');
+	let pendingNegativeItem = $state<NewItemInput | null>(null);
 
 	$effect(() => {
 		if (open) {
 			name = '';
 			price = '';
 			quantity = '1';
+			pendingNegativeItem = null;
 		}
 	});
 
 	function submit() {
 		const parsed = parseNewItemInput(name, price, quantity);
 		if (!parsed) return;
+		if (parsed.unitPriceCents < 0) {
+			pendingNegativeItem = parsed;
+			return;
+		}
 		onadd(parsed);
 	}
 
+	function confirmNegative() {
+		if (!pendingNegativeItem) return;
+		onadd(pendingNegativeItem);
+		pendingNegativeItem = null;
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
-		if (open && e.key === 'Escape') onclose();
+		if (!open) return;
+		if (e.key === 'Escape') {
+			if (pendingNegativeItem) {
+				pendingNegativeItem = null;
+			} else {
+				onclose();
+			}
+		}
 	}
 </script>
 
@@ -46,27 +65,36 @@
 			aria-label={$t('addItem')}
 			onclick={(e) => e.stopPropagation()}
 		>
-			<h2>{$t('addItem')}</h2>
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					submit();
-				}}
-			>
-				<!-- svelte-ignore a11y_autofocus -->
-				<input
-					type="text"
-					autofocus
-					placeholder={$t('itemNamePlaceholder')}
-					bind:value={name}
-				/>
-				<input type="number" min="0" step="0.01" placeholder={$t('priceLabel')} bind:value={price} />
-				<input type="number" min="1" placeholder={$t('quantityLabel')} bind:value={quantity} />
+			{#if pendingNegativeItem}
+				<h2>{$t('confirmNegativePriceTitle')}</h2>
+				<p>{$t('confirmNegativePriceBody').replace('{name}', pendingNegativeItem.name)}</p>
 				<div class="modal-actions">
-					<button type="button" onclick={onclose}>{$t('cancel')}</button>
-					<button type="submit" class="is-active">{$t('addItem')}</button>
+					<button type="button" onclick={() => (pendingNegativeItem = null)}>{$t('cancel')}</button>
+					<button type="button" class="is-active" onclick={confirmNegative}>{$t('addItem')}</button>
 				</div>
-			</form>
+			{:else}
+				<h2>{$t('addItem')}</h2>
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						submit();
+					}}
+				>
+					<!-- svelte-ignore a11y_autofocus -->
+					<input
+						type="text"
+						autofocus
+						placeholder={$t('itemNamePlaceholder')}
+						bind:value={name}
+					/>
+					<input type="number" step="0.01" placeholder={$t('priceLabel')} bind:value={price} />
+					<input type="number" min="1" placeholder={$t('quantityLabel')} bind:value={quantity} />
+					<div class="modal-actions">
+						<button type="button" onclick={onclose}>{$t('cancel')}</button>
+						<button type="submit" class="is-active">{$t('addItem')}</button>
+					</div>
+				</form>
+			{/if}
 		</div>
 	</div>
 {/if}
@@ -91,6 +119,10 @@
 
 	.modal h2 {
 		margin: 0 0 1rem;
+	}
+
+	.modal p {
+		margin: 0 0 1.25rem;
 	}
 
 	.modal form {

@@ -26,9 +26,16 @@ describe('parseNewItemInput', () => {
 		expect(parseNewItemInput('Bread', 'abc', '1')).toBeNull();
 	});
 
-	it('rejects a zero or negative price', () => {
+	it('rejects a zero price', () => {
 		expect(parseNewItemInput('Bread', '0', '1')).toBeNull();
-		expect(parseNewItemInput('Bread', '-1', '1')).toBeNull();
+	});
+
+	it('accepts a negative price, e.g. a manually entered discount or refund', () => {
+		expect(parseNewItemInput('Discount', '-1.50', '1')).toEqual({
+			name: 'Discount',
+			unitPriceCents: -150,
+			quantity: 1
+		});
 	});
 
 	it('rejects a quantity below 1', () => {

@@ -15,7 +15,7 @@ export function parseNewItemInput(name: string, price: string, quantity: string)
 	if (!trimmedName) return null;
 
 	const unitPriceCents = Math.round(Number(price) * 100);
-	if (!Number.isFinite(unitPriceCents) || unitPriceCents <= 0) return null;
+	if (!Number.isFinite(unitPriceCents) || unitPriceCents === 0) return null;
 
 	const parsedQuantity = Math.round(Number(quantity));
 	if (!Number.isFinite(parsedQuantity) || parsedQuantity < 1) return null;
