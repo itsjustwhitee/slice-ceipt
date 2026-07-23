@@ -28,12 +28,15 @@
 	function handleFiles(files: FileList | null) {
 		const list = files ? Array.from(files) : [];
 		if (list.length === 0) return;
-		const pdf = list.find((f) => f.type === 'application/pdf');
-		if (pdf) {
-			void loadReceipt(pdf);
-			return;
+		if ($pendingPhotos.length === 0) {
+			const pdf = list.find((f) => f.type === 'application/pdf');
+			if (pdf) {
+				void loadReceipt(pdf);
+				return;
+			}
 		}
-		addPhotos(list);
+		const images = list.filter((f) => f.type !== 'application/pdf');
+		if (images.length > 0) addPhotos(images);
 	}
 
 	function handleDrop(event: DragEvent) {
