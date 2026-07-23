@@ -4,7 +4,7 @@ A free, mobile-first web app for splitting shared receipts (photo or PDF) among 
 
 ## Status
 
-✅ Feature-complete: upload/scan a receipt (or skip and enter items by hand), split it either as a named group (per-item/per-unit assignment, custom shares) or solo (just your own fraction of each item), and get a shareable summary, all offline-capable, in English or Italian.
+✅ Feature-complete: upload/scan a receipt (or skip and enter items by hand), split it either as a named group (per-item/per-unit assignment, custom shares) or solo (just your own fraction of each item), and get a shareable summary, all offline-capable, in English or Italian, with a light or dark theme.
 
 ## How it works
 
@@ -52,7 +52,6 @@ Ideas not yet implemented, roughly in order of how much they'd help:
 
 - **More locales.** The i18n layer is just a dictionary lookup (`src/lib/i18n`), so adding a language is mostly translation work, not architecture work.
 - **Export the summary as an image or PDF**, not just copy/native-share text: nicer for sending in a chat that doesn't render plain text well.
-- **A light theme.** Colors are already centralized as CSS custom properties (`src/app.css`), so this is a matter of defining a second palette and a toggle, not restructuring styles.
 - **Wider receipt-format coverage.** The parser's header/footer/discount heuristics (`src/lib/parsing`) are tuned against real Italian receipts; broadening them against other countries' formats would make OCR extraction useful to more people.
 
 ## Contributing

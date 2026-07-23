@@ -1,6 +1,7 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
 	import { t, locale } from '$lib/i18n';
+	import { theme } from '$lib/stores/theme';
 	import { step, mode, resetSession, goBack } from '$lib/stores/receipt';
 	import Uploader from '$lib/components/Uploader.svelte';
 	import SetupStep from '$lib/components/SetupStep.svelte';
@@ -12,6 +13,12 @@
 	import ToastHost from '$lib/components/ToastHost.svelte';
 	import Logo from '$lib/icons/Logo.svelte';
 	import BackIcon from '$lib/icons/BackIcon.svelte';
+	import SunIcon from '$lib/icons/SunIcon.svelte';
+	import MoonIcon from '$lib/icons/MoonIcon.svelte';
+
+	function toggleTheme() {
+		theme.update((current) => (current === 'light' ? 'dark' : 'light'));
+	}
 </script>
 
 <main>
@@ -26,9 +33,24 @@
 			<Logo size={32} />
 			<span class="wordmark">Slice<span class="wordmark-accent">Ceipt</span></span>
 		</button>
-		<div class="lang-switch">
-			<button class:is-active={$locale === 'en'} onclick={() => locale.set('en')}>EN</button>
-			<button class:is-active={$locale === 'it'} onclick={() => locale.set('it')}>IT</button>
+		<div class="top-bar-controls">
+			<button
+				type="button"
+				class="icon-button"
+				aria-label={$theme === 'light' ? $t('themeToggleToDark') : $t('themeToggleToLight')}
+				title={$theme === 'light' ? $t('themeToggleToDark') : $t('themeToggleToLight')}
+				onclick={toggleTheme}
+			>
+				{#if $theme === 'light'}
+					<SunIcon size={16} />
+				{:else}
+					<MoonIcon size={16} />
+				{/if}
+			</button>
+			<div class="lang-switch">
+				<button class:is-active={$locale === 'en'} onclick={() => locale.set('en')}>EN</button>
+				<button class:is-active={$locale === 'it'} onclick={() => locale.set('it')}>IT</button>
+			</div>
 		</div>
 	</div>
 
@@ -81,6 +103,12 @@
 		border: none;
 		background: transparent;
 		padding: 0;
+	}
+
+	.top-bar-controls {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.wordmark {

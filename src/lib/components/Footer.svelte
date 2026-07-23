@@ -1,7 +1,9 @@
 <!-- src/lib/components/Footer.svelte -->
 <script lang="ts">
 	import { t } from '$lib/i18n';
+	import { theme } from '$lib/stores/theme';
 	import personalLogo from '$lib/assets/personal-logo.svg';
+	import personalLogoOutlined from '$lib/assets/personal-logo-outlined.svg';
 	import DocIcon from '$lib/icons/DocIcon.svelte';
 	import CodeIcon from '$lib/icons/CodeIcon.svelte';
 	import UserIcon from '$lib/icons/UserIcon.svelte';
@@ -36,7 +38,11 @@
 		</a>
 	</div>
 	<a class="personal-logo-link" href="https://justwhitee.org" target="_blank" rel="noopener noreferrer">
-		<img class="personal-logo" src={personalLogo} alt={$t('footerPersonalLogoAlt')} />
+		<img
+			class="personal-logo"
+			src={$theme === 'light' ? personalLogoOutlined : personalLogo}
+			alt={$t('footerPersonalLogoAlt')}
+		/>
 	</a>
 </footer>
 
@@ -128,6 +134,7 @@
 		opacity: 0.85;
 		transition: opacity 0.25s ease-out;
 	}
+
 
 	.personal-logo-link:hover .personal-logo {
 		opacity: 1;

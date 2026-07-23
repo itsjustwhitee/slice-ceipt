@@ -21,6 +21,23 @@
 	--font-wordmark: 'Mochiy Pop One', var(--font-sans);
 }
 
+/*
+ * Light theme: the exact inverse of dark, not just a lighter tint. Page
+ * background and card surface swap (light page / dark card instead of dark
+ * page / light card), and their text colors swap with them, so contrast
+ * stays just as strong in both directions. Accent and error stay constant —
+ * brand colors shouldn't shift with theme, and both already read fine on a
+ * light or dark card.
+ */
+:root[data-theme='light'] {
+	color-scheme: light;
+	--color-bg: #ffefe3;
+	--color-surface: #2b2b30;
+	--color-text: #1a1a1a;
+	--color-text-on-surface: #f5f5f5;
+	--color-text-muted: #6b6b70;
+}
+
 * {
 	box-sizing: border-box;
 }
