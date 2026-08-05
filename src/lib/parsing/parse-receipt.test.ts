@@ -60,6 +60,87 @@ describe('parseReceiptText end-to-end', () => {
 		expect(parseReceiptText('not a receipt at all\njust some words')).toEqual([]);
 	});
 
+	it('captures a whole-receipt percentage discount printed after SUBTOTALE, and merges standalone "N x price" lines into the coperto/drinks lines above them (real restaurant-receipt pattern)', () => {
+		const receipt = [
+			'ESCOBRILLO di Savoretti Fabio',
+			'VIA TOMMASO FORTIFIOCCA 68',
+			'ROMA  P.IVA 12403071009',
+			'TEL. +39-06-77811772',
+			'',
+			'TAVOLO14                              EURO',
+			'OP: OPERATORE7',
+			'        2 x  1,50',
+			"Caffe'                                 3,00",
+			'Bruschetta                             4,00',
+			'        2 x  9,50',
+			'pizza escobrillo                      19,00',
+			'SERVIZIO ACQUA                         1,50',
+			'MEDIA CHIARA                           4,50',
+			'SUBTOTALE                             32,00',
+			'Sconto % tot  20%                     -6,40',
+			'TOTALE EURO                           25,60',
+			'CONTANTI                              25,60',
+			'Resto                                  0,00'
+		].join('\n');
+
+		const items = parseReceiptText(receipt);
+
+		expect(items).toEqual([
+			{ name: "Caffe'", unitPriceCents: 150, quantity: 2 },
+			{ name: 'Bruschetta', unitPriceCents: 400, quantity: 1 },
+			{ name: 'pizza escobrillo', unitPriceCents: 950, quantity: 2 },
+			{ name: 'SERVIZIO ACQUA', unitPriceCents: 150, quantity: 1 },
+			{ name: 'MEDIA CHIARA', unitPriceCents: 450, quantity: 1 },
+			{
+				name: 'Sconto % tot 20%',
+				unitPriceCents: -640,
+				quantity: 1,
+				isWholeReceiptDiscount: true
+			}
+		]);
+
+		const sum = items.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		expect(sum).toBe(2560); // matches "TOTALE EURO 25,60" in the fixture
+	});
+
+	it('merges standalone "N x price" coperto-style lines end-to-end without inflating the total (real restaurant-receipt pattern)', () => {
+		const receipt = [
+			'Ristorante Da Esempio',
+			'Via Roma 1',
+			'',
+			'DOCUMENTO COMMERCIALE',
+			'di vendita o prestazione',
+			'',
+			'DESCRIZIONE              IVA        Prezzo(€)',
+			'        4 x    5,00',
+			'Coperto                  10,00%        20,00',
+			'        3 x    5,00',
+			'Acqua                    10,00%        15,00',
+			'Bibita                   10,00%         6,00',
+			'        2 x   10,00',
+			'Calice Vino 10                         20,00',
+			'Pasta al Pomodoro        10,00%        30,00',
+			'',
+			'TOTALE COMPLESSIVO                    91,00',
+			'di cui IVA                             8,27',
+			'',
+			'Pagamento contante                    91,00'
+		].join('\n');
+
+		const items = parseReceiptText(receipt);
+
+		expect(items).toEqual([
+			{ name: 'Coperto', unitPriceCents: 500, quantity: 4 },
+			{ name: 'Acqua', unitPriceCents: 500, quantity: 3 },
+			{ name: 'Bibita', unitPriceCents: 600, quantity: 1 },
+			{ name: 'Calice Vino 10', unitPriceCents: 1000, quantity: 2 },
+			{ name: 'Pasta al Pomodoro', unitPriceCents: 3000, quantity: 1 }
+		]);
+
+		const sum = items.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		expect(sum).toBe(9100); // matches "TOTALE COMPLESSIVO 91,00" in the fixture
+	});
+
 	it('handles an English-format receipt end-to-end', () => {
 		const receipt = `CORNER STORE\n\nMILK              3.99\nBREAD             2.50\n\nSUBTOTAL          6.49\nTAX               0.52\nTOTAL             7.01`;
 		const items = parseReceiptText(receipt);

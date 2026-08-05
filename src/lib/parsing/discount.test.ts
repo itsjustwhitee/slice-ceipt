@@ -51,6 +51,23 @@ describe('applyDiscounts', () => {
 		]);
 	});
 
+	it('treats a discount right after a running-total (SUBTOTALE) line as whole-receipt, even when its wording matches no keyword and the preceding item looks like a normal target (real restaurant-receipt pattern: "SUBTOTALE 32,00" / "Sconto % tot 20% -6,40")', () => {
+		const result = applyDiscounts([
+			{ name: 'MEDIA CHIARA', unitPriceCents: 450, quantity: 1 },
+			{ name: 'SUBTOTALE', unitPriceCents: 3200, quantity: 1 },
+			{ name: 'Sconto % tot 20%', unitPriceCents: -640, quantity: 1 }
+		]);
+		expect(result).toEqual([
+			{ name: 'MEDIA CHIARA', unitPriceCents: 450, quantity: 1 },
+			{
+				name: 'Sconto % tot 20%',
+				unitPriceCents: -640,
+				quantity: 1,
+				isWholeReceiptDiscount: true
+			}
+		]);
+	});
+
 	it('does not merge a second consecutive discount into an already-discounted item', () => {
 		const result = applyDiscounts([
 			{ name: 'PASTA', unitPriceCents: 120, quantity: 1 },

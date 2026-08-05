@@ -40,7 +40,7 @@ describe('extractItemLines', () => {
 		expect(extractItemLines(lines)).toEqual(['ITEM ONE   1,00', 'ITEM TWO   2,00']);
 	});
 
-	it('handles an English-format receipt', () => {
+	it('handles an English-format receipt, keeping the SUBTOTAL line itself (a whole-receipt discount can follow it before TAX/TOTAL — see discount.ts)', () => {
 		const lines = [
 			'CORNER STORE INC',
 			'123 MAIN ST',
@@ -53,7 +53,11 @@ describe('extractItemLines', () => {
 			'TOTAL             7.01',
 			'THANK YOU'
 		];
-		expect(extractItemLines(lines)).toEqual(['MILK              3.99', 'BREAD             2.50']);
+		expect(extractItemLines(lines)).toEqual([
+			'MILK              3.99',
+			'BREAD             2.50',
+			'SUBTOTAL          6.49'
+		]);
 	});
 
 	it('returns an empty array when nothing looks like an item', () => {
@@ -76,7 +80,23 @@ describe('extractItemLines', () => {
 		];
 		expect(extractItemLines(lines)).toEqual([
 			'PASSATA DI POMODORO       0,99',
-			'TONNO OLIO OLIVA          6,99'
+			'TONNO OLIO OLIVA          6,99',
+			'SUBTOTALE                 7,98'
 		]);
+	});
+
+	it('stops at an abbreviated "TOT." footer marker, not just the full "TOTALE" word (real receipt quirk)', () => {
+		const lines = ['PROFUMI     22%     1,00', 'TOT.COMPLESSIVO      1,00', 'di cui IVA            0,18'];
+		expect(extractItemLines(lines)).toEqual(['PROFUMI     22%     1,00']);
+	});
+
+	it('stops at an abbreviated "Pag." footer marker, not just the full "PAGAMENTO" word (real receipt quirk)', () => {
+		const lines = ['ITEM ONE   1,00', 'Pag.contante   1,00', 'Resto   0,00'];
+		expect(extractItemLines(lines)).toEqual(['ITEM ONE   1,00']);
+	});
+
+	it('does not mistake an item name starting with "TOT" or "PAG" for a footer marker', () => {
+		const lines = ['TOTANI FRESCHI       3,50', 'PAGELLA REGALO       2,00'];
+		expect(extractItemLines(lines)).toEqual(['TOTANI FRESCHI       3,50', 'PAGELLA REGALO       2,00']);
 	});
 });

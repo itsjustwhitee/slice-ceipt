@@ -6,17 +6,32 @@ import { parsePriceCents } from './price';
 // (e.g. "TOTALE EURO 45,67") also match the trailing-price pattern and
 // would otherwise look like an item line.
 //
+// "TOT(?:ALE)?\.?" and "PAG(?:AMENTO)?\.?" (rather than plain "TOTALE"/
+// "PAGAMENTO") also match the abbreviated forms some POS software prints
+// instead of the full word (e.g. "TOT.COMPLESSIVO", "Pag.contante") — a
+// real receipt using these abbreviations was falling through the original
+// exact-word match entirely, which let the whole totals/payment block leak
+// through as bogus items instead of being trimmed.
+//
 // Deliberately excludes "P.IVA" (the store's own VAT registration number,
 // which appears in the HEADER, not the footer — an earlier version matched
 // it and incorrectly truncated the item region to nothing on every receipt
-// that prints it, which is effectively all of them) and "DOCUMENTO
+// that prints it, which is effectively all of them), "DOCUMENTO
 // COMMERCIALE" (the mandatory title Italian receipts have printed at the
 // TOP since the 2020 "scontrino elettronico" reform, not the bottom — an
 // earlier version matched it and truncated the item region to nothing on
 // every receipt using this now-standard format, i.e. most real Italian
-// receipts).
+// receipts), and "SUBTOTALE"/"SUBTOTAL" (a running/partial total printed
+// mid-receipt — real receipts commonly print a whole-receipt discount
+// *between* this and the final "TOTALE" line, e.g. "SUBTOTALE 32,00" /
+// "Sconto % tot 20% -6,40" / "TOTALE EURO 25,60"; treating it as a hard
+// cutoff discarded that discount entirely instead of just the running-total
+// line itself. It's still excluded from the returned item lines — see
+// `RUNNING_TOTAL_KEYWORDS` in discount.ts, which drops it downstream once
+// it's had a chance to mark the discount line right after it as
+// whole-receipt).
 const FOOTER_KEYWORDS =
-	/^\s*(TOTALE|SUBTOTALE|CONTANTE|RESTO|CARTA|BANCOMAT|PAGAMENTO|IVA|IMPOSTA|SCONTRINO\s+FISCALE|OPERATORE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|SUBTOTAL|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
+	/^\s*(TOT(?:ALE)?\.?|CONTANT[EI]|RESTO|CARTA|BANCOMAT|PAG(?:AMENTO)?\.?|IVA|IMPOSTA|SCONTRINO\s+FISCALE|OPERATORE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
 
 /**
  * Extracts the subset of raw OCR/text lines that make up the item list:
@@ -24,7 +39,9 @@ const FOOTER_KEYWORDS =
  * block), further filtered to only lines that have a trailing price —
  * this drops the header (store name/address/date, which typically has no
  * trailing price) without needing to separately search for where the list
- * "starts".
+ * "starts". A running-total line (SUBTOTALE) is deliberately NOT a cutoff
+ * point, since a whole-receipt discount commonly follows it before the
+ * final total — see the comment on `FOOTER_KEYWORDS` above.
  */
 export function extractItemLines(lines: string[]): string[] {
 	const footerIndex = lines.findIndex((line) => FOOTER_KEYWORDS.test(line));
