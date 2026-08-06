@@ -2,7 +2,14 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { t } from '$lib/i18n';
-	import { mode, singleModeCount, setSingleModeCount, isSetupValid, confirmSetup } from '$lib/stores/receipt';
+	import {
+		mode,
+		singleModeCount,
+		setSingleModeCount,
+		isSetupValid,
+		isLowConfidenceExtraction,
+		confirmSetup
+	} from '$lib/stores/receipt';
 	import { participants, addParticipant, removeParticipant } from '$lib/stores/participants';
 	import { presets, savePreset, deletePreset, applyPreset } from '$lib/stores/presets';
 	import AddIcon from '$lib/icons/AddIcon.svelte';
@@ -41,6 +48,10 @@
 
 <div class="card">
 	<h1>{$t('setupTitle')}</h1>
+
+	{#if $isLowConfidenceExtraction}
+		<p class="low-confidence-notice">{$t('lowConfidenceWarning')}</p>
+	{/if}
 
 	<div class="mode-toggle">
 		<button class:is-active={$mode === 'group'} onclick={() => mode.set('group')}>
@@ -152,6 +163,15 @@
 </div>
 
 <style>
+	.low-confidence-notice {
+		margin: 1rem 0 0;
+		padding: 0.65rem 0.85rem;
+		border-radius: 8px;
+		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+		font-size: 0.9rem;
+	}
+
 	.mode-toggle {
 		display: flex;
 		gap: 0.75rem;

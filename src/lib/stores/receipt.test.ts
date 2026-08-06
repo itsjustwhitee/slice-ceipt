@@ -8,6 +8,7 @@ import {
 	extractionStatus,
 	extractionError,
 	extractionProgress,
+	extractionConfidence,
 	parsedItems,
 	groupItems,
 	singleItems,
@@ -81,6 +82,27 @@ describe('receipt session store', () => {
 		expect(get(extractionProgress)).toBe(0);
 	});
 
+	it('loadReceipt records OCR confidence from the extraction', async () => {
+		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
+		const confidenceDeps: ExtractDeps = {
+			...fakeDeps,
+			extractTextFromImage: async (_image, _onProgress, onConfidence) => {
+				onConfidence?.(42);
+				return 'Bread 2.50\n';
+			}
+		};
+		await loadReceipt(file, confidenceDeps);
+		expect(get(extractionConfidence)).toBe(42);
+	});
+
+	it('loadReceipt resets confidence to null at the start of a new extraction', async () => {
+		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
+		extractionConfidence.set(90);
+		await loadReceipt(file, fakeDeps);
+		// fakeDeps never reports confidence, so it should stay at the reset value (null), not the stale 90
+		expect(get(extractionConfidence)).toBeNull();
+	});
+
 	it('loadReceipt records an error and stays on the upload step on failure', async () => {
 		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
 		const failingDeps: ExtractDeps = {
@@ -129,9 +151,11 @@ describe('receipt session store', () => {
 		expect(get(pendingPhotos)).toEqual([]);
 	});
 
-	it('skipExtraction leaves items empty and advances to setup', () => {
+	it('skipExtraction leaves items empty, clears confidence, and advances to setup', () => {
+		extractionConfidence.set(80);
 		skipExtraction();
 		expect(get(parsedItems)).toEqual([]);
+		expect(get(extractionConfidence)).toBeNull();
 		expect(get(step)).toBe('setup');
 	});
 

@@ -26,6 +26,34 @@ describe('extractTextFromImages', () => {
 		expect(seen).toEqual([0.5, 0.75]);
 	});
 
+	it('reports the average OCR confidence across all images once, after they all finish', async () => {
+		const extractTextFromImage = vi
+			.fn()
+			.mockImplementationOnce(async (_image, _onProgress, onConfidence) => {
+				onConfidence?.(90);
+				return 'ONE';
+			})
+			.mockImplementationOnce(async (_image, _onProgress, onConfidence) => {
+				onConfidence?.(50);
+				return 'TWO';
+			});
+		const seen: number[] = [];
+		await extractTextFromImages(
+			[new Blob(['a']), new Blob(['b'])],
+			extractTextFromImage,
+			() => {},
+			(confidence) => seen.push(confidence)
+		);
+		expect(seen).toEqual([70]);
+	});
+
+	it('does not compute confidence at all when no onConfidence callback is given', async () => {
+		const extractTextFromImage = vi.fn().mockResolvedValue('TEXT');
+		await extractTextFromImages([new Blob(['a'])], extractTextFromImage, () => {});
+		// the per-image onConfidence forwarded to extractTextFromImage must be undefined in this case
+		expect(extractTextFromImage.mock.calls[0][2]).toBeUndefined();
+	});
+
 	it('runs OCR on every image concurrently, not sequentially', async () => {
 		const order: string[] = [];
 		const extractTextFromImage = vi.fn().mockImplementation(async () => {

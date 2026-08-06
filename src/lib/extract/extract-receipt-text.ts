@@ -5,7 +5,11 @@ import { extractTextFromImages } from './ocr-batch';
 export interface ExtractDeps {
 	extractTextFromPdfTextLayer: (data: ArrayBuffer) => Promise<string>;
 	renderPdfPagesToImages: (data: ArrayBuffer) => Promise<Blob[]>;
-	extractTextFromImage: (image: Blob | File, onProgress?: (fraction: number) => void) => Promise<string>;
+	extractTextFromImage: (
+		image: Blob | File,
+		onProgress?: (fraction: number) => void,
+		onConfidence?: (confidence: number) => void
+	) => Promise<string>;
 }
 
 const defaultDeps: ExtractDeps = {
@@ -30,21 +34,29 @@ const MIN_MEANINGFUL_TEXT_LENGTH = 20;
  *
  * `deps` is injectable so this branching logic can be unit-tested without
  * real PDF/OCR execution — production code should never need to pass it.
+ *
+ * `onConfidence`, when given, reports a 0-100 trust signal for the result:
+ * a PDF text layer is exact (digital text, not a guess) and always reports
+ * 100; OCR'd photos/scanned-PDF-pages report Tesseract's own recognition
+ * confidence instead, so the UI can nudge the user to double-check a bad
+ * scan's items rather than silently trusting a low-quality read.
  */
 export async function extractReceiptText(
 	file: File,
 	deps: ExtractDeps = defaultDeps,
-	onProgress: (fraction: number) => void = () => {}
+	onProgress: (fraction: number) => void = () => {},
+	onConfidence?: (confidence: number) => void
 ): Promise<string> {
 	if (file.type === 'application/pdf') {
 		const data = await file.arrayBuffer();
 		const textLayerResult = await deps.extractTextFromPdfTextLayer(data);
 		if (textLayerResult.trim().length >= MIN_MEANINGFUL_TEXT_LENGTH) {
 			onProgress(1);
+			onConfidence?.(100);
 			return textLayerResult;
 		}
 		const images = await deps.renderPdfPagesToImages(data);
-		return extractTextFromImages(images, deps.extractTextFromImage, onProgress);
+		return extractTextFromImages(images, deps.extractTextFromImage, onProgress, onConfidence);
 	}
-	return deps.extractTextFromImage(file, onProgress);
+	return deps.extractTextFromImage(file, onProgress, onConfidence);
 }

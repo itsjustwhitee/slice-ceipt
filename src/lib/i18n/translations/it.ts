@@ -27,6 +27,8 @@ const it: Dictionary = {
 	extractionErrorTitle: 'Non è stato possibile leggere lo scontrino',
 	extractionRetry: 'Riprova',
 	extractionContinueManually: 'Continua senza',
+	lowConfidenceWarning:
+		'La scansione non è risultata molto chiara: alcuni articoli potrebbero essere sbagliati, ricontrollali prima di continuare.',
 	setupTitle: 'Chi divide il conto?',
 	modeGroup: 'Gruppo',
 	modeSingle: 'Da solo',

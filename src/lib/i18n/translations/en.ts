@@ -25,6 +25,8 @@ const en = {
 	extractionErrorTitle: "Couldn't read the receipt",
 	extractionRetry: 'Try again',
 	extractionContinueManually: 'Continue without it',
+	lowConfidenceWarning:
+		"The scan wasn't very clear, so a few items might be wrong — double-check them before continuing.",
 	setupTitle: "Who's splitting?",
 	modeGroup: 'Group',
 	modeSingle: 'Just me',

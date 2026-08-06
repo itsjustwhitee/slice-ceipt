@@ -25,6 +25,28 @@ export const extractionStatus = writable<ExtractionStatus>('idle');
 export const extractionError = writable<string | null>(null);
 /** 0-1, only meaningful while `extractionStatus` is `'extracting'` — see `loadReceipt`. */
 export const extractionProgress = writable<number>(0);
+/**
+ * 0-100 OCR trust signal from the last successful extraction, or `null`
+ * before any extraction has run (or after `skipExtraction`/`resetSession`).
+ * A PDF text layer always reports 100 (exact digital text); a photo/scanned
+ * page reports Tesseract's own recognition confidence — see
+ * `extractReceiptText`'s doc comment. The UI uses this to nudge the user to
+ * double-check the parsed items after a low-confidence scan, not to block
+ * anything.
+ */
+export const extractionConfidence = writable<number | null>(null);
+/**
+ * Below this, Tesseract itself doesn't trust its own read enough to be
+ * worth silently believing — a rough cut (not scientifically calibrated
+ * against a large photo corpus) between "a normal, if imperfect, phone
+ * photo" and "blurry/crumpled/badly lit enough that the item list is
+ * worth a closer look" on Tesseract's 0-100 mean-confidence scale.
+ */
+const LOW_CONFIDENCE_THRESHOLD = 65;
+export const isLowConfidenceExtraction = derived(
+	extractionConfidence,
+	($extractionConfidence) => $extractionConfidence !== null && $extractionConfidence < LOW_CONFIDENCE_THRESHOLD
+);
 export const parsedItems = writable<ParsedItem[]>([]);
 export const groupItems = writable<GroupItem[]>([]);
 export const singleItems = writable<SingleItem[]>([]);
@@ -66,11 +88,13 @@ export async function loadReceipt(file: File, deps?: ExtractDeps): Promise<void>
 	extractionStatus.set('extracting');
 	extractionError.set(null);
 	extractionProgress.set(0);
+	extractionConfidence.set(null);
 	try {
 		const onProgress = (fraction: number) => extractionProgress.set(fraction);
+		const onConfidence = (confidence: number) => extractionConfidence.set(confidence);
 		const text = deps
-			? await extractReceiptText(file, deps, onProgress)
-			: await extractReceiptText(file, undefined, onProgress);
+			? await extractReceiptText(file, deps, onProgress, onConfidence)
+			: await extractReceiptText(file, undefined, onProgress, onConfidence);
 		parsedItems.set(parseReceiptText(text));
 		extractionStatus.set('idle');
 		step.set('setup');
@@ -91,12 +115,14 @@ export async function loadReceiptFromPhotos(photos: PendingPhoto[], deps?: Extra
 	extractionStatus.set('extracting');
 	extractionError.set(null);
 	extractionProgress.set(0);
+	extractionConfidence.set(null);
 	try {
 		const onProgress = (fraction: number) => extractionProgress.set(fraction);
+		const onConfidence = (confidence: number) => extractionConfidence.set(confidence);
 		const images = photos.map((p) => p.blob);
 		const text = deps
-			? await extractTextFromImages(images, deps.extractTextFromImage, onProgress)
-			: await extractTextFromImages(images, undefined, onProgress);
+			? await extractTextFromImages(images, deps.extractTextFromImage, onProgress, onConfidence)
+			: await extractTextFromImages(images, undefined, onProgress, onConfidence);
 		parsedItems.set(parseReceiptText(text));
 		extractionStatus.set('idle');
 		step.set('setup');
@@ -113,6 +139,7 @@ export function skipExtraction(): void {
 	extractionStatus.set('idle');
 	extractionError.set(null);
 	extractionProgress.set(0);
+	extractionConfidence.set(null);
 	step.set('setup');
 }
 
@@ -163,6 +190,7 @@ export function resetSession(): void {
 	extractionStatus.set('idle');
 	extractionError.set(null);
 	extractionProgress.set(0);
+	extractionConfidence.set(null);
 	parsedItems.set([]);
 	groupItems.set([]);
 	singleItems.set([]);

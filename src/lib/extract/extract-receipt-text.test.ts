@@ -94,6 +94,29 @@ describe('extractReceiptText', () => {
 		expect(seen).toEqual([1]);
 	});
 
+	it('reports full (100) confidence for a PDF text layer, since it is exact digital text rather than an OCR guess', async () => {
+		const deps = makeDeps({
+			extractTextFromPdfTextLayer: vi.fn().mockResolvedValue('PANE 2,50\nTOTALE 2,50')
+		});
+		const file = new File([new ArrayBuffer(10)], 'receipt.pdf', { type: 'application/pdf' });
+		const seen: number[] = [];
+		await extractReceiptText(file, deps, () => {}, (confidence) => seen.push(confidence));
+		expect(seen).toEqual([100]);
+	});
+
+	it('forwards OCR confidence through for a photo', async () => {
+		const deps = makeDeps({
+			extractTextFromImage: vi.fn().mockImplementation(async (_image, _onProgress, onConfidence) => {
+				onConfidence?.(42);
+				return 'PHOTO OCR RESULT';
+			})
+		});
+		const file = new File([new ArrayBuffer(10)], 'photo.jpg', { type: 'image/jpeg' });
+		const seen: number[] = [];
+		await extractReceiptText(file, deps, () => {}, (confidence) => seen.push(confidence));
+		expect(seen).toEqual([42]);
+	});
+
 	it('averages per-page progress across a multi-page scanned PDF instead of jumping per page', async () => {
 		const deps = makeDeps({
 			extractTextFromPdfTextLayer: vi.fn().mockResolvedValue(''),
