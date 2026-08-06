@@ -141,6 +141,41 @@ describe('parseReceiptText end-to-end', () => {
 		expect(sum).toBe(9100); // matches "TOTALE COMPLESSIVO 91,00" in the fixture
 	});
 
+	it('handles bare weight/price-per-kg/total rows end-to-end, recovering the real names instead of "0.248 12.50"-style garbage (real pizza-by-weight receipt pattern)', () => {
+		const receipt = [
+			'PIZZAMANIA',
+			'DI FRANZI E CLAUDIA',
+			'',
+			'R01  *13/14   B00   0007',
+			'U01',
+			'kg          €/kg          €',
+			'',
+			'PIZZA MARGHERITA',
+			'0.248       12.50        3.10',
+			'PIZZA QUATTRO STAGIONI',
+			'0.186       14.00        2.60',
+			'PIZZA MARINARA',
+			'0.126       7.50         0.95',
+			'PIZZA CAPRICCIOSA',
+			'0.098       7.50         0.74',
+			'',
+			'TOTALE                   7.39',
+			'CONTANTI                 7.39'
+		].join('\n');
+
+		const items = parseReceiptText(receipt);
+
+		expect(items).toEqual([
+			{ name: 'PIZZA MARGHERITA', unitPriceCents: 310, quantity: 1 },
+			{ name: 'PIZZA QUATTRO STAGIONI', unitPriceCents: 260, quantity: 1 },
+			{ name: 'PIZZA MARINARA', unitPriceCents: 95, quantity: 1 },
+			{ name: 'PIZZA CAPRICCIOSA', unitPriceCents: 74, quantity: 1 }
+		]);
+
+		const sum = items.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		expect(sum).toBe(739); // matches "04 x € 7.39" in the fixture
+	});
+
 	it('handles an English-format receipt end-to-end', () => {
 		const receipt = `CORNER STORE\n\nMILK              3.99\nBREAD             2.50\n\nSUBTOTAL          6.49\nTAX               0.52\nTOTAL             7.01`;
 		const items = parseReceiptText(receipt);
