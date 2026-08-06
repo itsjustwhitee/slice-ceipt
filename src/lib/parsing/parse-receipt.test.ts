@@ -141,6 +141,55 @@ describe('parseReceiptText end-to-end', () => {
 		expect(sum).toBe(9100); // matches "TOTALE COMPLESSIVO 91,00" in the fixture
 	});
 
+	it('handles a full real receipt combining coperto-style quantity lines AND a name wrapped across two OCR lines, reconciling the printed total (309,00)', () => {
+		const receipt = [
+			'DOCUMENTO COMMERCIALE',
+			'di vendita o prestazione',
+			'',
+			'DESCRIZIONE              IVA        Prezzo(€)',
+			'        4 x    5,00',
+			'Coperto                  10,00%        20,00',
+			'        3 x    5,00',
+			'Acqua                    10,00%        15,00',
+			'Bibita                   10,00%         6,00',
+			'        2 x   10,00',
+			'Calice Vino 10                         20,00',
+			'Pasta al Pomodoro        10,00%        30,00',
+			'        2 x   48,00',
+			'Risi e Bisi                            96,00',
+			'Rombo Yakitori alla "Mugn',
+			'aia"',
+			'                          10,00%        50,00',
+			'        3 x   16,00',
+			'Dessert                  10,00%        48,00',
+			'        2 x   12,00',
+			'Liquori                  10,00%        24,00',
+			'',
+			'TOTALE COMPLESSIVO                    309,00',
+			'di cui IVA                             28,09',
+			'',
+			'Pagamento contante                    309,00',
+			'Importo pagato                        309,00'
+		].join('\n');
+
+		const items = parseReceiptText(receipt);
+
+		expect(items).toEqual([
+			{ name: 'Coperto', unitPriceCents: 500, quantity: 4 },
+			{ name: 'Acqua', unitPriceCents: 500, quantity: 3 },
+			{ name: 'Bibita', unitPriceCents: 600, quantity: 1 },
+			{ name: 'Calice Vino 10', unitPriceCents: 1000, quantity: 2 },
+			{ name: 'Pasta al Pomodoro', unitPriceCents: 3000, quantity: 1 },
+			{ name: 'Risi e Bisi', unitPriceCents: 4800, quantity: 2 },
+			{ name: 'Rombo Yakitori alla "Mugn aia"', unitPriceCents: 5000, quantity: 1 },
+			{ name: 'Dessert', unitPriceCents: 1600, quantity: 3 },
+			{ name: 'Liquori', unitPriceCents: 1200, quantity: 2 }
+		]);
+
+		const sum = items.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		expect(sum).toBe(30900); // matches "TOTALE COMPLESSIVO 309,00" in the fixture
+	});
+
 	it('handles bare weight/price-per-kg/total rows end-to-end, recovering the real names instead of "0.248 12.50"-style garbage (real pizza-by-weight receipt pattern)', () => {
 		const receipt = [
 			'PIZZAMANIA',

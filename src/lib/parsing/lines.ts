@@ -34,6 +34,20 @@ const FOOTER_KEYWORDS =
 	/^\s*(TOT(?:ALE)?\.?|CONTANT[EI]|RESTO|CARTA|BANCOMAT|PAG(?:AMENTO)?\.?|IVA|IMPOSTA|SCONTRINO\s+FISCALE|OPERATORE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
 
 /**
+ * Cuts a raw OCR/text-layer line list down to everything before the first
+ * footer-keyword line (totals/payment/fiscal block) — unlike
+ * `extractItemLines`, this does NOT also drop lines with no price, so
+ * header-region lines that legitimately belong to an item (e.g. a name
+ * wrapped across two OCR lines, each with no price of its own — see
+ * `mergeWrappedNameLines`) survive long enough to be merged before
+ * anything filters them out.
+ */
+export function trimFooter(lines: string[]): string[] {
+	const footerIndex = lines.findIndex((line) => FOOTER_KEYWORDS.test(line));
+	return footerIndex === -1 ? lines : lines.slice(0, footerIndex);
+}
+
+/**
  * Extracts the subset of raw OCR/text lines that make up the item list:
  * everything before the first footer-keyword line (totals/payment/fiscal
  * block), further filtered to only lines that have a trailing price —
@@ -44,7 +58,5 @@ const FOOTER_KEYWORDS =
  * final total — see the comment on `FOOTER_KEYWORDS` above.
  */
 export function extractItemLines(lines: string[]): string[] {
-	const footerIndex = lines.findIndex((line) => FOOTER_KEYWORDS.test(line));
-	const region = footerIndex === -1 ? lines : lines.slice(0, footerIndex);
-	return region.filter((line) => parsePriceCents(line) !== null);
+	return trimFooter(lines).filter((line) => parsePriceCents(line) !== null);
 }
