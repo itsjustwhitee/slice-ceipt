@@ -99,4 +99,20 @@ describe('extractNameAndPrice', () => {
 			quantity: 1
 		});
 	});
+
+	it('strips a price with an OCR-misread colon decimal separator from the name too, not just its value (real receipt quirk, e.g. "1,50" read as "1:50")', () => {
+		expect(extractNameAndPrice('SERVIZIO ACQUA 1:50')).toEqual({
+			name: 'SERVIZIO ACQUA',
+			unitPriceCents: 150,
+			quantity: 1
+		});
+	});
+
+	it('strips a price with an OCR-misread curly-quote minus sign from the name too, not just its value', () => {
+		expect(extractNameAndPrice('Sconto % tot 20% “6,40')).toEqual({
+			name: 'Sconto % tot 20%',
+			unitPriceCents: -640,
+			quantity: 1
+		});
+	});
 });

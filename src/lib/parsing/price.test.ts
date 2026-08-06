@@ -37,4 +37,18 @@ describe('parsePriceCents', () => {
 	it('parses zero correctly', () => {
 		expect(parsePriceCents('OMAGGIO 0,00')).toBe(0);
 	});
+
+	it('treats a curly quote or dash as a minus sign (real OCR misread of a printed "-", confirmed against this project\'s actual Tesseract pipeline)', () => {
+		expect(parsePriceCents('Sconto % tot 20% “6,40')).toBe(-640); // "“" = “
+		expect(parsePriceCents('SCONTO –6,40')).toBe(-640); // en dash
+	});
+
+	it('falls back to treating a colon as the decimal separator when comma/dot parsing fails and the line has a letter (real OCR misread of "," as ":")', () => {
+		expect(parsePriceCents('SERVIZIO ACQUA 1:50')).toBe(150);
+	});
+
+	it('does not treat a bare digit:digit string with no letters as a price, since it is far more likely to be a timestamp', () => {
+		expect(parsePriceCents('21:08')).toBeNull();
+		expect(parsePriceCents('15/09/18 21:08')).toBeNull();
+	});
 });

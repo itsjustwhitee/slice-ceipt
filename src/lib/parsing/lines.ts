@@ -60,3 +60,33 @@ export function trimFooter(lines: string[]): string[] {
 export function extractItemLines(lines: string[]): string[] {
 	return trimFooter(lines).filter((line) => parsePriceCents(line) !== null);
 }
+
+// Shared with discount.ts's `applyDiscounts`, which matches this against an
+// already-trimmed parsed line name (hence the redundant-looking `^\s*` —
+// harmless there, needed here for raw lines that may have leading
+// whitespace of their own).
+export const RUNNING_TOTAL_KEYWORDS = /^\s*(SUBTOTALE|SUBTOTAL)\b/i;
+
+/**
+ * A running-total marker line (see the `SUBTOTALE`/`SUBTOTAL` part of
+ * `FOOTER_KEYWORDS`'s comment above) matters to the rest of the pipeline
+ * only for its presence, not its own printed amount — `applyDiscounts` in
+ * discount.ts uses it purely as a positional signal ("a discount right
+ * after this is whole-receipt") and never reads its value. But that value
+ * still has to parse as a valid price for the line to survive
+ * `extractItemLines`'s trailing-price filter at all, and real OCR
+ * sometimes mangles it beyond recognition — e.g. "SUBTOTALE 32,00" coming
+ * back as "SUBTOTALE 5200 |" (decimal separator dropped entirely, plus
+ * stray trailing noise), which fails to parse as a price and silently
+ * drops the whole line, taking the positional signal a whole-receipt
+ * discount right after it depends on down with it. Rewriting to a
+ * dummy-but-always-valid price keeps the marker alive regardless of how
+ * badly its own number got misread.
+ */
+export function normalizeRunningTotalLines(lines: string[]): string[] {
+	return lines.map((line) => {
+		const match = line.match(RUNNING_TOTAL_KEYWORDS);
+		if (!match || parsePriceCents(line) !== null) return line;
+		return `${match[0].trim()} 0,00`;
+	});
+}

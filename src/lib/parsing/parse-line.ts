@@ -1,12 +1,10 @@
-import { parsePriceCents } from './price';
+import { parsePriceCents, TRAILING_AMOUNT as TRAILING_PRICE } from './price';
 
 export interface ParsedLine {
 	name: string;
 	unitPriceCents: number;
 	quantity: number;
 }
-
-const TRAILING_PRICE = /(-?)(\d[\d.,]*\d|\d)\s*(?:€|EUR)?\s*$/;
 
 // Matches an explicit quantity marker. The digit comes BEFORE the marker
 // word for "X"/"PZ" style ("3X", "3 X", "3 PZ") but AFTER it for "Q.TA"

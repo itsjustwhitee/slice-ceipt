@@ -1,4 +1,5 @@
 import type { ParsedLine } from './parse-line';
+import { RUNNING_TOTAL_KEYWORDS } from './lines';
 
 export interface ParsedItem {
 	name: string;
@@ -24,7 +25,6 @@ const WHOLE_RECEIPT_DISCOUNT_KEYWORDS = /FEDELT|CARTA|PUNTI|BUONO|PROMOZ|LOYALTY
 // the subtotal") even when its wording doesn't match
 // `WHOLE_RECEIPT_DISCOUNT_KEYWORDS` and the item before it doesn't look
 // like an obvious discount target — see `afterRunningTotal` below.
-const RUNNING_TOTAL_KEYWORDS = /^(SUBTOTALE|SUBTOTAL)\b/i;
 
 /**
  * Walks the parsed lines in order, merging per-item discounts into the item
