@@ -7,10 +7,7 @@
 	import { resetSession, loadReceipt } from '$lib/stores/receipt';
 	import { addPhotos } from '$lib/stores/photos';
 
-	// Must match SHARE_CACHE/SHARE_FIELD_NAME's key scheme in service-worker.ts,
-	// which is what actually wrote these entries when it handled the Web Share
-	// Target POST — this page only exists to read them back out and hand them
-	// to the same upload flow a manual file picker would.
+	// Must match SHARE_CACHE in service-worker.ts, which writes these entries.
 	const SHARE_CACHE = 'share-target-payload';
 
 	onMount(async () => {

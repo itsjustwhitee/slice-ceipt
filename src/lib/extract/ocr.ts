@@ -1,14 +1,7 @@
 import { base } from '$app/paths';
 import { preprocessForOcr } from './image-preprocess';
 
-/**
- * Runs the receipt photo through `preprocessForOcr` (grayscale + contrast
- * stretch — see that function's doc comment) before handing it to
- * Tesseract, via an off-DOM canvas. Falls back to the original, unprocessed
- * image on any failure (an unusual browser/canvas quirk, a corrupt image,
- * etc.) rather than blocking extraction entirely over what's purely a
- * quality-of-read improvement, not a correctness requirement.
- */
+/** Grayscale + contrast-stretch before OCR; falls back to the original image on any failure. */
 async function preprocessImage(image: File | Blob): Promise<File | Blob> {
 	try {
 		const bitmap = await createImageBitmap(image);
@@ -35,17 +28,10 @@ async function preprocessImage(image: File | Blob): Promise<File | Blob> {
 }
 
 /**
- * `onProgress` only fires for Tesseract's `recognizing text` stage (the
- * actual OCR pass, and by far the slowest part) — earlier stages
- * (loading the WASM core/language data) each report their own 0-1
- * progress independently, so forwarding those too would make the bar
- * visibly jump backward each time a new stage starts.
- *
- * `onConfidence`, when given, is called once with Tesseract's own overall
- * mean confidence for the recognized text (0-100 — low values mean the
- * photo was blurry/crumpled/badly lit enough that the OCR itself doesn't
- * trust its own read). Surfacing this lets the UI nudge the user to
- * double-check the parsed items instead of silently trusting a bad scan.
+ * `onProgress` only fires for Tesseract's `recognizing text` stage, to
+ * avoid the bar jumping backward when earlier stages report their own 0-1.
+ * `onConfidence`, when given, is called once with Tesseract's 0-100 mean
+ * confidence, so the UI can flag a low-quality scan for the user.
  */
 export async function extractTextFromImage(
 	image: File | Blob,

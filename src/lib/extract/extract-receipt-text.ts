@@ -35,11 +35,9 @@ const MIN_MEANINGFUL_TEXT_LENGTH = 20;
  * `deps` is injectable so this branching logic can be unit-tested without
  * real PDF/OCR execution — production code should never need to pass it.
  *
- * `onConfidence`, when given, reports a 0-100 trust signal for the result:
- * a PDF text layer is exact (digital text, not a guess) and always reports
- * 100; OCR'd photos/scanned-PDF-pages report Tesseract's own recognition
- * confidence instead, so the UI can nudge the user to double-check a bad
- * scan's items rather than silently trusting a low-quality read.
+ * `onConfidence`, when given, reports a 0-100 trust signal: a PDF text
+ * layer always reports 100 (exact text), OCR reports Tesseract's own
+ * recognition confidence.
  */
 export async function extractReceiptText(
 	file: File,

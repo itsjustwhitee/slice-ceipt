@@ -25,23 +25,9 @@ export const extractionStatus = writable<ExtractionStatus>('idle');
 export const extractionError = writable<string | null>(null);
 /** 0-1, only meaningful while `extractionStatus` is `'extracting'` — see `loadReceipt`. */
 export const extractionProgress = writable<number>(0);
-/**
- * 0-100 OCR trust signal from the last successful extraction, or `null`
- * before any extraction has run (or after `skipExtraction`/`resetSession`).
- * A PDF text layer always reports 100 (exact digital text); a photo/scanned
- * page reports Tesseract's own recognition confidence — see
- * `extractReceiptText`'s doc comment. The UI uses this to nudge the user to
- * double-check the parsed items after a low-confidence scan, not to block
- * anything.
- */
+/** 0-100 OCR trust signal from the last extraction, or `null` before one has run. */
 export const extractionConfidence = writable<number | null>(null);
-/**
- * Below this, Tesseract itself doesn't trust its own read enough to be
- * worth silently believing — a rough cut (not scientifically calibrated
- * against a large photo corpus) between "a normal, if imperfect, phone
- * photo" and "blurry/crumpled/badly lit enough that the item list is
- * worth a closer look" on Tesseract's 0-100 mean-confidence scale.
- */
+/** Rough, uncalibrated cutoff for nudging the user to double-check a low-confidence scan. */
 const LOW_CONFIDENCE_THRESHOLD = 65;
 export const isLowConfidenceExtraction = derived(
 	extractionConfidence,

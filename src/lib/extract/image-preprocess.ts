@@ -1,22 +1,8 @@
 /**
- * Converts an RGBA pixel buffer to grayscale in place (luminosity-weighted:
- * 0.299R + 0.587G + 0.114B, the standard perceptual weighting), then
- * stretches contrast so the darkest pixel becomes 0 and the lightest
- * becomes 255. A receipt photo is very often low-contrast — faded thermal
- * paper, a shadow across part of it, dim indoor lighting — well before
- * it's unreadable to a human eye, and Tesseract's recognition is
- * measurably more sensitive to that than a human is. Alpha is left
- * untouched.
- *
- * Deliberately stops short of a hard black/white threshold
- * (binarization): that's a bigger lever but also a riskier one — it can
- * clip thin or anti-aliased character strokes that grayscale + contrast
- * alone preserve, and Tesseract's own recognition models are trained on
- * grayscale input, not pre-binarized images.
- *
- * Pure pixel-buffer math with no DOM/canvas dependency, so it's unit
- * -testable directly — see `ocr.ts` for the thin canvas wrapper that
- * actually applies this to a photo before handing it to Tesseract.
+ * Grayscales an RGBA buffer in place (luminosity-weighted), then stretches
+ * contrast so the darkest pixel becomes 0 and lightest becomes 255. Stops
+ * short of hard black/white thresholding, which can clip thin strokes.
+ * Pure math, no DOM — see ocr.ts for the canvas wrapper.
  */
 export function preprocessForOcr(data: Uint8ClampedArray): void {
 	const pixelCount = data.length / 4;
@@ -33,9 +19,7 @@ export function preprocessForOcr(data: Uint8ClampedArray): void {
 	}
 
 	const range = max - min;
-	// A range this small means the photo is already flat (uniform color,
-	// or blank) — stretching it further would mostly amplify noise, not
-	// signal, so grayscale alone is left as the result.
+	// Below this, the photo is already flat — stretching would amplify noise, not signal.
 	const stretch = range > 10;
 	const scale = stretch ? 255 / range : 1;
 

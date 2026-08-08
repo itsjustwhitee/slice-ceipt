@@ -1,55 +1,16 @@
-// A few punctuation marks that real OCR output has been observed to
-// substitute for a plain "-" minus sign on a receipt (tested against this
-// project's actual Tesseract pipeline on real photos: a printed "-6,40"
-// came back as "“6,40", U+201C LEFT DOUBLE QUOTATION MARK) — dashes and
-// smart quotes are visually close enough to a short printed hyphen for
-// Tesseract to occasionally confuse them. Accepted as a negative sign
-// alongside "-" itself; a plain "-" is by far the common case. The ASCII
-// "-" is listed first, before any other "-"-like character, specifically
-// so it can never end up between two other characters in the `[...]`
-// classes built from this string below — that position is the one place
-// "-" stops being literal and starts meaning "range" in a regex character
-// class, which would silently make this list mean something else.
+// OCR sometimes misreads a "-" as a dash or smart quote. "-" must stay
+// first in this string or it becomes a range operator inside `[...]`.
 const NEGATIVE_SIGN_CHARS = '-‐‑‒–—−‘’“”';
 const NEGATIVE_SIGN = new RegExp(`^[${NEGATIVE_SIGN_CHARS}]$`);
 
-// Decimal separator candidates, tried in this order. Colon is a fallback,
-// not a peer of comma/dot: it's only tried when neither comma nor dot
-// parsing succeeds, since a bare digit-colon-digit string is at least as
-// likely to be a timestamp (e.g. a receipt's "21:08" printed time) as a
-// misread price — see `parsePriceCents`'s doc comment.
+// Colon is a fallback decimal separator (comma/dot misread as ":"), tried
+// only when comma/dot parsing fails, to avoid misreading a timestamp.
 const PRIMARY_SEPARATORS = [',', '.'];
 const FALLBACK_SEPARATORS = [':'];
 
-/**
- * Matches a trailing money amount (sign + digits/separators + optional
- * currency), shared with `parse-line.ts`'s name/price splitting so the
- * two stay in sync — that code needs to know exactly how many trailing
- * characters `parsePriceCents` below considered "the price" in order to
- * strip the right amount off the end of the line to get the item's name.
- *
- * Tolerates non-digit junk after the amount (`[^\d]*$` rather than a
- * plain `\s*$`) — a real receipt photographed on a reflective/patterned
- * surface (tested against this project's actual Tesseract pipeline: a
- * wood-grain table under flash glare) picks up stray noise characters
- * past the true end of almost every printed line, e.g. "20,00" coming
- * back as "20,00 INNS IN". Requiring that trailing run to be digit-free
- * still guarantees the matched amount is the LAST number on the line: any
- * later digit forces the match to fail here and fall back to whatever
- * (if anything) qualifies further right, exactly as before this
- * allowance existed.
- *
- * Also tolerates one short letters-then-digits token right after the
- * amount (`[A-Za-z]{1,3}\d{0,2}`) even though it itself contains a digit —
- * a real receipt (tested the same way) prints a tax-category code directly
- * after the price with no separator of its own, e.g. "5.29 T1", which the
- * plain digit-free junk tolerance above alone would reject (it contains a
- * "1") and so would fail to find a price on that line at all. Requiring a
- * LETTER first keeps this from ever preferring an earlier amount over a
- * genuine later one — a second real price like "PANE 2,50 3,00" starts
- * with a digit, not a letter, so it can never match as "a tax code" and
- * this still correctly falls through to matching "3,00" instead.
- */
+// Shared with parse-line.ts so name-stripping agrees with parsePriceCents
+// on how many trailing chars count as "the price". Tolerates trailing
+// non-digit junk (OCR noise) and one short tax-code token (e.g. "T1").
 export const TRAILING_AMOUNT = new RegExp(
 	`([${NEGATIVE_SIGN_CHARS}]?)(\\d[\\d.,:]*\\d|\\d)\\s*(?:€|EUR)?\\s*(?:[A-Za-z]{1,3}\\d{0,2})?[^\\d]*$`
 );
@@ -74,20 +35,10 @@ function splitOnDecimalSeparator(
 }
 
 /**
- * Parses a trailing money amount from the end of a line, e.g. "PANE 2,50"
- * -> 250, "TOTALE EURO 1.234,56" -> 123456, "MILK 3.99" -> 399,
- * "SCONTO -0,50" -> -50. Handles both European (comma decimal) and US
- * (dot decimal) formats by treating whichever separator appears last AND
- * is followed by exactly 2 digits as the decimal separator — this works
- * without knowing the locale in advance. Returns null if no trailing
- * amount is found (e.g. a bare quantity code, a percentage, or a line
- * with no price at all).
- *
- * Also tolerant of two specific real-world OCR misreads (see the
- * `NEGATIVE_SIGN`/`FALLBACK_SEPARATORS` comments above): a minus sign
- * read back as a dash/smart-quote character, and — only when the line has
- * at least one letter, e.g. "SERVIZIO ACQUA 1:50" rather than a bare
- * "21:08" — a comma decimal separator read back as a colon.
+ * Parses a trailing money amount, e.g. "PANE 2,50" -> 250,
+ * "MILK 3.99" -> 399. Handles comma or dot decimals by treating whichever
+ * separator appears last (with exactly 2 trailing digits) as decimal.
+ * Returns null if no trailing amount is found.
  */
 export function parsePriceCents(line: string): number | null {
 	const match = line.match(TRAILING_AMOUNT);
