@@ -23,7 +23,11 @@
 		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",
 		"vite": "^8.0.16",
-		"vitest": "^4.1.8"
+		"vitest": "^4.1.8",
+		"workbox-cacheable-response": "^7.4.1",
+		"workbox-precaching": "^7.4.1",
+		"workbox-routing": "^7.4.1",
+		"workbox-strategies": "^7.4.1"
 	},
 	"dependencies": {
 		"pdfjs-dist": "^6.1.200",
