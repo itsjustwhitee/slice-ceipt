@@ -24,5 +24,9 @@ export function parseReceiptText(rawText: string): ParsedItem[] {
 		.map(extractNameAndPrice)
 		.filter((line): line is NonNullable<typeof line> => line !== null);
 	const withDiscounts = applyDiscounts(parsedLines);
-	return groupIdenticalItems(withDiscounts).filter((item) => item.name.trim() !== '');
+	// A real item name always has at least one letter — a name that's
+	// empty or pure punctuation/digits (e.g. "|") is a leftover OCR
+	// artifact, not a product, and would otherwise show up as a phantom
+	// item inflating the total.
+	return groupIdenticalItems(withDiscounts).filter((item) => /\p{L}/u.test(item.name));
 }

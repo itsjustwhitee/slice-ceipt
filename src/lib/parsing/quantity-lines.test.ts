@@ -35,4 +35,9 @@ describe('mergeBareQuantityLines', () => {
 	it('leaves a bare-quantity line with no usable neighbor as-is', () => {
 		expect(mergeBareQuantityLines(['        2 x  1,50'])).toEqual(['        2 x  1,50']);
 	});
+
+	it('drops a ",00" formatting suffix on the quantity itself (real receipt: "3,00 X 2,50" meaning 3 units, not a fractional count)', () => {
+		const result = mergeBareQuantityLines(['3,00 X 2,50', 'Coperto                          10%   7,50']);
+		expect(result).toEqual(['3X Coperto                          10%   7,50']);
+	});
 });

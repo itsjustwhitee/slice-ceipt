@@ -271,6 +271,28 @@ describe('parseReceiptText end-to-end', () => {
 		expect(sum).toBe(724); // matches "TOTAL 7.24" in the fixture
 	});
 
+	it('handles a real, badly-OCR\'d restaurant receipt: a decimal-formatted bare-quantity line, spaced decimals, and a nameless noise item, reconciling to the printed total (55,50)', () => {
+		const receipt = [
+			'| 300 X 2,60',
+			'ul COPERTO 10% 7.50',
+			'_ TROF]E PESTO 10% 18, 00',
+			"' PIATTINO CONDIVISIONE 10% 2,00 d",
+			'ACCIUGHE FRITTE 10% 20,00 |',
+			'ACQUA POTABILE 10% 2,00',
+			'BIRRA 0, 33 10% 6. 00',
+			'TOTALE COMPLESSIVO 55,50'
+		].join('\n');
+
+		const items = parseReceiptText(receipt);
+		const sum = items.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		expect(sum).toBe(5550); // matches "TOTALE COMPLESSIVO 55,50" in the fixture
+
+		// the OCR-corrupted "| 300 X 2,60" line never recovers a usable
+		// quantity/name (severe digit corruption: "3" misread as "300"),
+		// but must not leak through as a nameless phantom item either
+		expect(items.some((item) => !/\p{L}/u.test(item.name))).toBe(false);
+	});
+
 	it('handles an English-format receipt end-to-end', () => {
 		const receipt = `CORNER STORE\n\nMILK              3.99\nBREAD             2.50\n\nSUBTOTAL          6.49\nTAX               0.52\nTOTAL             7.01`;
 		const items = parseReceiptText(receipt);

@@ -1,7 +1,11 @@
 // Some restaurant POS systems print an item's quantity/unit-price on its
 // own line, above or below the name+total line, e.g. "4 x 5,00" /
 // "Coperto  20,00". Without merging, both parse as separate bogus items.
-const BARE_QUANTITY_LINE = /^\s*(\d+)\s*[x×]\s*\d[\d.,]*\d\s*(?:€|EUR)?\s*$/i;
+// The quantity itself is sometimes printed with a ",00"/".00" suffix for
+// formatting consistency with prices (real receipt: "3,00 X 2,50") — that
+// decimal part is dropped, not captured, since a fractional cover count
+// makes no sense here.
+const BARE_QUANTITY_LINE = /^\s*(\d+)(?:[.,]\d+)?\s*[x×]\s*\d[\d.,]*\d\s*(?:€|EUR)?\s*$/i;
 
 /**
  * Merges a bare "N x unit price" line into the adjacent name+total line by

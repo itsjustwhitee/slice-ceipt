@@ -1,4 +1,4 @@
-import { parsePriceCents, TRAILING_AMOUNT as TRAILING_PRICE } from './price';
+import { parsePriceCents, normalizeSpacedDecimals, TRAILING_AMOUNT as TRAILING_PRICE } from './price';
 
 export interface ParsedLine {
 	name: string;
@@ -31,10 +31,13 @@ const VAT_PERCENTAGE = /\d{1,2}\s*[.,]\s*\d{2}\s*%\s*$/;
  * quantity (rounded) to get the per-unit price. `quantity` defaults to 1
  * when no marker is present, and the price is used as-is.
  */
-export function extractNameAndPrice(line: string): ParsedLine | null {
-	const totalCents = parsePriceCents(line);
+export function extractNameAndPrice(rawLine: string): ParsedLine | null {
+	const totalCents = parsePriceCents(rawLine);
 	if (totalCents === null) return null;
 
+	// Normalized the same way parsePriceCents normalizes internally, so the
+	// match here lines up with the price it just computed above.
+	const line = normalizeSpacedDecimals(rawLine);
 	const priceMatch = line.match(TRAILING_PRICE);
 	const nameWithVat = line.slice(0, line.length - (priceMatch?.[0].length ?? 0)).trim();
 	const nameWithMarker = nameWithVat.replace(VAT_PERCENTAGE, '').replace(/\s+/g, ' ').trim();

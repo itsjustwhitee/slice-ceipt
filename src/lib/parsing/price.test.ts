@@ -60,4 +60,21 @@ describe('parsePriceCents', () => {
 	it('still prefers a later real amount over an earlier one when both are present, since a tax code must start with a letter, not a digit', () => {
 		expect(parsePriceCents('PANE 2,50 3,00')).toBe(300);
 	});
+
+	it('tolerates a space right after the decimal separator (real OCR misread, e.g. "18, 00" instead of "18,00")', () => {
+		expect(parsePriceCents('TROFIE PESTO 10% 18, 00')).toBe(1800);
+		expect(parsePriceCents('BIRRA 0, 33 10% 6. 00')).toBe(600);
+	});
+
+	it('tolerates a single bare digit directly after the price, since a one-letter VAT-category code (e.g. "B") is sometimes misread as a digit (e.g. "8") — real receipt: "3.06 8" for "3,06 B"', () => {
+		expect(parsePriceCents('CAROTE SAN ROCCO IT 3.06 8')).toBe(306);
+	});
+
+	it('recovers the real price even when followed by a trailing bare digit that cannot be a price on its own (no decimal separator)', () => {
+		expect(parsePriceCents('PANE 2,50 3')).toBe(250);
+	});
+
+	it('still prefers a later real (multi-digit, decimal) amount over an earlier one, rather than treating its first digit as trailing noise', () => {
+		expect(parsePriceCents('PANE 2,50 30,00')).toBe(3000);
+	});
 });
