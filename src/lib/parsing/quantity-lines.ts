@@ -5,7 +5,21 @@
 // formatting consistency with prices (real receipt: "3,00 X 2,50") — that
 // decimal part is dropped, not captured, since a fractional cover count
 // makes no sense here.
-const BARE_QUANTITY_LINE = /^\s*(\d+)(?:[.,]\d+)?\s*[x×]\s*\d[\d.,]*\d\s*(?:€|EUR)?\s*$/i;
+// A short (≤4 char) leading run of non-digit junk is also tolerated, e.g.
+// OCR misreading a border/smudge as "RR 2x 48,00" instead of "2x 48,00" —
+// safe because a *real* item name before a marker is always longer and/or
+// multi-word (contains a space), which this can't absorb: the run can't
+// contain digits or spaces, so it can never eat into the actual quantity.
+// The quantity itself is capped at 2 digits: nothing in this app's domain
+// (splitting a shared receipt) legitimately has a 3+ digit line quantity,
+// but OCR digit corruption produces one easily (e.g. "3" -> "300"), so
+// above that it's more likely corruption than a real count and is left
+// unmerged rather than risk multiplying a price by a bogus quantity.
+// Trailing junk after the price (e.g. "RR 2x 48,00 SHEENA") is tolerated
+// the same way TRAILING_AMOUNT does in price.ts, for the same reason: OCR
+// noise from the rest of the receipt bleeding onto this line's end.
+const BARE_QUANTITY_LINE =
+	/^\s*(?:[^\d\s]{1,4}\s+)?(\d{1,2})(?:[.,]\d+)?\s*[x×]\s*\d[\d.,]*\d\s*(?:€|EUR)?\s*(?:[A-Za-z]{1,3}\d{0,2}|\d)?[^\d]*$/i;
 
 /**
  * Merges a bare "N x unit price" line into the adjacent name+total line by

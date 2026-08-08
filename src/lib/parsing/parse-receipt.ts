@@ -27,6 +27,12 @@ export function parseReceiptText(rawText: string): ParsedItem[] {
 	// A real item name always has at least one letter — a name that's
 	// empty or pure punctuation/digits (e.g. "|") is a leftover OCR
 	// artifact, not a product, and would otherwise show up as a phantom
-	// item inflating the total.
-	return groupIdenticalItems(withDiscounts).filter((item) => /\p{L}/u.test(item.name));
+	// item inflating the total. A name that's *just* a bare "x"/"×" is the
+	// same kind of artifact: a quantity line whose leading digit OCR lost
+	// entirely (e.g. "2 x 10,00" -> "x 10,00"), leaving no digit for
+	// QUANTITY_MARKER to anchor on, so it parses as a fake item named "x"
+	// instead of merging — no real product is ever named just "x".
+	return groupIdenticalItems(withDiscounts).filter(
+		(item) => /\p{L}/u.test(item.name) && !/^[x×]$/i.test(item.name)
+	);
 }
