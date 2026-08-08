@@ -26,11 +26,11 @@ describe('extractNameAndPrice', () => {
 		});
 	});
 
-	it('handles the marker after the name (X3 style)', () => {
-		expect(extractNameAndPrice('BIRRA ICHNUSA 50CL X3   4,50')).toEqual({
-			name: 'BIRRA ICHNUSA 50CL',
-			unitPriceCents: 150,
-			quantity: 3
+	it('does NOT treat a digit-after-"X" suffix as a quantity marker, since it is often a product/pack-size code rather than a checkout multiplier (real Coop receipt: "DANACOL BIANCO X8" priced as one €5.90 pack, not 8 units at ~0.74 each)', () => {
+		expect(extractNameAndPrice('DANACOL BIANCO X8   5,90')).toEqual({
+			name: 'DANACOL BIANCO X8',
+			unitPriceCents: 590,
+			quantity: 1
 		});
 	});
 

@@ -6,13 +6,12 @@ export interface ParsedLine {
 	quantity: number;
 }
 
-// Matches an explicit quantity marker. The digit comes BEFORE the marker
-// word for "X"/"PZ" style ("3X", "3 X", "3 PZ") but AFTER it for "Q.TA"
-// style ("Q.TA 2", "Q.TÀ 3") — these are genuinely different conventions,
-// not two orderings of the same one, so they need separate alternatives
-// rather than one "digit-then-word" pattern.
-const QUANTITY_MARKER =
-	/(?:(\d+)\s*(?:X\b|PZ\b)|\bX\s*(\d+)\b|Q\.?T[AÀ]?\.?\s*(\d+))/i;
+// Matches an explicit quantity marker: digit-before-word for "X"/"PZ"
+// style ("3X", "3 PZ"), digit-after for "Q.TA" style ("Q.TA 2"). No
+// digit-AFTER-"X" form ("X8") on purpose — real receipt evidence
+// (Coop: "DANACOL BIANCO X8" priced as one €5.90 pack) shows that shape
+// is often a product/pack-size code, not a checkout quantity marker.
+const QUANTITY_MARKER = /(?:(\d+)\s*(?:X\b|PZ\b)|Q\.?T[AÀ]?\.?\s*(\d+))/i;
 
 // Many Italian receipts print a per-line VAT rate between the item name and
 // its price (e.g. "PASSATA DI POMODORO 4,00% 0,99") — this is the item's tax
@@ -45,7 +44,7 @@ export function extractNameAndPrice(line: string): ParsedLine | null {
 		return { name: nameWithMarker, unitPriceCents: totalCents, quantity: 1 };
 	}
 
-	const quantity = Number(markerMatch[1] ?? markerMatch[2] ?? markerMatch[3]);
+	const quantity = Number(markerMatch[1] ?? markerMatch[2]);
 	const cleanName = (
 		nameWithMarker.slice(0, markerMatch.index) +
 		nameWithMarker.slice((markerMatch.index ?? 0) + markerMatch[0].length)
