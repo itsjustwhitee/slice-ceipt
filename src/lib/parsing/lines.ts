@@ -21,7 +21,7 @@ import { parsePriceCents } from './price';
 // TOP since the 2020 "scontrino elettronico" reform, not the bottom — an
 // earlier version matched it and truncated the item region to nothing on
 // every receipt using this now-standard format, i.e. most real Italian
-// receipts), and "SUBTOTALE"/"SUBTOTAL" (a running/partial total printed
+// receipts), "SUBTOTALE"/"SUBTOTAL" (a running/partial total printed
 // mid-receipt — real receipts commonly print a whole-receipt discount
 // *between* this and the final "TOTALE" line, e.g. "SUBTOTALE 32,00" /
 // "Sconto % tot 20% -6,40" / "TOTALE EURO 25,60"; treating it as a hard
@@ -29,9 +29,15 @@ import { parsePriceCents } from './price';
 // line itself. It's still excluded from the returned item lines — see
 // `RUNNING_TOTAL_KEYWORDS` in discount.ts, which drops it downstream once
 // it's had a chance to mark the discount line right after it as
-// whole-receipt).
+// whole-receipt), and "OPERATORE" (identifies which staff member is
+// serving — verified against a real bar/caffetteria receipt: some small
+// POS systems print this right after the store's header info, *before*
+// the item list, not down by CASSA/CASSIERE in the footer like the more
+// common convention. An earlier version matched it unconditionally and
+// discarded that receipt's entire item list — "Operatore 10" printed
+// directly above "ACQUA 0.50 0,80" x2 — before the parser ever saw it).
 const FOOTER_KEYWORDS =
-	/^\s*(TOT(?:ALE)?\.?|CONTANT[EI]|RESTO|CARTA|BANCOMAT|PAG(?:AMENTO)?\.?|IVA|IMPOSTA|SCONTRINO\s+FISCALE|OPERATORE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
+	/^\s*(TOT(?:ALE)?\.?|CONTANT[EI]|RESTO|CARTA|BANCOMAT|PAG(?:AMENTO)?\.?|IVA|IMPOSTA|SCONTRINO\s+FISCALE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
 
 /**
  * Cuts a raw OCR/text-layer line list down to everything before the first

@@ -225,6 +225,52 @@ describe('parseReceiptText end-to-end', () => {
 		expect(sum).toBe(739); // matches "04 x € 7.39" in the fixture
 	});
 
+	it('handles a real bar/caffetteria receipt printing "Operatore" above the item list instead of down in the footer', () => {
+		const receipt = [
+			'BAR GUGLIELMO',
+			'di Angela Critelli',
+			'Piazza Stazione - 88100 Catanzaro Lido',
+			"P.Iva IT 02753370796",
+			'EURO',
+			'Operatore 10',
+			'ACQUA 0.50            0,80',
+			'ACQUA 0.50            0,80',
+			'TOTALE EURO            1,60',
+			'CONTANTI                1,60'
+		].join('\n');
+
+		const items = parseReceiptText(receipt);
+
+		expect(items).toEqual([{ name: 'ACQUA 0.50', unitPriceCents: 80, quantity: 2 }]);
+
+		const sum = items.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		expect(sum).toBe(160); // matches "TOTALE EURO 1,60" in the fixture
+	});
+
+	it('handles a real receipt with a trailing tax-category code after every price (real Aruba/Curaçao supermarket receipt format, e.g. "5.29 T1")', () => {
+		const receipt = [
+			'FISCAL INVOICE',
+			'DESCRIPTION                              VALUE',
+			'PANOLINI BABY WIPES 72PC                 5.29 T1',
+			'PANOLINI BABY WIPES 20PC                 1.95 T1',
+			'SUBTOTAL                                 7.24',
+			'TOTAL                                    7.24',
+			'CASH                                     7.24',
+			'QUANTITY ITEMS: 2',
+			'06/03/2019 14:04:21 0001'
+		].join('\n');
+
+		const items = parseReceiptText(receipt);
+
+		expect(items).toEqual([
+			{ name: 'PANOLINI BABY WIPES 72PC', unitPriceCents: 529, quantity: 1 },
+			{ name: 'PANOLINI BABY WIPES 20PC', unitPriceCents: 195, quantity: 1 }
+		]);
+
+		const sum = items.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		expect(sum).toBe(724); // matches "TOTAL 7.24" in the fixture
+	});
+
 	it('handles an English-format receipt end-to-end', () => {
 		const receipt = `CORNER STORE\n\nMILK              3.99\nBREAD             2.50\n\nSUBTOTAL          6.49\nTAX               0.52\nTOTAL             7.01`;
 		const items = parseReceiptText(receipt);

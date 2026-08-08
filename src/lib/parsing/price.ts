@@ -38,8 +38,21 @@ const FALLBACK_SEPARATORS = [':'];
  * later digit forces the match to fail here and fall back to whatever
  * (if anything) qualifies further right, exactly as before this
  * allowance existed.
+ *
+ * Also tolerates one short letters-then-digits token right after the
+ * amount (`[A-Za-z]{1,3}\d{0,2}`) even though it itself contains a digit —
+ * a real receipt (tested the same way) prints a tax-category code directly
+ * after the price with no separator of its own, e.g. "5.29 T1", which the
+ * plain digit-free junk tolerance above alone would reject (it contains a
+ * "1") and so would fail to find a price on that line at all. Requiring a
+ * LETTER first keeps this from ever preferring an earlier amount over a
+ * genuine later one — a second real price like "PANE 2,50 3,00" starts
+ * with a digit, not a letter, so it can never match as "a tax code" and
+ * this still correctly falls through to matching "3,00" instead.
  */
-export const TRAILING_AMOUNT = new RegExp(`([${NEGATIVE_SIGN_CHARS}]?)(\\d[\\d.,:]*\\d|\\d)\\s*(?:€|EUR)?[^\\d]*$`);
+export const TRAILING_AMOUNT = new RegExp(
+	`([${NEGATIVE_SIGN_CHARS}]?)(\\d[\\d.,:]*\\d|\\d)\\s*(?:€|EUR)?\\s*(?:[A-Za-z]{1,3}\\d{0,2})?[^\\d]*$`
+);
 
 function splitOnDecimalSeparator(
 	numeric: string,

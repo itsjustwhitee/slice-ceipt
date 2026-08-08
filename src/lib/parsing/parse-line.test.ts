@@ -115,4 +115,12 @@ describe('extractNameAndPrice', () => {
 			quantity: 1
 		});
 	});
+
+	it('strips a trailing tax-category code (and the price) from the name, leaving just the item name (real receipt format, e.g. "5.29 T1")', () => {
+		expect(extractNameAndPrice('PANOLINI BABY WIPES 72PC 5.29 T1')).toEqual({
+			name: 'PANOLINI BABY WIPES 72PC',
+			unitPriceCents: 529,
+			quantity: 1
+		});
+	});
 });

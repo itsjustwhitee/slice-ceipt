@@ -99,4 +99,19 @@ describe('extractItemLines', () => {
 		const lines = ['TOTANI FRESCHI       3,50', 'PAGELLA REGALO       2,00'];
 		expect(extractItemLines(lines)).toEqual(['TOTANI FRESCHI       3,50', 'PAGELLA REGALO       2,00']);
 	});
+
+	it('does not treat "Operatore" as a footer marker, since some small POS systems (bars/caffetterie) print it right above the item list, not down by CASSA/CASSIERE in the footer (real receipt quirk)', () => {
+		const lines = [
+			'BAR GUGLIELMO',
+			'di Angela Critelli',
+			'Piazza Stazione - 88100 Catanzaro Lido',
+			"P.Iva IT 02753370796",
+			'Operatore 10',
+			'ACQUA 0.50            0,80',
+			'ACQUA 0.50            0,80',
+			'TOTALE EURO            1,60',
+			'CONTANTI                1,60'
+		];
+		expect(extractItemLines(lines)).toEqual(['ACQUA 0.50            0,80', 'ACQUA 0.50            0,80']);
+	});
 });

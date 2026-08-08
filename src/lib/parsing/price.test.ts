@@ -51,4 +51,13 @@ describe('parsePriceCents', () => {
 		expect(parsePriceCents('21:08')).toBeNull();
 		expect(parsePriceCents('15/09/18 21:08')).toBeNull();
 	});
+
+	it('tolerates a short tax-category code directly after the price, even though it contains a digit (real receipt format, e.g. "5.29 T1")', () => {
+		expect(parsePriceCents('PANOLINI BABY WIPES 72PC 5.29 T1')).toBe(529);
+		expect(parsePriceCents('PANOLINI BABY WIPES 20PC 1.95 T1')).toBe(195);
+	});
+
+	it('still prefers a later real amount over an earlier one when both are present, since a tax code must start with a letter, not a digit', () => {
+		expect(parsePriceCents('PANE 2,50 3,00')).toBe(300);
+	});
 });
