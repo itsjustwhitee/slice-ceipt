@@ -3,6 +3,7 @@
 	import { t } from '$lib/i18n';
 	import { setPhotoCorrection, type PendingPhoto } from '$lib/stores/photos';
 	import { warpQuad, quadOutputSize, type Point, type Quad } from '$lib/crop/warp';
+	import { detectReceiptQuad } from '$lib/crop/auto-detect';
 	import BackIcon from '$lib/icons/BackIcon.svelte';
 	import ResetIcon from '$lib/icons/ResetIcon.svelte';
 
@@ -52,6 +53,14 @@
 		ctx.drawImage(sourceBitmap, 0, 0, displayWidth, displayHeight);
 	}
 
+	// Runs on the already-drawn display canvas (cheap: it's capped at DISPLAY_MAX).
+	function detectHandles(): Quad | null {
+		const ctx = displayCanvas.getContext('2d');
+		if (!ctx) return null;
+		const { data } = ctx.getImageData(0, 0, displayWidth, displayHeight);
+		return detectReceiptQuad(data, displayWidth, displayHeight);
+	}
+
 	$effect(() => {
 		let cancelled = false;
 		createImageBitmap(photo.blob).then((bitmap) => {
@@ -63,8 +72,8 @@
 			scale = Math.min(1, DISPLAY_MAX / bitmap.width);
 			displayWidth = Math.round(bitmap.width * scale);
 			displayHeight = Math.round(bitmap.height * scale);
-			handles = defaultHandles(displayWidth, displayHeight);
 			drawSource();
+			handles = detectHandles() ?? defaultHandles(displayWidth, displayHeight);
 		});
 		return () => {
 			cancelled = true;
@@ -73,7 +82,7 @@
 	});
 
 	function resetHandles() {
-		handles = defaultHandles(displayWidth, displayHeight);
+		handles = detectHandles() ?? defaultHandles(displayWidth, displayHeight);
 	}
 
 	function pointerDown(i: number, e: PointerEvent) {

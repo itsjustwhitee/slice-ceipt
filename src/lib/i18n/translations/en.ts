@@ -9,6 +9,8 @@ const en = {
 	uploadTakePhoto: 'Take a photo',
 	uploadSkip: 'Skip',
 	photosLoaded: 'Photos loaded ({count})',
+	cropHint:
+		'✂️ A tight crop around the receipt improves automatic reading: tap the crop icon on a photo to fix it. Cropping to just the item list, leaving out the header and footer, often helps further.',
 	addPhotoCamera: 'Take a photo',
 	addPhotoImport: 'Import more',
 	photoContinue: 'Continue',

@@ -11,6 +11,8 @@ const it: Dictionary = {
 	uploadTakePhoto: 'Scatta una foto',
 	uploadSkip: 'Salta',
 	photosLoaded: 'Foto caricate ({count})',
+	cropHint:
+		"✂️ Un ritaglio preciso attorno allo scontrino migliora la lettura automatica: tocca l'icona di ritaglio su ogni foto per correggerlo. A volte ritagliare solo l'elenco degli articoli, escludendo intestazione e piè di pagina, aiuta ulteriormente.",
 	addPhotoCamera: 'Scatta foto',
 	addPhotoImport: 'Importa altre',
 	photoContinue: 'Continua',

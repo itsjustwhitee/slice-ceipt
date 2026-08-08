@@ -42,6 +42,7 @@
 </script>
 
 <h2>{$t('photosLoaded').replace('{count}', String($pendingPhotos.length))}</h2>
+<p class="crop-hint">{$t('cropHint')}</p>
 
 <ul class="photo-list">
 	{#each $pendingPhotos as photo, i (photo.id)}
@@ -115,6 +116,15 @@
 </div>
 
 <style>
+	.crop-hint {
+		margin: 0.5rem 0 0;
+		padding: 0.65rem 0.85rem;
+		border-radius: 8px;
+		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+		font-size: 0.9rem;
+	}
+
 	.photo-list {
 		list-style: none;
 		margin: 0.75rem 0;
