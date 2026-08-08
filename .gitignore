@@ -36,3 +36,6 @@ docs/superpowers/
 .superpowers
 
 assets/camera_.svg
+dataset-test/
+
+*.traineddata
