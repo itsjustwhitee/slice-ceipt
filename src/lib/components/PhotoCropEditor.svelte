@@ -6,6 +6,7 @@
 	import { detectReceiptQuad } from '$lib/crop/auto-detect';
 	import BackIcon from '$lib/icons/BackIcon.svelte';
 	import ResetIcon from '$lib/icons/ResetIcon.svelte';
+	import CheckIcon from '$lib/icons/CheckIcon.svelte';
 
 	interface Props {
 		photo: PendingPhoto;
@@ -171,7 +172,10 @@
 	>
 		<ResetIcon size={16} />
 	</button>
-	<button type="button" class="continue" onclick={confirm}>{$t('confirmCrop')}</button>
+	<button type="button" class="continue" onclick={confirm}>
+		<CheckIcon size={16} />
+		{$t('confirmCrop')}
+	</button>
 </div>
 
 <style>
@@ -247,5 +251,12 @@
 		align-items: center;
 		gap: 0.75rem;
 		margin-top: 1.25rem;
+	}
+
+	.continue {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		line-height: 1;
 	}
 </style>

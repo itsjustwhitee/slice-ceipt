@@ -1,6 +1,6 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
-	import { t, locale } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 	import { theme } from '$lib/stores/theme';
 	import { step, mode, resetSession, goBack } from '$lib/stores/receipt';
 	import Uploader from '$lib/components/Uploader.svelte';
@@ -11,6 +11,7 @@
 	import SingleSummary from '$lib/components/SingleSummary.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import ToastHost from '$lib/components/ToastHost.svelte';
+	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
 	import Logo from '$lib/icons/Logo.svelte';
 	import BackIcon from '$lib/icons/BackIcon.svelte';
 	import SunIcon from '$lib/icons/SunIcon.svelte';
@@ -47,10 +48,7 @@
 					<MoonIcon size={16} />
 				{/if}
 			</button>
-			<div class="lang-switch">
-				<button class:is-active={$locale === 'en'} onclick={() => locale.set('en')}>EN</button>
-				<button class:is-active={$locale === 'it'} onclick={() => locale.set('it')}>IT</button>
-			</div>
+			<LanguageSwitcher />
 		</div>
 	</div>
 
@@ -119,11 +117,6 @@
 
 	.wordmark-accent {
 		color: var(--color-accent);
-	}
-
-	.lang-switch {
-		display: flex;
-		gap: 0.5rem;
 	}
 
 	.floating-back {

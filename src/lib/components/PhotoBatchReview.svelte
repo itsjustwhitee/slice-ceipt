@@ -6,6 +6,8 @@
 	import BinIcon from '$lib/icons/BinIcon.svelte';
 	import CameraIcon from '$lib/icons/CameraIcon.svelte';
 	import ImageIcon from '$lib/icons/ImageIcon.svelte';
+	import CheckIcon from '$lib/icons/CheckIcon.svelte';
+	import InfoBanner from './InfoBanner.svelte';
 
 	interface Props {
 		onedit: (id: string) => void;
@@ -42,7 +44,7 @@
 </script>
 
 <h2>{$t('photosLoaded').replace('{count}', String($pendingPhotos.length))}</h2>
-<p class="crop-hint">{$t('cropHint')}</p>
+<InfoBanner text={$t('cropHint')} />
 
 <ul class="photo-list">
 	{#each $pendingPhotos as photo, i (photo.id)}
@@ -112,19 +114,13 @@
 	>
 		<ImageIcon size={16} />
 	</button>
-	<button type="button" class="continue" onclick={oncontinue}>{$t('photoContinue')}</button>
+	<button type="button" class="continue" onclick={oncontinue}>
+		<CheckIcon size={16} />
+		{$t('photoContinue')}
+	</button>
 </div>
 
 <style>
-	.crop-hint {
-		margin: 0.5rem 0 0;
-		padding: 0.65rem 0.85rem;
-		border-radius: 8px;
-		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-		border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
-		font-size: 0.9rem;
-	}
-
 	.photo-list {
 		list-style: none;
 		margin: 0.75rem 0;
@@ -183,6 +179,11 @@
 	}
 
 	.add-row .continue {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
 		flex: 1;
+		line-height: 1;
 	}
 </style>

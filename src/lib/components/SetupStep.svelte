@@ -15,6 +15,10 @@
 	import AddIcon from '$lib/icons/AddIcon.svelte';
 	import BinIcon from '$lib/icons/BinIcon.svelte';
 	import BookmarkIcon from '$lib/icons/BookmarkIcon.svelte';
+	import CheckIcon from '$lib/icons/CheckIcon.svelte';
+	import GroupIcon from '$lib/icons/GroupIcon.svelte';
+	import SingleIcon from '$lib/icons/SingleIcon.svelte';
+	import InfoBanner from './InfoBanner.svelte';
 
 	let newParticipantName = $state('');
 	let newPresetName = $state('');
@@ -50,132 +54,163 @@
 	<h1>{$t('setupTitle')}</h1>
 
 	{#if $isLowConfidenceExtraction}
-		<p class="low-confidence-notice">{$t('lowConfidenceWarning')}</p>
+		<InfoBanner text={$t('lowConfidenceWarning')} />
 	{/if}
 
-	<div class="mode-toggle">
-		<button class:is-active={$mode === 'group'} onclick={() => mode.set('group')}>
-			{$t('modeGroup')}
-		</button>
-		<button class:is-active={$mode === 'single'} onclick={() => mode.set('single')}>
+	<div class="mode-tabs" role="tablist">
+		<button
+			role="tab"
+			aria-selected={$mode === 'single'}
+			class:is-active={$mode === 'single'}
+			onclick={() => mode.set('single')}
+		>
+			<SingleIcon size={16} />
 			{$t('modeSingle')}
 		</button>
+		<button
+			role="tab"
+			aria-selected={$mode === 'group'}
+			class:is-active={$mode === 'group'}
+			onclick={() => mode.set('group')}
+		>
+			<GroupIcon size={16} />
+			{$t('modeGroup')}
+		</button>
 	</div>
-	<p class="hint">{$mode === 'group' ? $t('modeGroupHint') : $t('modeSingleHint')}</p>
+	<div class="mode-panel">
+		<p class="hint">{$mode === 'group' ? $t('modeGroupHint') : $t('modeSingleHint')}</p>
 
-	{#if $mode === 'group'}
-		<section>
-			<h2>{$t('participantsTitle')}</h2>
-			<form
-				class="inline-form"
-				onsubmit={(e) => {
-					e.preventDefault();
-					submitAddParticipant();
-				}}
-			>
-				<input
-					bind:this={participantNameInput}
-					type="text"
-					placeholder={$t('participantNamePlaceholder')}
-					bind:value={newParticipantName}
-				/>
-				<button
-					class="icon-button"
-					type="submit"
-					aria-label={$t('addParticipant')}
-					title={$t('addParticipant')}
+		{#if $mode === 'group'}
+			<section>
+				<h2>{$t('participantsTitle')}</h2>
+				<form
+					class="inline-form"
+					onsubmit={(e) => {
+						e.preventDefault();
+						submitAddParticipant();
+					}}
 				>
-					<AddIcon size={16} />
-				</button>
-			</form>
-			<ul class="participant-list">
-				{#each $participants as participant (participant.id)}
-					<li>
-						<span>{participant.name}</span>
-						<button
-							class="icon-button is-danger"
-							aria-label={$t('removeParticipant')}
-							title={$t('removeParticipant')}
-							onclick={() => removeParticipant(participant.id)}
-						>
-							<BinIcon size={16} />
-						</button>
-					</li>
-				{/each}
-			</ul>
-		</section>
-
-		<section>
-			<h2>{$t('presetsTitle')}</h2>
-			{#if $presets.length > 0}
-				<ul class="preset-list">
-					{#each $presets as preset (preset.id)}
+					<input
+						bind:this={participantNameInput}
+						type="text"
+						placeholder={$t('participantNamePlaceholder')}
+						bind:value={newParticipantName}
+					/>
+					<button
+						class="icon-button"
+						type="submit"
+						aria-label={$t('addParticipant')}
+						title={$t('addParticipant')}
+					>
+						<AddIcon size={16} />
+					</button>
+				</form>
+				<ul class="participant-list">
+					{#each $participants as participant (participant.id)}
 						<li>
-							<span>{preset.name} ({preset.participantNames.join(', ')})</span>
-							<div class="preset-actions">
-								<button onclick={() => applyPreset(preset.id)}>{$t('applyPreset')}</button>
-								<button
-									class="icon-button is-danger"
-									aria-label={$t('deletePreset')}
-									title={$t('deletePreset')}
-									onclick={() => deletePreset(preset.id)}
-								>
-									<BinIcon size={16} />
-								</button>
-							</div>
+							<span>{participant.name}</span>
+							<button
+								class="icon-button is-danger"
+								aria-label={$t('removeParticipant')}
+								title={$t('removeParticipant')}
+								onclick={() => removeParticipant(participant.id)}
+							>
+								<BinIcon size={16} />
+							</button>
 						</li>
 					{/each}
 				</ul>
-			{/if}
-			<form
-				class="inline-form"
-				onsubmit={(e) => {
-					e.preventDefault();
-					submitSavePreset();
-				}}
-			>
-				<input type="text" placeholder={$t('presetNamePlaceholder')} bind:value={newPresetName} />
-				<button
-					class="icon-button"
-					type="submit"
-					aria-label={$t('savePreset')}
-					title={$t('savePreset')}
+			</section>
+
+			<section>
+				<h2>{$t('presetsTitle')}</h2>
+				{#if $presets.length > 0}
+					<ul class="preset-list">
+						{#each $presets as preset (preset.id)}
+							<li>
+								<span>{preset.name} ({preset.participantNames.join(', ')})</span>
+								<div class="preset-actions">
+									<button onclick={() => applyPreset(preset.id)}>{$t('applyPreset')}</button>
+									<button
+										class="icon-button is-danger"
+										aria-label={$t('deletePreset')}
+										title={$t('deletePreset')}
+										onclick={() => deletePreset(preset.id)}
+									>
+										<BinIcon size={16} />
+									</button>
+								</div>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+				<form
+					class="inline-form"
+					onsubmit={(e) => {
+						e.preventDefault();
+						submitSavePreset();
+					}}
 				>
-					<BookmarkIcon size={16} />
-				</button>
-			</form>
-		</section>
-	{:else}
-		<section class="stepper">
-			<button onclick={() => setSingleModeCount($singleModeCount - 1)}>−</button>
-			<span class="stepper-value">{$singleModeCount}</span>
-			<button onclick={() => setSingleModeCount($singleModeCount + 1)}>+</button>
-			<span class="hint">{$t('singleCountLabel')}</span>
-		</section>
-	{/if}
+					<input type="text" placeholder={$t('presetNamePlaceholder')} bind:value={newPresetName} />
+					<button
+						class="icon-button"
+						type="submit"
+						aria-label={$t('savePreset')}
+						title={$t('savePreset')}
+					>
+						<BookmarkIcon size={16} />
+					</button>
+				</form>
+			</section>
+		{:else}
+			<section class="stepper">
+				<button onclick={() => setSingleModeCount($singleModeCount - 1)}>−</button>
+				<span class="stepper-value">{$singleModeCount}</span>
+				<button onclick={() => setSingleModeCount($singleModeCount + 1)}>+</button>
+				<span class="hint">{$t('singleCountLabel')}</span>
+			</section>
+		{/if}
+	</div>
 
 	{#if !$isSetupValid}
 		<p class="status-error">{$t('setupNeedMoreParticipants')}</p>
 	{/if}
 	<button class="continue" disabled={!$isSetupValid} onclick={confirmSetup}>
+		<CheckIcon size={16} />
 		{$t('setupContinue')}
 	</button>
 </div>
 
 <style>
-	.low-confidence-notice {
-		margin: 1rem 0 0;
-		padding: 0.65rem 0.85rem;
-		border-radius: 8px;
-		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-		border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
-		font-size: 0.9rem;
+	.mode-tabs {
+		display: flex;
+		gap: 0.25rem;
+		margin-top: 1rem;
 	}
 
-	.mode-toggle {
+	.mode-tabs button {
 		display: flex;
-		gap: 0.75rem;
-		margin: 1rem 0 0.5rem;
+		align-items: center;
+		gap: 0.4rem;
+		border: none;
+		border-radius: 10px 10px 0 0;
+		background: color-mix(in srgb, var(--color-text-on-surface) 22%, transparent);
+		padding: 0.55em 1em;
+		opacity: 0.8;
+	}
+
+	.mode-tabs button.is-active {
+		opacity: 1;
+		background: var(--color-accent);
+		color: #1a1a1a;
+	}
+
+	.mode-panel {
+		background: color-mix(in srgb, var(--color-text-on-surface) 3%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-text-on-surface) 10%, transparent);
+		border-top: 3px solid var(--color-accent);
+		border-radius: 0 12px 12px 12px;
+		padding: 1rem;
 	}
 
 	.hint {
@@ -244,8 +279,13 @@
 	}
 
 	.continue {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
 		margin-top: 1.5rem;
 		width: 100%;
+		line-height: 1;
 	}
 
 	.continue:disabled {

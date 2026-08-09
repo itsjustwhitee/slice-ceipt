@@ -27,6 +27,7 @@
 	import PlusIcon from '$lib/icons/PlusIcon.svelte';
 	import MinusIcon from '$lib/icons/MinusIcon.svelte';
 	import GearIcon from '$lib/icons/GearIcon.svelte';
+	import CheckIcon from '$lib/icons/CheckIcon.svelte';
 
 	let expandedItemId = $state<string | null>(null);
 	let bulkPanelOpen = $state(false);
@@ -251,7 +252,10 @@
 		{/each}
 	</ul>
 
-	<button class="continue" type="button" onclick={() => step.set('summary')}>{$t('itemsContinue')}</button>
+	<button class="continue" type="button" onclick={() => step.set('summary')}>
+		<CheckIcon size={16} />
+		{$t('itemsContinue')}
+	</button>
 </div>
 
 <AddItemModal open={addModalOpen} onadd={handleAddItem} onclose={() => (addModalOpen = false)} />
@@ -472,7 +476,12 @@
 	}
 
 	.continue {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
 		margin-top: 1.5rem;
 		width: 100%;
+		line-height: 1;
 	}
 </style>

@@ -113,7 +113,11 @@
 			ondragleave={() => (isDragOver = false)}
 			ondrop={handleDrop}
 		>
-			<UploadIcon size={28} />
+			<span class="upload-icon-wrap">
+				<span class="pulse-ring"></span>
+				<span class="pulse-ring is-delayed"></span>
+				<UploadIcon size={28} />
+			</span>
 			<p>{$t('uploadDropzone')}</p>
 		</div>
 		<div class="actions">
@@ -208,9 +212,52 @@
 		background: color-mix(in srgb, var(--color-accent) 8%, transparent);
 	}
 
+	.upload-icon-wrap {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.pulse-ring {
+		position: absolute;
+		inset: -6px;
+		border-radius: 50%;
+		background: var(--color-accent);
+		opacity: 0;
+		animation: pulse-shrink 3.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+		pointer-events: none;
+	}
+
+	.pulse-ring.is-delayed {
+		animation-delay: 1.8s;
+	}
+
+	@keyframes pulse-shrink {
+		0% {
+			transform: scale(1.5);
+			opacity: 0;
+		}
+		20% {
+			opacity: 0.1;
+		}
+		100% {
+			transform: scale(0.85);
+			opacity: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.pulse-ring {
+			animation: none;
+			display: none;
+		}
+	}
+
 	.actions {
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		gap: 0.75rem;
 		margin-top: 1.25rem;
 		flex-wrap: wrap;
