@@ -48,11 +48,15 @@ describe('detectReceiptQuad', () => {
 		expect(detectReceiptQuad(data, width, height)).toBeNull();
 	});
 
-	it('returns null when the whole frame is already bright (no contrast to find an edge from)', () => {
+	it('returns the full frame when the whole photo is already paper (nothing to crop out)', () => {
 		const width = 40;
 		const height = 40;
 		const data = makeImage(width, height, () => 240);
-		expect(detectReceiptQuad(data, width, height)).toBeNull();
+		const quad = detectReceiptQuad(data, width, height);
+		expect(quad).not.toBeNull();
+		const [tl, , br] = quad!;
+		expect(tl).toEqual([0, 0]);
+		expect(br).toEqual([width - 1, height - 1]);
 	});
 
 	it('picks the larger of two separate bright regions', () => {
@@ -67,8 +71,11 @@ describe('detectReceiptQuad', () => {
 
 		const quad = detectReceiptQuad(data, width, height);
 		expect(quad).not.toBeNull();
+		// off by a pixel or two is fine: detection runs on a downsampled copy
 		const [tl, , br] = quad!;
-		expect(tl).toEqual([40, 10]);
-		expect(br).toEqual([100, 50]);
+		expect(tl[0]).toBeCloseTo(40, -1);
+		expect(tl[1]).toBeCloseTo(10, -1);
+		expect(br[0]).toBeCloseTo(100, -1);
+		expect(br[1]).toBeCloseTo(50, -1);
 	});
 });

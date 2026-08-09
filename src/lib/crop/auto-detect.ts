@@ -34,6 +34,47 @@ function otsuThreshold(gray: Float32Array): number {
 	return best;
 }
 
+// Box-downsamples grayscale so dense text smooths into the paper's average
+// (avoiding fragmentation below) while the receipt/background edge survives.
+function downsample(
+	gray: Float32Array,
+	width: number,
+	height: number,
+	outWidth: number,
+	outHeight: number
+): Float32Array {
+	const sum = new Float32Array(outWidth * outHeight);
+	const count = new Int32Array(outWidth * outHeight);
+	for (let y = 0; y < height; y++) {
+		const oy = Math.min(outHeight - 1, Math.floor((y * outHeight) / height));
+		for (let x = 0; x < width; x++) {
+			const ox = Math.min(outWidth - 1, Math.floor((x * outWidth) / width));
+			const oi = oy * outWidth + ox;
+			sum[oi] += gray[y * width + x];
+			count[oi]++;
+		}
+	}
+	for (let i = 0; i < sum.length; i++) sum[i] /= count[i] || 1;
+	return sum;
+}
+
+// Shrinks bright by 1px to sever thin bridges into an adjacent bright background patch.
+function erode(bright: Uint8Array, width: number, height: number): Uint8Array {
+	const out = new Uint8Array(width * height);
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const i = y * width + x;
+			if (!bright[i]) continue;
+			const left = x === 0 || bright[i - 1];
+			const right = x === width - 1 || bright[i + 1];
+			const up = y === 0 || bright[i - width];
+			const down = y === height - 1 || bright[i + width];
+			out[i] = left && right && up && down ? 1 : 0;
+		}
+	}
+	return out;
+}
+
 // Largest 4-connected bright region, via iterative (non-recursive) flood fill.
 function largestBrightRegionBounds(
 	bright: Uint8Array,
@@ -90,36 +131,66 @@ function largestBrightRegionBounds(
 	return best;
 }
 
+const ANALYSIS_MAX = 100;
 const MIN_AREA_FRACTION = 0.15;
-const MAX_AREA_FRACTION = 0.97;
+const ERODE_ITERATIONS = 2;
+const MIN_FILL_RATIO = 0.6; // below this, the box is mostly leaked-into empty space
+const MAX_CHROMA = 40; // paper is near-neutral; excludes warm/colored bright backgrounds (wood, skin, fabric)
 
-/**
- * Guesses the receipt's bounding rectangle for pre-seeding the crop editor's
- * corner handles. Returns null (fall back to the default inset) when
- * nothing plausible is found. Axis-aligned only — dragging fixes rotation.
- */
+/** Guesses the receipt's bounding rectangle, or null if nothing plausible is found. */
 export function detectReceiptQuad(data: Uint8ClampedArray, width: number, height: number): Quad | null {
 	const pixelCount = width * height;
 	if (pixelCount === 0) return null;
 
-	const gray = new Float32Array(pixelCount);
+	const fullGray = new Float32Array(pixelCount);
+	const fullChroma = new Float32Array(pixelCount);
 	for (let i = 0; i < pixelCount; i++) {
 		const o = i * 4;
-		gray[i] = 0.299 * data[o] + 0.587 * data[o + 1] + 0.114 * data[o + 2];
+		const r = data[o];
+		const g = data[o + 1];
+		const b = data[o + 2];
+		fullGray[i] = 0.299 * r + 0.587 * g + 0.114 * b;
+		fullChroma[i] = Math.max(r, g, b) - Math.min(r, g, b);
 	}
+
+	const analysisScale = Math.min(1, ANALYSIS_MAX / Math.max(width, height));
+	const aw = Math.max(1, Math.round(width * analysisScale));
+	const ah = Math.max(1, Math.round(height * analysisScale));
+	const gray = downsample(fullGray, width, height, aw, ah);
+	const chroma = downsample(fullChroma, width, height, aw, ah);
+	const analysisPixelCount = aw * ah;
 
 	const threshold = otsuThreshold(gray);
 	// Strictly greater: Otsu's boundary value belongs to the background cluster.
-	const bright = new Uint8Array(pixelCount);
-	for (let i = 0; i < pixelCount; i++) bright[i] = gray[i] > threshold ? 1 : 0;
+	const bright = new Uint8Array(analysisPixelCount);
+	for (let i = 0; i < analysisPixelCount; i++)
+		bright[i] = gray[i] > threshold && chroma[i] <= MAX_CHROMA ? 1 : 0;
 
-	const region = largestBrightRegionBounds(bright, width, height);
+	let eroded: Uint8Array = bright;
+	for (let i = 0; i < ERODE_ITERATIONS; i++) eroded = erode(eroded, aw, ah);
+
+	const region = largestBrightRegionBounds(eroded, aw, ah);
 	if (!region) return null;
 
-	const areaFraction = region.size / pixelCount;
-	if (areaFraction < MIN_AREA_FRACTION || areaFraction > MAX_AREA_FRACTION) return null;
+	const ex0 = Math.max(0, region.x0 - ERODE_ITERATIONS);
+	const ey0 = Math.max(0, region.y0 - ERODE_ITERATIONS);
+	const ex1 = Math.min(aw - 1, region.x1 + ERODE_ITERATIONS);
+	const ey1 = Math.min(ah - 1, region.y1 + ERODE_ITERATIONS);
 
-	const { x0, y0, x1, y1 } = region;
+	const boxArea = (ex1 - ex0 + 1) * (ey1 - ey0 + 1);
+	if (boxArea / analysisPixelCount < MIN_AREA_FRACTION) return null;
+
+	let brightInBox = 0;
+	for (let y = ey0; y <= ey1; y++) {
+		for (let x = ex0; x <= ex1; x++) brightInBox += bright[y * aw + x];
+	}
+	if (brightInBox / boxArea < MIN_FILL_RATIO) return null;
+
+	const x0 = Math.max(0, Math.floor((ex0 * width) / aw));
+	const y0 = Math.max(0, Math.floor((ey0 * height) / ah));
+	const x1 = Math.min(width - 1, Math.ceil(((ex1 + 1) * width) / aw) - 1);
+	const y1 = Math.min(height - 1, Math.ceil(((ey1 + 1) * height) / ah) - 1);
+
 	return [
 		[x0, y0],
 		[x1, y0],
