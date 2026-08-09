@@ -20,6 +20,16 @@
 	function toggleTheme() {
 		theme.update((current) => (current === 'light' ? 'dark' : 'light'));
 	}
+
+	// Starts matching SSR (detectInitialTheme always returns 'dark' server-side)
+	// and is corrected in an $effect — see Logo.svelte for why a direct
+	// `$theme === 'light'` conditional/attribute here would stay stuck on the
+	// dark-theme icon and label after a reload with light theme saved.
+	let isLight = $state(false);
+
+	$effect(() => {
+		isLight = $theme === 'light';
+	});
 </script>
 
 <main>
@@ -38,11 +48,11 @@
 			<button
 				type="button"
 				class="icon-button"
-				aria-label={$theme === 'light' ? $t('themeToggleToDark') : $t('themeToggleToLight')}
-				title={$theme === 'light' ? $t('themeToggleToDark') : $t('themeToggleToLight')}
+				aria-label={isLight ? $t('themeToggleToDark') : $t('themeToggleToLight')}
+				title={isLight ? $t('themeToggleToDark') : $t('themeToggleToLight')}
 				onclick={toggleTheme}
 			>
-				{#if $theme === 'light'}
+				{#if isLight}
 					<SunIcon size={16} />
 				{:else}
 					<MoonIcon size={16} />

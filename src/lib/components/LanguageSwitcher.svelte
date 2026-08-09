@@ -12,6 +12,16 @@
 	let open = $state(false);
 	let current = $derived(OPTIONS.find((option) => option.value === $locale) ?? OPTIONS[0]);
 
+	// Starts matching SSR (detectInitialLocale always returns 'en' server-side)
+	// and is corrected in an $effect rather than bound to `current.flag`
+	// directly — see Logo.svelte for why a direct binding here would stay
+	// stuck on the English flag after a reload with Italian saved.
+	let currentFlagSrc = $state(flagEn);
+
+	$effect(() => {
+		currentFlagSrc = current.flag;
+	});
+
 	function select(value: Locale) {
 		locale.set(value);
 		open = false;
@@ -33,7 +43,7 @@
 		aria-label={$t('languageSwitcherLabel')}
 		onclick={() => (open = !open)}
 	>
-		<img class="flag" src={current.flag} alt="" width="18" height="18" />
+		<img class="flag" src={currentFlagSrc} alt="" width="18" height="18" />
 		{current.value.toUpperCase()}
 	</button>
 
