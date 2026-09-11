@@ -50,7 +50,9 @@
 	<a class="personal-logo-link" href="https://justwhitee.org" target="_blank" rel="noopener noreferrer">
 		<img class="personal-logo" src={personalLogoSrc} alt={$t('footerPersonalLogoAlt')} />
 	</a>
-	<p class="version" title={$t('footerVersionTitle')}>v{__APP_VERSION__} · {__COMMIT_HASH__}</p>
+	<p class="version" title={$t('footerVersionTitle')}>
+		<span class="version-number">v{__APP_VERSION__}</span> · {__COMMIT_HASH__}
+	</p>
 </footer>
 
 <InstallInfoModal open={installModalOpen} onclose={() => (installModalOpen = false)} />
@@ -148,9 +150,15 @@
 	}
 
 	.version {
-		margin-top: 0.25rem;
-		font-size: 0.7rem;
+		margin-top: 1.25rem;
+		margin-bottom: 0.5rem;
+		font-size: 0.65rem;
 		font-family: monospace;
+		font-style: italic;
 		opacity: 0.6;
+	}
+
+	.version-number {
+		font-weight: 700;
 	}
 </style>
