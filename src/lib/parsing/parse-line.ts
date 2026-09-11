@@ -11,7 +11,12 @@ export interface ParsedLine {
 // digit-AFTER-"X" form ("X8") on purpose — real receipt evidence
 // (Coop: "DANACOL BIANCO X8" priced as one €5.90 pack) shows that shape
 // is often a product/pack-size code, not a checkout quantity marker.
-const QUANTITY_MARKER = /(?:(\d+)\s*(?:X\b|PZ\b)|Q\.?T[AÀ]?\.?\s*(\d+))/i;
+// "PZ" additionally requires a space before it ("3 PZ", never "3PZ") —
+// unlike "X", a glued-on "<N>PZ" is a pack-size suffix baked into the
+// product code (real Coop receipt: "M-ASC.COOP CASA 3PZ" priced as one
+// €1.85 pack of 3, not 3 units at ~0.62 each), while a real quantity
+// marker is always printed with a space.
+const QUANTITY_MARKER = /(?:(\d+)\s*X\b|(\d+)\s+PZ\b|Q\.?T[AÀ]?\.?\s*(\d+))/i;
 
 // Many Italian receipts print a per-line VAT rate between the item name and
 // its price (e.g. "PASSATA DI POMODORO 4,00% 0,99") — this is the item's tax
@@ -47,7 +52,7 @@ export function extractNameAndPrice(rawLine: string): ParsedLine | null {
 		return { name: nameWithMarker, unitPriceCents: totalCents, quantity: 1 };
 	}
 
-	const quantity = Number(markerMatch[1] ?? markerMatch[2]);
+	const quantity = Number(markerMatch[1] ?? markerMatch[2] ?? markerMatch[3]);
 	const cleanName = (
 		nameWithMarker.slice(0, markerMatch.index) +
 		nameWithMarker.slice((markerMatch.index ?? 0) + markerMatch[0].length)

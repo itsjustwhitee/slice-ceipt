@@ -95,6 +95,21 @@ describe('extractItemLines', () => {
 		expect(extractItemLines(lines)).toEqual(['ITEM ONE   1,00']);
 	});
 
+	it('still stops at a footer marker when a short stray symbol is glued onto its front (real low-quality-photo receipt: "= TOT.CONPLESSIVO 1,00")', () => {
+		const lines = ['= PROFUMI 22% 1,00', '= TOT.CONPLESSIVO 1,00', '8 pag.contante 1,00'];
+		expect(extractItemLines(lines)).toEqual(['= PROFUMI 22% 1,00']);
+	});
+
+	it('does not mistake a header "P. Iva: ..." line (OCR-inserted space after "P.") for the IVA footer marker', () => {
+		const lines = [
+			'Trattoria Il Gabbiano',
+			'P. Iva: 01622310180',
+			'Menu Carta                2,00',
+			'CONTANTI                   2,00'
+		];
+		expect(extractItemLines(lines)).toEqual(['Menu Carta                2,00']);
+	});
+
 	it('does not mistake an item name starting with "TOT" or "PAG" for a footer marker', () => {
 		const lines = ['TOTANI FRESCHI       3,50', 'PAGELLA REGALO       2,00'];
 		expect(extractItemLines(lines)).toEqual(['TOTANI FRESCHI       3,50', 'PAGELLA REGALO       2,00']);

@@ -46,6 +46,27 @@ describe('groupIdenticalItems', () => {
 		]);
 	});
 
+	it('groups consecutive items with an identical discount', () => {
+		const result = groupIdenticalItems([
+			{ name: 'PASTA', unitPriceCents: 100, quantity: 1, originalPriceCents: 120 },
+			{ name: 'PASTA', unitPriceCents: 100, quantity: 1, originalPriceCents: 120 }
+		]);
+		expect(result).toEqual([
+			{ name: 'PASTA', unitPriceCents: 100, quantity: 2, originalPriceCents: 120 }
+		]);
+	});
+
+	it('does not group items with the same discounted price but a different original price', () => {
+		const result = groupIdenticalItems([
+			{ name: 'PASTA', unitPriceCents: 100, quantity: 1, originalPriceCents: 120 },
+			{ name: 'PASTA', unitPriceCents: 100, quantity: 1, originalPriceCents: 150 }
+		]);
+		expect(result).toEqual([
+			{ name: 'PASTA', unitPriceCents: 100, quantity: 1, originalPriceCents: 120 },
+			{ name: 'PASTA', unitPriceCents: 100, quantity: 1, originalPriceCents: 150 }
+		]);
+	});
+
 	it('leaves whole-receipt discount items standalone', () => {
 		const result = groupIdenticalItems([
 			{ name: 'SCONTO FEDELTA', unitPriceCents: -100, quantity: 1, isWholeReceiptDiscount: true },

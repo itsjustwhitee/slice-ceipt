@@ -10,13 +10,27 @@ import { parsePriceCents } from './price';
 const FOOTER_KEYWORDS =
 	/^\s*(TOT(?:ALE)?\.?|CONTANT[EI]|RESTO|CARTA|BANCOMAT|PAG(?:AMENTO)?\.?|IVA|IMPOSTA|SCONTRINO\s+FISCALE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
 
+// A low-quality photo (background bleeding in past the receipt's edge, a
+// faint fold/shadow) often gets OCR'd with a short stray symbol token
+// glued onto the front of an otherwise-clean line (e.g. "=
+// TOT.COMPLESSIVO 1,00") — real receipt evidence. That defeats the
+// anchored match above outright. Stripping a short (<=3 char) leading
+// *symbol-only* token before testing is safe: it can never eat into a
+// real word (letters/digits are excluded, so e.g. "P. Iva: ..." keeps its
+// "P." — stripping that too would misfire, "Iva" alone reading as the IVA
+// footer keyword on what's actually a header line), and a real line's own
+// first word is essentially always longer than 3 chars anyway.
+const LEADING_NOISE = /^\s*[^\w\s]{1,3}\s+/;
+
 /**
  * Cuts a raw line list down to everything before the first footer-keyword
  * line. Unlike `extractItemLines`, keeps priceless lines too, so a name
  * wrapped across OCR lines (see `mergeWrappedNameLines`) can still merge.
  */
 export function trimFooter(lines: string[]): string[] {
-	const footerIndex = lines.findIndex((line) => FOOTER_KEYWORDS.test(line));
+	const footerIndex = lines.findIndex(
+		(line) => FOOTER_KEYWORDS.test(line) || FOOTER_KEYWORDS.test(line.replace(LEADING_NOISE, ''))
+	);
 	return footerIndex === -1 ? lines : lines.slice(0, footerIndex);
 }
 

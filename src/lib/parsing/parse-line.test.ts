@@ -42,6 +42,14 @@ describe('extractNameAndPrice', () => {
 		});
 	});
 
+	it('does NOT treat a glued-on "<N>PZ" suffix as a quantity marker, since it is a pack-size code baked into the product name rather than a checkout multiplier (real Coop receipt: "M-ASC.COOP CASA 3PZ" priced as one €1.85 pack, not 3 units at ~0.62 each)', () => {
+		expect(extractNameAndPrice('M-ASC.COOP CASA 3PZ   1,85')).toEqual({
+			name: 'M-ASC.COOP CASA 3PZ',
+			unitPriceCents: 185,
+			quantity: 1
+		});
+	});
+
 	it('handles "Q.TA" style marker (digit AFTER the keyword, unlike X/PZ)', () => {
 		expect(extractNameAndPrice('YOGURT Q.TA 2            2,00')).toEqual({
 			name: 'YOGURT',

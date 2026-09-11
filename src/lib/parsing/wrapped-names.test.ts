@@ -17,6 +17,16 @@ describe('mergeWrappedNameLines', () => {
 		expect(mergeWrappedNameLines(lines)).toEqual(lines);
 	});
 
+	it('joins a name wrapped across two lines even when the price line keeps the broken word\'s tail (real Coop receipt: "Hamburger - 200 gr - Sals" / "a BBQ 10,00% 8,00")', () => {
+		const result = mergeWrappedNameLines(['Hamburger - 200 gr - Sals', 'a BBQ 10,00% 8,00']);
+		expect(result).toEqual(['Hamburger - 200 gr - Salsa BBQ 10,00% 8,00']);
+	});
+
+	it('joins a word-tail wrap where the tail is a single short fragment (real receipt: "Ketc" / "hup")', () => {
+		const result = mergeWrappedNameLines(['Hamburger - 300 gr - Ketc', 'hup 10,00% 8,00']);
+		expect(result).toEqual(['Hamburger - 300 gr - Ketchup 10,00% 8,00']);
+	});
+
 	it('does not attach unrelated priceless lines (e.g. a column-header row) to the next item, since that item already has its own name', () => {
 		const result = mergeWrappedNameLines([
 			'DESCRIZIONE              IVA        Prezzo(€)',
