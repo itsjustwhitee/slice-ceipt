@@ -100,6 +100,14 @@ describe('extractNameAndPrice', () => {
 		});
 	});
 
+	it('strips a trailing VAT rate printed as a bare integer with no decimal part (real Lidl receipt: "COSTINE DI SUINO 10% 8,38")', () => {
+		expect(extractNameAndPrice('COSTINE DI SUINO       10%      8,38')).toEqual({
+			name: 'COSTINE DI SUINO',
+			unitPriceCents: 838,
+			quantity: 1
+		});
+	});
+
 	it('does not strip a number that only coincidentally looks like a VAT rate but has no percent sign', () => {
 		expect(extractNameAndPrice('CACIOT MISTO MONTE 4,00        5,90')).toEqual({
 			name: 'CACIOT MISTO MONTE 4,00',
@@ -118,7 +126,7 @@ describe('extractNameAndPrice', () => {
 
 	it('strips a price with an OCR-misread curly-quote minus sign from the name too, not just its value', () => {
 		expect(extractNameAndPrice('Sconto % tot 20% “6,40')).toEqual({
-			name: 'Sconto % tot 20%',
+			name: 'Sconto % tot',
 			unitPriceCents: -640,
 			quantity: 1
 		});

@@ -8,7 +8,7 @@ import { parsePriceCents } from './price';
 // SUBTOTALE/SUBTOTAL is excluded too: a whole-receipt discount commonly
 // follows it before the final TOTALE — see RUNNING_TOTAL_KEYWORDS below.
 const FOOTER_KEYWORDS =
-	/^\s*(TOT(?:ALE)?\.?|CONTANT[EI]|RESTO|CARTA|BANCOMAT|PAG(?:AMENTO)?\.?|IVA|IMPOSTA|SCONTRINO\s+FISCALE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU)\b/i;
+	/^\s*(TOT(?:ALE)?\.?|CONTANT[EI]|RESTO|CARTA|BANCOMAT|PAG(?:AMENTO)?\.?|IVA|IMPOSTA|SCONTRINO\s+FISCALE|CASSA|CASSIERE|GRAZIE|ARRIVEDERCI|TOTAL|CASH|CHANGE|VAT|TAX|THANK\s+YOU|VALORE\s+SCONT[OI])\b/i;
 
 // A low-quality photo (background bleeding in past the receipt's edge, a
 // faint fold/shadow) often gets OCR'd with a short stray symbol token

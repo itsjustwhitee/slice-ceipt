@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mergeBareQuantityLines } from './quantity-lines';
+import { mergeBareQuantityLines, mergeCadQuantityLines } from './quantity-lines';
 
 describe('mergeBareQuantityLines', () => {
 	it('merges a bare "N x price" line into the following name line (real coperto-receipt pattern)', () => {
@@ -39,5 +39,36 @@ describe('mergeBareQuantityLines', () => {
 	it('drops a ",00" formatting suffix on the quantity itself (real receipt: "3,00 X 2,50" meaning 3 units, not a fractional count)', () => {
 		const result = mergeBareQuantityLines(['3,00 X 2,50', 'Coperto                          10%   7,50']);
 		expect(result).toEqual(['3X Coperto                          10%   7,50']);
+	});
+});
+
+describe('mergeCadQuantityLines', () => {
+	it('merges a "Cad <unit price> Pz. <N>" disclosure line into the preceding item line (real Lidl receipt)', () => {
+		const result = mergeCadQuantityLines(['COSTINE DI SUINO       10%      8,38', 'Cad 4,19 Pz. 2']);
+		expect(result).toEqual(['2X COSTINE DI SUINO       10%      8,38']);
+	});
+
+	it('handles several disclosure/item pairs in the same receipt independently', () => {
+		const result = mergeCadQuantityLines([
+			'COSTINE DI SUINO       10%      8,38',
+			'Cad 4,19 Pz. 2',
+			'Coupon Lidl Plus -5%   10%     -0,42',
+			'PANCETTA A FETTE       10%      5,58',
+			'Cad 2,79 Pz. 2'
+		]);
+		expect(result).toEqual([
+			'2X COSTINE DI SUINO       10%      8,38',
+			'Coupon Lidl Plus -5%   10%     -0,42',
+			'2X PANCETTA A FETTE       10%      5,58'
+		]);
+	});
+
+	it('leaves a disclosure line with no preceding item as-is (nothing to merge into)', () => {
+		expect(mergeCadQuantityLines(['Cad 4,19 Pz. 2'])).toEqual(['Cad 4,19 Pz. 2']);
+	});
+
+	it('leaves normal lines untouched', () => {
+		const lines = ['PANE INTEGRALE          2,50', '3X BIRRA ICHNUSA 50CL   4,50'];
+		expect(mergeCadQuantityLines(lines)).toEqual(lines);
 	});
 });

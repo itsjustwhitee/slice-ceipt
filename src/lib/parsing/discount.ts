@@ -51,7 +51,16 @@ export function applyDiscounts(lines: ParsedLine[]): ParsedItem[] {
 
 		if (!isWholeReceipt) {
 			previous.originalPriceCents = previous.unitPriceCents;
-			previous.unitPriceCents = previous.unitPriceCents + line.unitPriceCents;
+			// The discount line's amount is a lump sum for the whole line, not
+			// per unit (real Lidl receipt: "COSTINE DI SUINO ... 8,38" / "Cad
+			// 4,19 Pz. 2" / "Coupon Lidl Plus -5% ... -0,42" — the -0.42 is 5%
+			// of the 8.38 *total*, not per piece). Adding it straight to
+			// unitPriceCents like a per-unit amount would multiply it by
+			// quantity when the split is computed downstream, over-discounting
+			// a multi-unit item. Spread it across the quantity instead.
+			previous.unitPriceCents = Math.round(
+				(previous.unitPriceCents * previous.quantity + line.unitPriceCents) / previous.quantity
+			);
 			continue;
 		}
 

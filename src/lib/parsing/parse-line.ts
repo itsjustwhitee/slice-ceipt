@@ -24,8 +24,11 @@ const QUANTITY_MARKER = /(?:(\d+)\s*X\b|(\d+)\s+PZ\b|Q\.?T[AÀ]?\.?\s*(\d+))/i;
 // used, the same way a quantity marker is. Some real receipts' extracted
 // text puts a space after the decimal separator ("4, 00%" rather than
 // "4,00%") — allow optional whitespace there too, or the rate is left
-// stuck to the name instead of being stripped.
-const VAT_PERCENTAGE = /\d{1,2}\s*[.,]\s*\d{2}\s*%\s*$/;
+// stuck to the name instead of being stripped. The decimal part itself is
+// optional: discount-format retailers (real Lidl receipt: "COSTINE DI
+// SUINO 10% 8,38") print the rate as a bare integer instead of "10,00%" —
+// without this, every single item's name on that receipt keeps its VAT tag.
+const VAT_PERCENTAGE = /\d{1,2}\s*(?:[.,]\s*\d{2})?\s*%\s*$/;
 
 /**
  * Splits one already-confirmed item line (from `extractItemLines`) into its

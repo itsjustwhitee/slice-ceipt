@@ -63,3 +63,35 @@ export function mergeBareQuantityLines(lines: string[]): string[] {
 
 	return result;
 }
+
+// Discount supermarkets disclose a multi-piece item's per-unit price and
+// count on their own line right after the item's name+total line, e.g.
+// "COSTINE DI SUINO 10% 8,38" / "Cad 4,19 Pz. 2" (real Lidl receipt: "Cad" =
+// "cadauno"/each, "Pz." = "pezzi"/pieces). Unlike BARE_QUANTITY_LINE this
+// always trails its item rather than leading it, so it must merge backward
+// only — there's no "prefer the following line" case here, the line after
+// is always the next item's own discount/name line, never part of this one.
+const CAD_QUANTITY_LINE = /^\s*Cad\.?\s+\d+[.,]\d{2}\s*(?:€|EUR)?\s+Pz\.?\s*(\d{1,2})\s*$/i;
+
+/**
+ * Merges a "Cad <unit price> Pz. <N>" disclosure line into the item line
+ * just before it by prepending an "NX" marker, the same convention
+ * `mergeBareQuantityLines` uses, so `extractNameAndPrice` recovers the real
+ * per-unit price/quantity instead of leaving the item at quantity 1. Must
+ * run before `mergeWrappedNameLines`, which would otherwise treat this
+ * priceless line as an orphaned name fragment and silently drop it.
+ */
+export function mergeCadQuantityLines(lines: string[]): string[] {
+	const result: string[] = [];
+
+	for (const line of lines) {
+		const match = line.match(CAD_QUANTITY_LINE);
+		if (match && result.length > 0) {
+			result[result.length - 1] = `${match[1]}X ${result[result.length - 1]}`;
+			continue;
+		}
+		result.push(line);
+	}
+
+	return result;
+}

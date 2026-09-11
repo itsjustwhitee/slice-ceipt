@@ -92,7 +92,7 @@ describe('parseReceiptText end-to-end', () => {
 			{ name: 'SERVIZIO ACQUA', unitPriceCents: 150, quantity: 1 },
 			{ name: 'MEDIA CHIARA', unitPriceCents: 450, quantity: 1 },
 			{
-				name: 'Sconto % tot 20%',
+				name: 'Sconto % tot',
 				unitPriceCents: -640,
 				quantity: 1,
 				isWholeReceiptDiscount: true
@@ -300,5 +300,51 @@ describe('parseReceiptText end-to-end', () => {
 			{ name: 'MILK', unitPriceCents: 399, quantity: 1 },
 			{ name: 'BREAD', unitPriceCents: 250, quantity: 1 }
 		]);
+	});
+
+	it('parses a real Lidl receipt end-to-end: bare-integer VAT rates, "Cad ... Pz." multi-unit disclosure lines, a "VALORE SCONTI" summary line before SUBTOTALE, and per-line coupon discounts', () => {
+		const receipt = [
+			'Lidl Italia S.r.l. a socio unico',
+			'Imola (BO) - cdc 1335',
+			'40026-Via Selice 100',
+			'PI02275030233 RAEE IT08020000001777',
+			'',
+			'DOCUMENTO COMMERCIALE',
+			'di vendita o prestazione',
+			'',
+			'DESCRIZIONE            IVA  PREZZO(€)',
+			'BORSA DELLA SPESA      22%      0,79',
+			'Coupon Lidl Plus -5%   22%     -0,04',
+			'CALVE SALSA BARBECUE   10%      2,99',
+			'Coupon Lidl Plus -5%   10%     -0,15',
+			'COSTINE DI SUINO       10%      8,38',
+			'Cad 4,19 Pz. 2',
+			'Coupon Lidl Plus -5%   10%     -0,42',
+			'PANCETTA A FETTE       10%      5,58',
+			'Cad 2,79 Pz. 2',
+			'Coupon Lidl Plus -5%   10%     -0,28',
+			'CROCC.MAIS. AL FORM.   10%      0,88',
+			'Cad 0,44 Pz. 2',
+			'Coupon Lidl Plus -5%   10%     -0,04',
+			'VALORE SCONTI                   0,93',
+			'SUBTOTALE                      17,69',
+			'TOTALE COMPLESSIVO             17,69',
+			'DI CUI IVA                      1,61',
+			'Pagamento contante              20,00',
+			'Resto                            2,31'
+		].join('\n');
+
+		const items = parseReceiptText(receipt);
+
+		expect(items).toEqual([
+			{ name: 'BORSA DELLA SPESA', unitPriceCents: 75, quantity: 1, originalPriceCents: 79 },
+			{ name: 'CALVE SALSA BARBECUE', unitPriceCents: 284, quantity: 1, originalPriceCents: 299 },
+			{ name: 'COSTINE DI SUINO', unitPriceCents: 398, quantity: 2, originalPriceCents: 419 },
+			{ name: 'PANCETTA A FETTE', unitPriceCents: 265, quantity: 2, originalPriceCents: 279 },
+			{ name: 'CROCC.MAIS. AL FORM.', unitPriceCents: 42, quantity: 2, originalPriceCents: 44 }
+		]);
+
+		const sum = items.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		expect(sum).toBe(1769); // matches "SUBTOTALE"/"TOTALE COMPLESSIVO 17,69" in the fixture
 	});
 });

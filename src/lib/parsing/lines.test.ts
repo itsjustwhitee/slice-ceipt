@@ -100,6 +100,15 @@ describe('extractItemLines', () => {
 		expect(extractItemLines(lines)).toEqual(['= PROFUMI 22% 1,00']);
 	});
 
+	it('stops at a "VALORE SCONTI" footer marker (real Lidl receipt: total-discounts summary line before SUBTOTALE)', () => {
+		const lines = [
+			'COSTINE DI SUINO       10%      8,38',
+			'VALORE SCONTI                   2,38',
+			'SUBTOTALE                      45,52'
+		];
+		expect(extractItemLines(lines)).toEqual(['COSTINE DI SUINO       10%      8,38']);
+	});
+
 	it('does not mistake a header "P. Iva: ..." line (OCR-inserted space after "P.") for the IVA footer marker', () => {
 		const lines = [
 			'Trattoria Il Gabbiano',

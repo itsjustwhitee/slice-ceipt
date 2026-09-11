@@ -28,6 +28,21 @@ describe('applyDiscounts', () => {
 		]);
 	});
 
+	it('spreads a per-item discount across quantity instead of treating it as per-unit (real Lidl receipt: "COSTINE DI SUINO" x2 @ 8,38 total, "Coupon Lidl Plus" -0,42 total, not per piece)', () => {
+		const result = applyDiscounts([
+			{ name: 'COSTINE DI SUINO', unitPriceCents: 419, quantity: 2 },
+			{ name: 'Coupon Lidl Plus', unitPriceCents: -42, quantity: 1 }
+		]);
+		expect(result).toEqual([
+			{
+				name: 'COSTINE DI SUINO',
+				unitPriceCents: 398,
+				quantity: 2,
+				originalPriceCents: 419
+			}
+		]);
+	});
+
 	it('treats a loyalty-card discount as a whole-receipt item, not merged into the preceding item', () => {
 		const result = applyDiscounts([
 			{ name: 'BIRRA ICHNUSA 50CL', unitPriceCents: 150, quantity: 3 },
