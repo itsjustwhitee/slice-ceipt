@@ -92,6 +92,7 @@ const it: Dictionary = {
 	footerSource: 'Codice sorgente',
 	footerMadeBy: 'justwhitee',
 	footerPersonalLogoAlt: 'justwhitee',
+	footerVersionTitle: 'Numero di versione e commit di build — includilo quando segnali un bug',
 	installModalTitle: '📲 Installare SliceCeipt',
 	installIntro: "SliceCeipt è una Progressive Web App: installala una volta e si comporterà come un'app nativa, funzionando anche offline senza la barra del browser.",
 	installStepAndroid: 'Android (Chrome): tocca il menu (⋮) e scegli "Installa app" oppure "Aggiungi a schermata Home".',

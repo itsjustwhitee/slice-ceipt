@@ -90,6 +90,7 @@ const en = {
 	footerSource: 'Source code',
 	footerMadeBy: 'justwhitee',
 	footerPersonalLogoAlt: 'justwhitee',
+	footerVersionTitle: 'Version number and build commit — include this when reporting a bug',
 	installModalTitle: '📲 Installing SliceCeipt',
 	installIntro: 'SliceCeipt is a Progressive Web App: install it once and it behaves like a native app, working offline with no browser bar.',
 	installStepAndroid: 'Android (Chrome): tap the menu (⋮) and choose "Install app" or "Add to Home screen".',

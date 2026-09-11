@@ -50,6 +50,7 @@
 	<a class="personal-logo-link" href="https://justwhitee.org" target="_blank" rel="noopener noreferrer">
 		<img class="personal-logo" src={personalLogoSrc} alt={$t('footerPersonalLogoAlt')} />
 	</a>
+	<p class="version" title={$t('footerVersionTitle')}>v{__APP_VERSION__} · {__COMMIT_HASH__}</p>
 </footer>
 
 <InstallInfoModal open={installModalOpen} onclose={() => (installModalOpen = false)} />
@@ -144,5 +145,12 @@
 
 	.personal-logo-link:hover .personal-logo {
 		opacity: 1;
+	}
+
+	.version {
+		margin-top: 0.25rem;
+		font-size: 0.7rem;
+		font-family: monospace;
+		opacity: 0.6;
 	}
 </style>
