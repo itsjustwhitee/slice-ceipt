@@ -6,6 +6,11 @@ import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
 declare let self: ServiceWorkerGlobalScope;
 
+// registerType 'autoUpdate' with injectManifest: the new worker must take over itself, or an installed
+// app keeps running the old one, whose missing or stale share handler lets shared files hit the host (405).
+self.skipWaiting();
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
