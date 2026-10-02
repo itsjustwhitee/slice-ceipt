@@ -29,6 +29,8 @@ const en = {
 	extractionContinueManually: 'Continue without it',
 	lowConfidenceWarning:
 		"⚠️ The scan wasn't very clear, so a few items might be wrong — double-check them before continuing.",
+	totalMismatchWarning:
+		'⚠️ The items add up to {parsed}, but the receipt shows a total of {printed} — double-check them before continuing.',
 	setupTitle: "Who's splitting?",
 	modeGroup: 'Group',
 	modeSingle: 'Single',

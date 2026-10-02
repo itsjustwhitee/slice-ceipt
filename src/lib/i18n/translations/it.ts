@@ -31,6 +31,8 @@ const it: Dictionary = {
 	extractionContinueManually: 'Continua senza',
 	lowConfidenceWarning:
 		'⚠️ La scansione non è risultata molto chiara: alcuni articoli potrebbero essere sbagliati, ricontrollali prima di continuare.',
+	totalMismatchWarning:
+		'⚠️ Gli articoli sommano a {parsed}, ma lo scontrino indica un totale di {printed} — ricontrollali prima di continuare.',
 	setupTitle: 'Chi divide il conto?',
 	modeGroup: 'Gruppo',
 	modeSingle: 'Singolo',

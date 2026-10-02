@@ -10,6 +10,8 @@ import {
 	extractionProgress,
 	extractionConfidence,
 	parsedItems,
+	printedTotalCents,
+	totalMismatchWarning,
 	groupItems,
 	singleItems,
 	groupTotals,
@@ -103,6 +105,35 @@ describe('receipt session store', () => {
 		expect(get(extractionConfidence)).toBeNull();
 	});
 
+	it('loadReceipt records the printed total and flags a mismatch when it disagrees with the parsed items (real Lidl-receipt OCR failure mode: a mangled discount inflates/deflates the sum)', async () => {
+		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
+		const deps: ExtractDeps = {
+			...fakeDeps,
+			extractTextFromImage: async () => 'Bread 2.50\nMilk 1.20\nTOTALE COMPLESSIVO 45,52\n'
+		};
+		await loadReceipt(file, deps);
+		expect(get(printedTotalCents)).toBe(4552);
+		expect(get(totalMismatchWarning)).toBe(true);
+	});
+
+	it('loadReceipt does not flag a mismatch when the parsed items reconcile with the printed total', async () => {
+		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
+		const deps: ExtractDeps = {
+			...fakeDeps,
+			extractTextFromImage: async () => 'Bread 2.50\nMilk 1.20\nTOTALE 3,70\n'
+		};
+		await loadReceipt(file, deps);
+		expect(get(printedTotalCents)).toBe(370);
+		expect(get(totalMismatchWarning)).toBe(false);
+	});
+
+	it('loadReceipt does not flag a mismatch when the receipt has no recognizable printed total', async () => {
+		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
+		await loadReceipt(file, fakeDeps);
+		expect(get(printedTotalCents)).toBeNull();
+		expect(get(totalMismatchWarning)).toBe(false);
+	});
+
 	it('loadReceipt records an error and stays on the upload step on failure', async () => {
 		const file = new File([new Uint8Array([1])], 'receipt.jpg', { type: 'image/jpeg' });
 		const failingDeps: ExtractDeps = {
@@ -151,11 +182,13 @@ describe('receipt session store', () => {
 		expect(get(pendingPhotos)).toEqual([]);
 	});
 
-	it('skipExtraction leaves items empty, clears confidence, and advances to setup', () => {
+	it('skipExtraction leaves items empty, clears confidence and the printed total, and advances to setup', () => {
 		extractionConfidence.set(80);
+		printedTotalCents.set(4552);
 		skipExtraction();
 		expect(get(parsedItems)).toEqual([]);
 		expect(get(extractionConfidence)).toBeNull();
+		expect(get(printedTotalCents)).toBeNull();
 		expect(get(step)).toBe('setup');
 	});
 

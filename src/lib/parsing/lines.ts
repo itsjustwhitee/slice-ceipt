@@ -20,7 +20,9 @@ const FOOTER_KEYWORDS =
 // "P." — stripping that too would misfire, "Iva" alone reading as the IVA
 // footer keyword on what's actually a header line), and a real line's own
 // first word is essentially always longer than 3 chars anyway.
-const LEADING_NOISE = /^\s*[^\w\s]{1,3}\s+/;
+// Exported for printed-total.ts, which needs the same tolerance when
+// scanning for the receipt's own grand-total line.
+export const LEADING_NOISE = /^\s*[^\w\s]{1,3}\s+/;
 
 /**
  * Cuts a raw line list down to everything before the first footer-keyword

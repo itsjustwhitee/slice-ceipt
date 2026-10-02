@@ -8,10 +8,16 @@
 		setSingleModeCount,
 		isSetupValid,
 		isLowConfidenceExtraction,
+		totalMismatchWarning,
+		parsedItems,
+		printedTotalCents,
 		confirmSetup
 	} from '$lib/stores/receipt';
 	import { participants, addParticipant, removeParticipant } from '$lib/stores/participants';
 	import { presets, savePreset, deletePreset, applyPreset } from '$lib/stores/presets';
+	import { currency } from '$lib/stores/currency';
+	import { locale } from '$lib/i18n';
+	import { formatCents } from '$lib/money/format';
 	import AddIcon from '$lib/icons/AddIcon.svelte';
 	import BinIcon from '$lib/icons/BinIcon.svelte';
 	import BookmarkIcon from '$lib/icons/BookmarkIcon.svelte';
@@ -48,6 +54,14 @@
 		savePreset(name, $participants.map((p) => p.name));
 		newPresetName = '';
 	}
+
+	let totalMismatchText = $derived.by(() => {
+		if (!$totalMismatchWarning || $printedTotalCents === null) return '';
+		const parsedSum = $parsedItems.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		return $t('totalMismatchWarning')
+			.replace('{parsed}', formatCents(parsedSum, $currency, $locale))
+			.replace('{printed}', formatCents($printedTotalCents, $currency, $locale));
+	});
 </script>
 
 <div class="card">
@@ -55,6 +69,9 @@
 
 	{#if $isLowConfidenceExtraction}
 		<InfoBanner text={$t('lowConfidenceWarning')} />
+	{/if}
+	{#if $totalMismatchWarning}
+		<InfoBanner text={totalMismatchText} />
 	{/if}
 
 	<div class="mode-tabs" role="tablist">

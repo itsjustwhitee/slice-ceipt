@@ -1,6 +1,6 @@
 import { derived, get, writable } from 'svelte/store';
 import { extractReceiptText, extractTextFromImages, type ExtractDeps } from '$lib/extract';
-import { parseReceiptText, type ParsedItem } from '$lib/parsing';
+import { parseReceiptText, extractPrintedTotalCents, type ParsedItem } from '$lib/parsing';
 import {
 	createGroupItemsFromParsed,
 	computeGroupTotals,
@@ -34,6 +34,22 @@ export const isLowConfidenceExtraction = derived(
 	($extractionConfidence) => $extractionConfidence !== null && $extractionConfidence < LOW_CONFIDENCE_THRESHOLD
 );
 export const parsedItems = writable<ParsedItem[]>([]);
+/** The receipt's own printed grand total, or `null` if none was found in the extracted text. */
+export const printedTotalCents = writable<number | null>(null);
+// A couple of cents of slack for harmless rounding, not for real parsing
+// gaps — this is meant to catch the receipt visibly not reconciling (an
+// OCR-mangled discount turning -0,27 into -90,27, say), not to chase every
+// last cent.
+const TOTAL_MISMATCH_TOLERANCE_CENTS = 2;
+/** True when the parsed items' sum doesn't reconcile with the receipt's own printed total, so the setup step can nudge the user to double-check before continuing. */
+export const totalMismatchWarning = derived(
+	[parsedItems, printedTotalCents],
+	([$parsedItems, $printedTotalCents]) => {
+		if ($printedTotalCents === null) return false;
+		const sum = $parsedItems.reduce((total, item) => total + item.unitPriceCents * item.quantity, 0);
+		return Math.abs(sum - $printedTotalCents) > TOTAL_MISMATCH_TOLERANCE_CENTS;
+	}
+);
 export const groupItems = writable<GroupItem[]>([]);
 export const singleItems = writable<SingleItem[]>([]);
 
@@ -75,6 +91,7 @@ export async function loadReceipt(file: File, deps?: ExtractDeps): Promise<void>
 	extractionError.set(null);
 	extractionProgress.set(0);
 	extractionConfidence.set(null);
+	printedTotalCents.set(null);
 	try {
 		const onProgress = (fraction: number) => extractionProgress.set(fraction);
 		const onConfidence = (confidence: number) => extractionConfidence.set(confidence);
@@ -82,6 +99,7 @@ export async function loadReceipt(file: File, deps?: ExtractDeps): Promise<void>
 			? await extractReceiptText(file, deps, onProgress, onConfidence)
 			: await extractReceiptText(file, undefined, onProgress, onConfidence);
 		parsedItems.set(parseReceiptText(text));
+		printedTotalCents.set(extractPrintedTotalCents(text));
 		extractionStatus.set('idle');
 		step.set('setup');
 	} catch (err) {
@@ -102,6 +120,7 @@ export async function loadReceiptFromPhotos(photos: PendingPhoto[], deps?: Extra
 	extractionError.set(null);
 	extractionProgress.set(0);
 	extractionConfidence.set(null);
+	printedTotalCents.set(null);
 	try {
 		const onProgress = (fraction: number) => extractionProgress.set(fraction);
 		const onConfidence = (confidence: number) => extractionConfidence.set(confidence);
@@ -110,6 +129,7 @@ export async function loadReceiptFromPhotos(photos: PendingPhoto[], deps?: Extra
 			? await extractTextFromImages(images, deps.extractTextFromImage, onProgress, onConfidence)
 			: await extractTextFromImages(images, undefined, onProgress, onConfidence);
 		parsedItems.set(parseReceiptText(text));
+		printedTotalCents.set(extractPrintedTotalCents(text));
 		extractionStatus.set('idle');
 		step.set('setup');
 	} catch (err) {
@@ -122,6 +142,7 @@ export async function loadReceiptFromPhotos(photos: PendingPhoto[], deps?: Extra
 /** Per spec's "falls back gracefully... or is skipped": bypasses extraction entirely, leaving items empty for full manual entry in the item tree. */
 export function skipExtraction(): void {
 	parsedItems.set([]);
+	printedTotalCents.set(null);
 	extractionStatus.set('idle');
 	extractionError.set(null);
 	extractionProgress.set(0);
@@ -178,6 +199,7 @@ export function resetSession(): void {
 	extractionProgress.set(0);
 	extractionConfidence.set(null);
 	parsedItems.set([]);
+	printedTotalCents.set(null);
 	groupItems.set([]);
 	singleItems.set([]);
 	clearPhotos();
